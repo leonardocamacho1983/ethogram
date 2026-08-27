@@ -1,47 +1,28 @@
-export default function Page() {
-  return (
-    <main
-      style={{
-        colorScheme: 'light dark',
-        position: 'relative',
-        display: 'flex',
-        minHeight: '100vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'light-dark(#fff, #000)',
-        color: 'light-dark(#000, #fff)',
-      }}
-    >
-      <svg
-        aria-hidden="true"
-        style={{ width: 80, height: 80 }}
-        width={80}
-        height={80}
-        fill="none"
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      >
-        <path
-          d="M14.2 14.2H17V6.9375C17 4.76288 15.2371 3 13.0625 3H5.8V5.8M14.2 14.2V7.79063L7.79062 14.2H14.2ZM14.2 14.2V17H6.9375C4.76288 17 3 15.2371 3 13.0625V5.8H5.8M5.8 5.8V12.2313L12.2313 5.8H5.8Z"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <p
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: 'calc(50% + 56px)',
-          transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'light-dark(#71717a, #a1a1aa)',
-        }}
-      >
-        Your v0 generation will show here.
-      </p>
-    </main>
-  )
+'use client'
+
+import { useMemo, useState } from 'react'
+import { agents, compareRuns, storyCode, type Story } from '@/data/agentbook'
+import { Activity, AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, Clock3, Code2, Copy, Ellipsis, FlaskConical, GitCompare, Headphones, History, ListChecks, Moon, Play, Plus, Search, Settings2, Sun, Target, Wrench, X } from 'lucide-react'
+
+const iconMap = { headset: Headphones, target: Target, search: Search }
+
+type Tab = 'Canvas' | 'Story' | 'Runs' | 'Compare'
+
+function Badge({ children, tone = 'muted' }: { children: React.ReactNode; tone?: 'muted' | 'green' | 'yellow' | 'red' }) { return <span className={`ab-badge ab-${tone}`}>{children}</span> }
+function Panel({ title, icon: Icon, children, right }: { title: string; icon?: React.ElementType; children: React.ReactNode; right?: React.ReactNode }) { return <section className="ab-panel"><div className="ab-panel-head"><div className="ab-panel-title">{Icon && <Icon size={14} />}<span>{title}</span></div>{right}</div>{children}</section> }
+
+function Sidebar({ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded }: any) {
+  return <aside className="ab-sidebar"><div className="ab-sidebar-top"><div className="ab-logo-mark">A</div><span>Agentbook</span><button className="ab-icon-button" aria-label="Configurações"><Settings2 size={15} /></button></div><div className="ab-project"><span className="ab-dot" /> acme-agents <ChevronDown size={14} /></div><div className="ab-search"><Search size={14} /><span>Filter stories</span><kbd>⌘ K</kbd></div><div className="ab-nav-label">AGENTS <button className="ab-plus" aria-label="Adicionar agente"><Plus size={13} /></button></div><div className="ab-agents">{agents.map((agent) => { const Icon = iconMap[agent.icon as keyof typeof iconMap]; const open = expanded[agent.id]; return <div key={agent.id}><button className={`ab-agent ${selectedAgent === agent.id ? 'selected' : ''}`} onClick={() => { setSelectedAgent(agent.id); setSelectedStory(agent.stories[0].id); setExpanded({ ...expanded, [agent.id]: !open }) }}><span className="ab-chevron">{open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span><Icon size={15} /><span>{agent.name}</span><span className="ab-count">{agent.stories.length}</span></button>{open && <div className="ab-story-list">{agent.stories.map((story) => <button key={story.id} className={`ab-story-link ${selectedStory === story.id ? 'selected' : ''}`} onClick={() => setSelectedStory(story.id)}><span className={`ab-status-dot ${story.status}`} />{story.name}</button>)}</div>}</div> })}</div><div className="ab-sidebar-bottom"><button className="ab-bottom-link"><FlaskConical size={15} /> Environments <Badge>3</Badge></button><button className="ab-bottom-link"><ListChecks size={15} /> All assertions <Badge>24</Badge></button><button className="ab-bottom-link"><History size={15} /> Activity</button><div className="ab-user"><div className="ab-avatar">SC</div><div><strong>Sarah Chen</strong><small>Admin</small></div><Ellipsis size={16} /></div></div></aside>
 }
+
+function StoryHeader({ story, tab, setTab, onRun, running, theme, setTheme }: { story: Story; tab: Tab; setTab: (t: Tab) => void; onRun: () => void; running: boolean; theme: string; setTheme: (t: string) => void }) { return <><header className="ab-header"><div className="ab-breadcrumb"><span>Customer Support Agent</span><ChevronRight size={14} /><strong>{story.name}</strong></div><div className="ab-header-actions"><button className="ab-icon-button" aria-label="Alternar tema" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}</button><button className="ab-icon-button" aria-label="Mais opções"><Ellipsis size={16} /></button><button className="ab-run-button" onClick={onRun} disabled={running}>{running ? <Activity className="ab-spin" size={14} /> : <Play size={13} fill="currentColor" />} {running ? 'Running...' : 'Run Story'}</button></div></header><div className="ab-story-meta"><div className={`ab-story-symbol ${story.status}`}><Code2 size={18} /></div><div><h1>{story.name}</h1><p>{story.description}</p></div><div className="ab-meta-spacer" /><Badge tone={story.status === 'policy' ? 'yellow' : 'green'}>{story.status === 'policy' ? 'POLICY' : 'PASSING'}</Badge><span className="ab-updated"><Clock3 size={13} /> Updated 2h ago</span></div><nav className="ab-tabs" aria-label="Story views">{(['Canvas', 'Story', 'Runs', 'Compare'] as Tab[]).map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Runs' && <span className="ab-tab-count">12</span>}</button>)}</nav></> }
+
+function Canvas({ story, ran }: { story: Story; ran: boolean }) { return <div className="ab-canvas"><div className="ab-canvas-main"><Panel title="Given" icon={FlaskConical}><div className="ab-given-grid">{story.given.map((line) => <div className="ab-given-row" key={line}><span className="ab-key">{line.split(':')[0]}</span><span>{line.split(':').slice(1).join(':').trim()}</span></div>)}</div></Panel><Panel title="Configuration" icon={Settings2} right={<button className="ab-text-button">Edit <ChevronRight size={13} /></button>}><div className="ab-config-grid"><div><small>MODEL</small><strong>claude-3-5-sonnet</strong></div><div><small>TEMPERATURE</small><strong>0.2</strong></div><div><small>MAX STEPS</small><strong>8</strong></div><div><small>ENVIRONMENT</small><strong><span className="ab-dot" /> production</strong></div></div></Panel><Panel title="Input"><div className="ab-input-box">{story.prompt}</div></Panel><Panel title="Result" icon={Check} right={<Badge tone={ran ? 'green' : 'muted'}>{ran ? 'PASS' : 'READY'}</Badge>}><div className="ab-result"><div><small>DECISION</small><strong>{story.result.decision}</strong></div><div><small>REASON</small><p>{story.result.reason}</p></div><div className="ab-confidence"><small>CONFIDENCE</small><strong>{story.result.confidence}</strong><div className="ab-progress"><span style={{ width: `${story.result.confidence * 100}%` }} /></div></div></div></Panel></div><div className="ab-canvas-side"><Timeline story={story} ran={ran} /><ToolInspector story={story} /><Panel title="Assertions" icon={ListChecks} right={<span className="ab-muted-small">3 / 3 passed</span>}><div className="ab-assertions">{story.assertions.map((a) => <div className="ab-assertion" key={a.label}><Check size={14} /><div><strong>{a.label}</strong><small>{a.detail}</small></div></div>)}</div></Panel><Panel title="Metrics" icon={Activity}><div className="ab-metrics"><div><small>LATENCY</small><strong>1.8s</strong></div><div><small>INPUT TOKENS</small><strong>842</strong></div><div><small>TOOL CALLS</small><strong>{story.tools.length}</strong></div><div><small>EST. COST</small><strong>$0.014</strong></div></div></Panel></div></div> }
+function Timeline({ story, ran }: { story: Story; ran: boolean }) { return <Panel title="Execution timeline" icon={Activity} right={<span className="ab-muted-small">{ran ? 'Completed in 1.8s' : 'Not run yet'}</span>}><div className="ab-timeline">{['Receive request', 'Understand intent', 'Check policy', 'Create escalation', 'Respond'].map((step, i) => <div className="ab-timeline-row" key={step}><div className={`ab-timeline-icon ${ran || i < 3 ? 'done' : ''}`}>{ran || i < 3 ? <Check size={12} /> : <span>{i + 1}</span>}</div><div><strong>{step}</strong><small>{i === 2 ? 'Policy threshold: $100' : i === 3 ? 'ESC-8831 created' : i === 4 ? 'Escalation explained to customer' : 'Completed'}</small></div><span className="ab-time">{['0.1s', '0.4s', '0.6s', '0.3s', '0.4s'][i]}</span></div>)}</div></Panel> }
+function ToolInspector({ story }: { story: Story }) { const [open, setOpen] = useState<string | null>(null); return <Panel title="Tool calls" icon={Wrench} right={<span className="ab-muted-small">{story.tools.length} calls</span>}><div className="ab-tools">{story.tools.map((tool) => <div key={tool.name} className="ab-tool"><button className="ab-tool-row" onClick={() => setOpen(open === tool.name ? null : tool.name)}><ChevronRight className={open === tool.name ? 'rotate-90' : ''} size={14} /><strong>{tool.name}</strong><Badge tone="green">{tool.status}</Badge><span>{tool.duration}</span></button>{open === tool.name && <div className="ab-json"><div><small>INPUT</small><code>{tool.input}</code></div><div><small>OUTPUT</small><code>{tool.output}</code></div><button className="ab-copy"><Copy size={12} /> Copy JSON</button></div>}</div>)}</div></Panel> }
+
+function StoryView() { return <div className="ab-code-wrap"><div className="ab-code-toolbar"><span><Code2 size={14} /> refund-requires-approval.story.ts</span><button className="ab-text-button"><Copy size={13} /> Copy</button></div><pre>{storyCode.split('\n').map((line, i) => <span key={i}><i>{String(i + 1).padStart(2, ' ')}</i>{line}{'\n'}</span>)}</pre></div> }
+function RunsView({ story, selectedRun, setSelectedRun }: { story: Story; selectedRun: string; setSelectedRun: (id: string) => void }) { return <div className="ab-runs-view"><div className="ab-view-intro"><div><h2>Run history</h2><p>Every execution of this story, across all versions and environments.</p></div><button className="ab-secondary-button"><ArrowDown size={14} /> Export CSV</button></div><div className="ab-table"><div className="ab-table-row ab-table-head"><span>STATUS</span><span>VERSION</span><span>RUN AT</span><span>DURATION</span><span>SCORE</span><span>NOTE</span></div>{story.runs.concat(story.runs, story.runs).map((run, i) => <button className={`ab-table-row ${selectedRun === run.id + i ? 'selected' : ''}`} key={run.id + i} onClick={() => setSelectedRun(run.id + i)}><span><Badge tone={run.status === 'PASS' ? 'green' : 'red'}>{run.status}</Badge></span><span className="ab-mono">{run.version}</span><span>{run.date}</span><span>{run.duration}</span><span className="ab-score">{run.score}</span><span>{run.note}</span></button>)}</div></div> }
+function CompareView({ story }: { story: Story }) { return <div className="ab-compare"><div className="ab-view-intro"><div><h2>Compare runs</h2><p>Understand how agent behavior changed between two executions.</p></div><button className="ab-secondary-button"><GitCompare size={14} /> Select runs</button></div><div className="ab-compare-grid">{[compareRuns.a, compareRuns.b].map((run, i) => <div className="ab-compare-col" key={run.id}><div className="ab-compare-label">RUN {i === 0 ? 'A' : 'B'} <Badge tone={run.status === 'PASS' ? 'green' : 'red'}>{run.status}</Badge></div><div className="ab-compare-card"><small>VERSION</small><strong>{run.version}</strong><div className="ab-compare-score"><span>{run.score}</span><small>assertion score</small></div><div className="ab-compare-note">{run.note}</div></div><div className="ab-compare-card"><small>DECISION</small><strong>{i === 0 ? story.result.decision : 'Issue full refund'}</strong><div className="ab-diff"><span className={i === 0 ? 'good' : 'bad'}>{i === 0 ? <Check size={13} /> : <X size={13} />}</span>{i === 0 ? 'Correct escalation path' : 'Bypassed approval policy'}</div></div></div>)}</div><div className="ab-insight"><GitCompare size={16} /><div><strong>Behavior changed significantly</strong><p>Run B called <code>issue_refund</code> directly. Run A correctly created an escalation because the refund exceeded the approval threshold.</p></div></div></div> }
+
+export default function Page() { const [selectedAgent, setSelectedAgent] = useState('support'); const [selectedStory, setSelectedStory] = useState('refund'); const [expanded, setExpanded] = useState({ support: true, sales: false, research: false }); const [tab, setTab] = useState<Tab>('Canvas'); const [running, setRunning] = useState(false); const [ran, setRan] = useState(true); const [theme, setTheme] = useState('dark'); const [selectedRun, setSelectedRun] = useState('run-10480'); const story = useMemo(() => agents.find((a) => a.id === selectedAgent)?.stories.find((s) => s.id === selectedStory) ?? agents[0].stories[0], [selectedAgent, selectedStory]); const runStory = () => { setRunning(true); setRan(false); window.setTimeout(() => { setRunning(false); setRan(true) }, 1200) }; return <div className={`agentbook ${theme}`}><Sidebar {...{ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded }} /><main className="ab-main"><StoryHeader story={story} tab={tab} setTab={setTab} onRun={runStory} running={running} theme={theme} setTheme={setTheme} />{tab === 'Canvas' && <Canvas story={story} ran={ran} />}{tab === 'Story' && <StoryView />}{tab === 'Runs' && <RunsView story={story} selectedRun={selectedRun} setSelectedRun={setSelectedRun} />}{tab === 'Compare' && <CompareView story={story} />}</main></div> }
