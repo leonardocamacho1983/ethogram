@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "stories:discover": "node scripts/generate-story-registry.mjs",
+    "predev": "node scripts/generate-story-registry.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-story-registry.mjs",
     "build": "next build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
     "start": "next start"
   },
   "dependencies": {
