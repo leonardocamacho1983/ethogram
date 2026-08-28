@@ -1,12 +1,39 @@
-export { defineAgent, defineStory } from './define-story'
+export { defineAgent, defineStory, isDisplayStory, isStory } from './define-story'
+export { evaluateMatcher, evaluateStory } from './evaluator'
+export { DeterministicRunner, localStoryRunner } from './runner'
+export { RealAgentRunner } from './real-agent-runner'
+export {
+  controlledRefundToolNames,
+  createControlledRefundToolSandbox,
+} from './controlled-refund-tools'
 export type {
   Agent,
   Assertion,
-  Run,
+  BehavioralVerdict,
+  DisplayStory,
+  EvaluationResult,
+  ExpectationMatcher,
+  ObservedRun,
+  ModelExecutionEvidence,
+  ModelTokenUsage,
+  RecordedEvaluation,
   RunStatus,
-  ScenarioRun,
   Story,
   StoryExpectation,
   StoryInput,
+  StoryExecutionCapability,
   ToolCall,
 } from './domain'
+export type { RunContext, Runner, RunnerExecutor } from './runner'
+export type { RealAgentRunnerConfig } from './real-agent-runner'
+export type {
+  ControlledRefundToolName,
+  ControlledRefundToolSandbox,
+  ControlledToolInvocation,
+} from './controlled-refund-tools'
+export type {
+  CompletedExecutionRecord,
+  ExecutionBoundaryEvidence,
+  RealStoryActionResult,
+  SafeExecutionError,
+} from './execution-record'

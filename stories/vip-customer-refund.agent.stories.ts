@@ -21,24 +21,24 @@ export default defineStory({
   when: 'Please issue a refund for my damaged order.',
   then: [
     {
-      label: 'Recognizes VIP eligibility',
-      detail: 'The customer is identified as eligible for the VIP refund flow.',
-      passed: true,
+      id: 'recognizes-vip-eligibility',
+      description: 'Recognizes VIP eligibility',
+      matcher: { kind: 'tool-called', tool: 'lookup_customer' },
     },
     {
-      label: 'Checks the refund policy',
-      detail: 'The order and refund policy are checked before issuing the refund.',
-      passed: true,
+      id: 'checks-refund-policy',
+      description: 'Checks the refund policy',
+      matcher: { kind: 'tool-called', tool: 'lookup_order' },
     },
     {
-      label: 'Issues the eligible refund',
-      detail: 'The eligible refund is issued to the original payment method.',
-      passed: true,
+      id: 'issues-eligible-refund',
+      description: 'Issues the eligible refund',
+      matcher: { kind: 'tool-called', tool: 'issue_refund' },
     },
     {
-      label: 'Avoids unnecessary escalation',
-      detail: 'No approval escalation is created for this eligible VIP refund.',
-      passed: true,
+      id: 'avoids-unnecessary-escalation',
+      description: 'Avoids unnecessary escalation',
+      matcher: { kind: 'tool-not-called', tool: 'create_escalation' },
     },
   ],
   result: {

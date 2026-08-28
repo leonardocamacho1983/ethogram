@@ -10,11 +10,13 @@
     "build": "next build",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
+    "test:real-agent": "node --test tests/real-agent-runner.integration.mjs",
     "start": "next start"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
     "@vercel/analytics": "1.6.1",
+    "ai": "^7.0.83",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",

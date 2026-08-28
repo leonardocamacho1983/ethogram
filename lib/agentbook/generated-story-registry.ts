@@ -3,3 +3,4 @@ import * as storyModule0 from '../../stories/demo.agent.stories'
 import * as storyModule1 from '../../stories/vip-customer-refund.agent.stories'
 
 export const storyModules = [storyModule0, storyModule1]
+export const storyModuleFiles = ["stories/demo.agent.stories.ts","stories/vip-customer-refund.agent.stories.ts"]

@@ -16,3 +16,4 @@ node_modules
 *.tsbuildinfo
 .playwright-cli/
 output/playwright/
+.env*
