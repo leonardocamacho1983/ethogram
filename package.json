@@ -2,6 +2,10 @@
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "tests/fixtures/external-agent-project"
+  ],
   "scripts": {
     "stories:discover": "node scripts/generate-story-registry.mjs",
     "predev": "node scripts/generate-story-registry.mjs",

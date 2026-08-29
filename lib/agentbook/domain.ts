@@ -138,6 +138,7 @@ export type StoryComparison = {
 export type StoryExecutionCapability =
   | { kind: 'prototype-mock' }
   | { kind: 'real-agent'; profile: string }
+  | { kind: 'external-profile'; profile: string }
 
 export type StoryCore = {
   readonly __agentbookType: 'story'

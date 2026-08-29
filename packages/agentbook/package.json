@@ -1,0 +1,9 @@
+{
+  "name": "@agentbook/core",
+  "version": "0.0.0-test",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  }
+}

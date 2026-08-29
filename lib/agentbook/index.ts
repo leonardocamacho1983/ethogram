@@ -2,6 +2,8 @@ export { defineAgent, defineStory, isDisplayStory, isStory } from './define-stor
 export { evaluateMatcher, evaluateStory } from './evaluator'
 export { DeterministicRunner, localStoryRunner } from './runner'
 export { RealAgentRunner } from './real-agent-runner'
+export { ExternalProjectRunner } from './external-project-runner'
+export { defineExecutionProfile, isExternalExecutionProfile } from './external-execution'
 export {
   controlledRefundToolNames,
   createControlledRefundToolSandbox,
@@ -26,6 +28,14 @@ export type {
 } from './domain'
 export type { RunContext, Runner, RunnerExecutor } from './runner'
 export type { RealAgentRunnerConfig } from './real-agent-runner'
+export type {
+  ExternalExecutionContext,
+  ExternalExecutionOutcome,
+  ExternalExecutionProfile,
+  ExternalToolDefinition,
+  ExternalToolSet,
+} from './external-execution'
+export type { ExternalToolInvocation } from './external-project-runner'
 export type {
   ControlledRefundToolName,
   ControlledRefundToolSandbox,

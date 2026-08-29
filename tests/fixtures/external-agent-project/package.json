@@ -1,0 +1,9 @@
+{
+  "name": "external-agent-project-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@agentbook/core": "0.0.0-test"
+  }
+}

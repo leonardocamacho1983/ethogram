@@ -29,7 +29,7 @@ export type SafeExecutionError = {
 export type ExecutionBoundaryEvidence = {
   executionId: string
   completedBehavioralRuns: 1
-  runner: 'RealAgentRunner'
+  runner: 'RealAgentRunner' | 'ExternalProjectRunner'
   evaluator: 'deterministic'
   storyUnchanged: boolean
   toolTraceMatchesObservedRun: boolean

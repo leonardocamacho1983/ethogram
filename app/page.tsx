@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { loadConfiguredAgentbookProject } from '@/app/actions/load-agentbook-project'
+import { runExternalStory } from '@/app/actions/run-external-story'
 import { runRealStory } from '@/app/actions/run-real-story'
 import { discoverStories, groupStoriesByAgent, type AgentWithStories } from '@/lib/agentbook/discovery'
 import { evaluateStory } from '@/lib/agentbook/evaluator'
@@ -25,7 +27,7 @@ type ExpandedState = Record<string, boolean>
 type UiRunState =
   | { kind: 'idle' }
   | { kind: 'running' }
-  | { kind: 'completed'; execution: CompletedExecutionRecord; boundaryEvidence?: ExecutionBoundaryEvidence; source: 'real' | 'prototype-mock' }
+  | { kind: 'completed'; execution: CompletedExecutionRecord; boundaryEvidence?: ExecutionBoundaryEvidence; source: 'real' | 'external' | 'prototype-mock' }
   | { kind: 'execution-error'; error: SafeExecutionError }
 
 function parseGiven(story: DisplayStory): GivenState {
@@ -35,8 +37,8 @@ function parseGiven(story: DisplayStory): GivenState {
   }))
 }
 
-function isRealExecutable(story: DisplayStory): boolean {
-  return story.execution?.kind === 'real-agent'
+function isServerExecutable(story: DisplayStory): boolean {
+  return story.execution?.kind === 'real-agent' || story.execution?.kind === 'external-profile'
 }
 
 function executePrototypeStory(story: DisplayStory, values: GivenState): CompletedExecutionRecord {
@@ -45,7 +47,7 @@ function executePrototypeStory(story: DisplayStory, values: GivenState): Complet
 }
 
 function initialRunState(story: DisplayStory, values: GivenState): UiRunState {
-  if (isRealExecutable(story)) return { kind: 'idle' }
+  if (isServerExecutable(story)) return { kind: 'idle' }
   return { kind: 'completed', execution: executePrototypeStory(story, values), source: 'prototype-mock' }
 }
 
@@ -65,10 +67,11 @@ type SidebarProps = {
   expanded: ExpandedState
   setExpanded: React.Dispatch<React.SetStateAction<ExpandedState>>
   agentList: AgentWithStories[]
+  projectName: string
 }
 
-function Sidebar({ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded, agentList }: SidebarProps) {
-  return <aside className="ab-sidebar"><div className="ab-sidebar-top"><div className="ab-logo-mark">A</div><span>Agentbook</span><button className="ab-icon-button" aria-label="Configurações"><Settings2 size={15} /></button></div><div className="ab-project"><span className="ab-dot" /> acme-agents <ChevronDown size={14} /></div><div className="ab-search"><Search size={14} /><span>Filter stories</span><kbd>⌘ K</kbd></div><div className="ab-nav-label">AGENTS <button className="ab-plus" aria-label="Adicionar agente"><Plus size={13} /></button></div><div className="ab-agents">{agentList.map((agent) => { const Icon = iconMap[agent.icon]; const open = expanded[agent.id]; return <div key={agent.id}><button className={`ab-agent ${selectedAgent === agent.id ? 'selected' : ''}`} onClick={() => { setSelectedAgent(agent.id); setSelectedStory(agent.stories[0].id); setExpanded((current) => ({ ...current, [agent.id]: !open })) }}><span className="ab-chevron">{open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span><Icon size={15} /><span>{agent.name}</span><span className="ab-count">{agent.stories.length}</span></button>{open ? <div className="ab-story-list">{agent.stories.map((story) => <button key={story.id} className={`ab-story-link ${selectedStory === story.id ? 'selected' : ''}`} onClick={() => { setSelectedAgent(agent.id); setSelectedStory(story.id) }}><span className={`ab-status-dot ${story.status}`} /><span>{story.name}</span><em>{story.kind}</em></button>)}</div> : null}</div> })}</div><div className="ab-sidebar-bottom"><button className="ab-bottom-link"><FlaskConical size={15} /> Environments <Badge>3</Badge></button><button className="ab-bottom-link"><ListChecks size={15} /> All assertions <Badge>24</Badge></button><button className="ab-bottom-link"><History size={15} /> Activity</button><div className="ab-user"><div className="ab-avatar">SC</div><div><strong>Sarah Chen</strong><small>Admin</small></div><Ellipsis size={16} /></div></div></aside>
+function Sidebar({ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded, agentList, projectName }: SidebarProps) {
+  return <aside className="ab-sidebar"><div className="ab-sidebar-top"><div className="ab-logo-mark">A</div><span>Agentbook</span><button className="ab-icon-button" aria-label="Configurações"><Settings2 size={15} /></button></div><div className="ab-project"><span className="ab-dot" /> {projectName} <ChevronDown size={14} /></div><div className="ab-search"><Search size={14} /><span>Filter stories</span><kbd>⌘ K</kbd></div><div className="ab-nav-label">AGENTS <button className="ab-plus" aria-label="Adicionar agente"><Plus size={13} /></button></div><div className="ab-agents">{agentList.map((agent) => { const Icon = iconMap[agent.icon]; const open = expanded[agent.id]; return <div key={agent.id}><button className={`ab-agent ${selectedAgent === agent.id ? 'selected' : ''}`} onClick={() => { setSelectedAgent(agent.id); setSelectedStory(agent.stories[0].id); setExpanded((current) => ({ ...current, [agent.id]: !open })) }}><span className="ab-chevron">{open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span><Icon size={15} /><span>{agent.name}</span><span className="ab-count">{agent.stories.length}</span></button>{open ? <div className="ab-story-list">{agent.stories.map((story) => <button key={story.id} className={`ab-story-link ${selectedStory === story.id ? 'selected' : ''}`} onClick={() => { setSelectedAgent(agent.id); setSelectedStory(story.id) }}><span className={`ab-status-dot ${story.status}`} /><span>{story.name}</span><em>{story.kind}</em></button>)}</div> : null}</div> })}</div><div className="ab-sidebar-bottom"><button className="ab-bottom-link"><FlaskConical size={15} /> Environments <Badge>3</Badge></button><button className="ab-bottom-link"><ListChecks size={15} /> All assertions <Badge>24</Badge></button><button className="ab-bottom-link"><History size={15} /> Activity</button><div className="ab-user"><div className="ab-avatar">SC</div><div><strong>Sarah Chen</strong><small>Admin</small></div><Ellipsis size={16} /></div></div></aside>
 }
 
 type StoryHeaderProps = { story: DisplayStory; tab: Tab; setTab: (tab: Tab) => void; onRun: () => void; running: boolean; theme: string; setTheme: (theme: string) => void }
@@ -77,8 +80,8 @@ function StoryHeader({ story, tab, setTab, onRun, running, theme, setTheme }: St
   return <><header className="ab-header"><div className="ab-breadcrumb"><span>{story.agent.name}</span><ChevronRight size={14} /><strong>{story.name}</strong></div><div className="ab-header-actions"><button className="ab-icon-button" aria-label="Alternar tema" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}</button><button className="ab-icon-button" aria-label="Mais opções"><Ellipsis size={16} /></button><button className="ab-run-button" onClick={onRun} disabled={running}>{running ? <Activity className="ab-spin" size={14} /> : <Play size={13} fill="currentColor" />} {running ? 'Running...' : 'Run Story'}</button></div></header><div className="ab-story-meta"><div className={`ab-story-symbol ${story.status}`}><Code2 size={18} /></div><div><h1>{story.name}</h1><p>{story.description}</p><small className="ab-source">{story.source.file}{story.source.exportName ? ` › ${story.source.exportName}` : ''}</small></div><div className="ab-meta-spacer" /><Badge tone={story.status === 'policy' ? 'yellow' : story.status === 'fail' ? 'red' : 'green'}>{story.status === 'policy' ? 'POLICY' : story.status === 'fail' ? 'FAILING' : 'PASSING'}</Badge><span className="ab-updated"><Clock3 size={13} /> Updated 2h ago</span></div><nav className="ab-tabs" aria-label="Story views">{(['Canvas', 'Story', 'Runs', 'Compare'] as Tab[]).map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Runs' ? <span className="ab-tab-count">{story.runs.length}</span> : null}</button>)}</nav></>
 }
 
-function GivenPanel({ story, values, setValue, real }: { story: DisplayStory; values: GivenState; setValue: (key: string, value: string) => void; real: boolean }) {
-  return <Panel title="Given" icon={FlaskConical} right={<span className="ab-muted-small">{real ? 'Controlled real fixture' : 'Local mock'}</span>}><div className="ab-given-grid">{story.given.map((line) => { const [rawKey, ...rest] = line.split(':'); const key = rawKey.trim(); return <label className="ab-given-row" key={line}><span className="ab-key">{key}</span><input aria-label={key} value={values[key] ?? rest.join(':').trim()} readOnly={real} onChange={(event) => setValue(key, event.target.value)} /></label> })}</div></Panel>
+function GivenPanel({ story, values, setValue, executable }: { story: DisplayStory; values: GivenState; setValue: (key: string, value: string) => void; executable: boolean }) {
+  return <Panel title="Given" icon={FlaskConical} right={<span className="ab-muted-small">{executable ? 'Controlled execution' : 'Local mock'}</span>}><div className="ab-given-grid">{story.given.map((line) => { const [rawKey, ...rest] = line.split(':'); const key = rawKey.trim(); return <label className="ab-given-row" key={line}><span className="ab-key">{key}</span><input aria-label={key} value={values[key] ?? rest.join(':').trim()} readOnly={executable} onChange={(event) => setValue(key, event.target.value)} /></label> })}</div></Panel>
 }
 
 function ResultPanel({ state }: { state: UiRunState }) {
@@ -125,9 +128,11 @@ function MetricsPanel({ state }: { state: UiRunState }) {
 }
 
 function Canvas({ story, values, setValue, state }: { story: DisplayStory; values: GivenState; setValue: (key: string, value: string) => void; state: UiRunState }) {
-  const real = isRealExecutable(story)
+  const executable = isServerExecutable(story)
+  const real = story.execution?.kind === 'real-agent'
+  const external = story.execution?.kind === 'external-profile'
   const run = state.kind === 'completed' ? state.execution.observedRun : undefined
-  return <div className="ab-canvas"><div className="ab-canvas-main"><GivenPanel story={story} values={values} setValue={setValue} real={real} /><Panel title="Configuration" icon={Settings2}><div className="ab-config-grid"><div><small>MODEL</small><strong>{run?.evidence?.model ?? (real ? 'Available after Run' : 'Prototype mock')}</strong></div><div><small>RANDOMNESS</small><strong>{run?.evidence ? `${run.evidence.randomness.temperature} · lowest practical` : 'Available after Run'}</strong></div><div><small>MAX STEPS</small><strong>{real ? 'Server controlled' : 'N/A'}</strong></div><div><small>ENVIRONMENT</small><strong><span className="ab-dot" /> {real ? 'Development · server' : 'local mock'}</strong></div></div></Panel><Panel title="Input"><div className="ab-input-box">{story.prompt}</div></Panel><ResultPanel state={state} /></div><div className="ab-canvas-side"><ExecutionTimeline state={state} /><ToolInspector state={state} /><AssertionsPanel story={story} state={state} /><MetricsPanel state={state} /></div></div>
+  return <div className="ab-canvas"><div className="ab-canvas-main"><GivenPanel story={story} values={values} setValue={setValue} executable={executable} /><Panel title="Configuration" icon={Settings2}><div className="ab-config-grid"><div><small>MODEL</small><strong>{run?.evidence?.model ?? (real ? 'Available after Run' : external ? 'External deterministic profile' : 'Prototype mock')}</strong></div><div><small>RANDOMNESS</small><strong>{run?.evidence ? `${run.evidence.randomness.temperature} · lowest practical` : real ? 'Available after Run' : 'N/A'}</strong></div><div><small>MAX STEPS</small><strong>{executable ? 'Server controlled' : 'N/A'}</strong></div><div><small>ENVIRONMENT</small><strong><span className="ab-dot" /> {real ? 'Development · server' : external ? 'External project · server' : 'local mock'}</strong></div></div></Panel><Panel title="Input"><div className="ab-input-box">{story.prompt}</div></Panel><ResultPanel state={state} /></div><div className="ab-canvas-side"><ExecutionTimeline state={state} /><ToolInspector state={state} /><AssertionsPanel story={story} state={state} /><MetricsPanel state={state} /></div></div>
 }
 
 function fallbackStoryCode(story: DisplayStory): string {
@@ -168,7 +173,11 @@ export default function Page() {
   const firstAgent = discoveredAgents[0]
   const firstStory = firstAgent.stories[0]
   const [sessionStories, setSessionStories] = useState<DisplayStory[]>([])
-  const agentList = useMemo(() => groupStoriesByAgent([...discoveredStories, ...sessionStories]), [sessionStories])
+  const [projectStories, setProjectStories] = useState<DisplayStory[]>(discoveredStories)
+  const [projectName, setProjectName] = useState('acme-agents')
+  const [projectSource, setProjectSource] = useState<'internal' | 'external'>('internal')
+  const [projectLoadError, setProjectLoadError] = useState<string | null>(null)
+  const agentList = useMemo(() => groupStoriesByAgent([...projectStories, ...sessionStories]), [projectStories, sessionStories])
   const [selectedAgent, setSelectedAgent] = useState(firstAgent.id)
   const [selectedStory, setSelectedStory] = useState(firstStory.id)
   const [expanded, setExpanded] = useState<ExpandedState>(() => Object.fromEntries(discoveredAgents.map((agent, index) => [agent.id, index === 0])))
@@ -182,13 +191,37 @@ export default function Page() {
   const executingRef = useRef(false)
 
   useEffect(() => {
+    let active = true
+    void loadConfiguredAgentbookProject().then((result) => {
+      if (!active || result.status === 'not-configured') return
+      if (result.status === 'project-error') {
+        setProjectLoadError(`${result.code}: ${result.message}`)
+        return
+      }
+      if (result.stories.length === 0) {
+        setProjectLoadError('EXTERNAL_PROJECT_EMPTY: No external Stories were discovered.')
+        return
+      }
+      const loadedAgents = groupStoriesByAgent(result.stories)
+      setProjectStories(result.stories)
+      setProjectName(result.packageName)
+      setProjectSource('external')
+      setSelectedAgent(loadedAgents[0].id)
+      setSelectedStory(loadedAgents[0].stories[0].id)
+      setExpanded(Object.fromEntries(loadedAgents.map((agent, index) => [agent.id, index === 0])))
+      setProjectLoadError(null)
+    })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
     setValues(initial)
     setRunState(initialRunState(story, initial))
     executingRef.current = false
   }, [initial, story])
 
   const setValue = (key: string, value: string) => setValues((current) => ({ ...current, [key]: value }))
-  const modified = !isRealExecutable(story) && JSON.stringify(values) !== JSON.stringify(initial)
+  const modified = !isServerExecutable(story) && JSON.stringify(values) !== JSON.stringify(initial)
   const running = runState.kind === 'running'
 
   const runStory = async () => {
@@ -196,10 +229,17 @@ export default function Page() {
     executingRef.current = true
     setRunState({ kind: 'running' })
     try {
-      if (isRealExecutable(story)) {
+      if (story.execution?.kind === 'real-agent') {
         const result = await runRealStory({ agentId: story.agent.id, storyId: story.id })
         if (result.status === 'completed') {
           setRunState({ kind: 'completed', execution: result.execution, boundaryEvidence: result.boundaryEvidence, source: 'real' })
+        } else {
+          setRunState({ kind: 'execution-error', error: result.error })
+        }
+      } else if (story.execution?.kind === 'external-profile') {
+        const result = await runExternalStory({ agentId: story.agent.id, storyId: story.id })
+        if (result.status === 'completed') {
+          setRunState({ kind: 'completed', execution: result.execution, boundaryEvidence: result.boundaryEvidence, source: 'external' })
         } else {
           setRunState({ kind: 'execution-error', error: result.error })
         }
@@ -227,9 +267,9 @@ export default function Page() {
     setTab('Canvas')
   }
 
-  const completedEvidence = runState.kind === 'completed' && runState.source === 'real'
+  const completedEvidence = runState.kind === 'completed' && runState.source !== 'prototype-mock'
     ? { execution: runState.execution, boundaryEvidence: runState.boundaryEvidence }
     : undefined
 
-  return <div className={`agentbook ${theme}`}><Sidebar {...{ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded, agentList }} /><main className="ab-main" data-execution-kind={story.execution?.kind ?? 'prototype-mock'}><StoryHeader story={story} tab={tab} setTab={setTab} onRun={runStory} running={running} theme={theme} setTheme={setTheme} />{completedEvidence ? <output hidden className="ab-sr-only" data-testid="execution-evidence">{JSON.stringify(completedEvidence)}</output> : null}{tab === 'Canvas' ? <>{modified ? <div className="ab-variant-banner"><span><Badge tone="yellow">MODIFIED</Badge> Running a modified variant of this Story</span><button className="ab-secondary-button" onClick={saveVariant}>Save as new Story</button></div> : null}<Canvas story={story} values={values} setValue={setValue} state={runState} /></> : null}{tab === 'Story' ? <StoryView story={story} /> : null}{tab === 'Runs' ? <RunsView story={story} selectedRun={selectedRun} setSelectedRun={setSelectedRun} /> : null}{tab === 'Compare' ? <CompareView story={story} /> : null}</main></div>
+  return <div className={`agentbook ${theme}`}><Sidebar {...{ selectedAgent, selectedStory, setSelectedAgent, setSelectedStory, expanded, setExpanded, agentList, projectName }} /><main className="ab-main" data-execution-kind={story.execution?.kind ?? 'prototype-mock'} data-project-source={projectSource}><StoryHeader story={story} tab={tab} setTab={setTab} onRun={runStory} running={running} theme={theme} setTheme={setTheme} />{projectLoadError ? <div className="ab-variant-banner" data-testid="project-load-error"><span><Badge tone="red">PROJECT ERROR</Badge> {projectLoadError}</span></div> : null}{completedEvidence ? <output hidden className="ab-sr-only" data-testid="execution-evidence">{JSON.stringify(completedEvidence)}</output> : null}{tab === 'Canvas' ? <>{modified ? <div className="ab-variant-banner"><span><Badge tone="yellow">MODIFIED</Badge> Running a modified variant of this Story</span><button className="ab-secondary-button" onClick={saveVariant}>Save as new Story</button></div> : null}<Canvas story={story} values={values} setValue={setValue} state={runState} /></> : null}{tab === 'Story' ? <StoryView story={story} /> : null}{tab === 'Runs' ? <RunsView story={story} selectedRun={selectedRun} setSelectedRun={setSelectedRun} /> : null}{tab === 'Compare' ? <CompareView story={story} /> : null}</main></div>
 }

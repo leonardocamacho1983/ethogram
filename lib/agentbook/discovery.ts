@@ -21,15 +21,16 @@ function storyExports(module: StoryModule): Story[] {
   })
 }
 
-function toDisplayStory(story: Story, discoveredFile: string): DisplayStory {
+export function toDisplayStory(story: Story, discoveredFile: string): DisplayStory {
   if (isDisplayStory(story)) return story
 
+  const executable = story.execution?.kind === 'real-agent' || story.execution?.kind === 'external-profile'
   return {
     ...story,
-    group: story.execution?.kind === 'real-agent' ? 'Real executions' : 'General',
-    status: story.execution?.kind === 'real-agent' ? 'policy' : 'pass',
-    kind: story.execution?.kind === 'real-agent' ? 'POLICY' : 'DEFAULT',
-    tags: story.execution?.kind === 'real-agent' ? ['real-agent'] : [],
+    group: executable ? 'Executable Stories' : 'General',
+    status: executable ? 'policy' : 'pass',
+    kind: executable ? 'POLICY' : 'DEFAULT',
+    tags: story.execution ? [story.execution.kind] : [],
     result: {
       decision: 'Not run',
       reason: 'Run this Story to produce execution evidence.',

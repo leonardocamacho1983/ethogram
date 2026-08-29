@@ -18,6 +18,10 @@ export async function discoverStoryFiles(rootDirectory) {
     const entries = await readdir(directory, { withFileTypes: true })
     entries.sort((left, right) => left.name.localeCompare(right.name))
 
+    if (directory !== rootDirectory && entries.some((entry) => entry.isFile() && entry.name === 'package.json')) {
+      return
+    }
+
     for (const entry of entries) {
       if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue
 
