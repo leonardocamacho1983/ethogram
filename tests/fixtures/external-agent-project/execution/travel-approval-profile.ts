@@ -12,6 +12,7 @@ export const travelApprovalProfile = defineExecutionProfile({
   id: 'controlled-travel-approval',
   tools: travelTools,
   async execute({ story, callTool }) {
+    if (!Array.isArray(story.given)) throw new Error('Travel Approval expects legacy GIVEN text.')
     const facts = storyFacts(story.given)
     const destination = facts.destination
     const estimatedCost = Number(facts.estimatedCost)

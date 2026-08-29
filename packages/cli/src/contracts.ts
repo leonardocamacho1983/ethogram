@@ -16,12 +16,22 @@ export type StoryExpectationDescriptor = {
   matcher: ExpectationMatcher
 }
 
+export type StoryGivenValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly StoryGivenValue[]
+  | { readonly [key: string]: StoryGivenValue }
+
+export type StoryGiven = string[] | Readonly<Record<string, StoryGivenValue>>
+
 export type StoryDescriptor = {
   id: string
   name: string
   agent: AgentDescriptor
   description: string
-  given: string[]
+  given: StoryGiven
   prompt: string
   expectations: StoryExpectationDescriptor[]
   source: string

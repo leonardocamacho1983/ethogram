@@ -97,6 +97,11 @@ export async function startDeveloperServer(options: StartServerOptions): Promise
         await staticAsset(response, 'styles.css', 'text/css; charset=utf-8')
         return
       }
+      if (request.method === 'GET' && requestUrl.pathname === '/favicon.ico') {
+        response.writeHead(204, { 'cache-control': 'no-store' })
+        response.end()
+        return
+      }
       if (request.method === 'GET' && requestUrl.pathname === '/api/project') {
         json(response, 200, project)
         return

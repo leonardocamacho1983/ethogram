@@ -12,6 +12,6 @@ Runtime values:
 - `defineStory`
 - `defineExecutionProfile`
 
-Public types cover Agent and Story authoring, `tool-called` and `tool-not-called` matchers, and the generic external execution-profile/tool contract.
+Public types cover Agent and Story authoring, legacy and structured GIVEN values, `tool-called` and `tool-not-called` matchers, and the generic external execution-profile/tool contract.
 
 Story expectations declare required behavior. They never contain behavioral verdicts.

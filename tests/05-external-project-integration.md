@@ -687,7 +687,7 @@ Baseline working tree contained only this untracked Test 05 specification. The i
 
 ### A. Selected external project root
 
-`/Users/leonardocamacho/Documents/ChatGPT/Agentbook/tests/fixtures/external-agent-project`
+`tests/fixtures/external-agent-project`
 
 The root was supplied server-side through `AGENTBOOK_PROJECT_ROOT`; it is not embedded in React, the Story, the Evaluator, or the generic Runner.
 

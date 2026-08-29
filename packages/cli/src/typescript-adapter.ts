@@ -23,7 +23,7 @@ type NativeStory = {
   name: string
   agent: NativeAgent
   description: string
-  given: string[]
+  given: StoryDescriptor['given']
   prompt: string
   expectations: StoryDescriptor['expectations']
   execution?: { kind: 'external-profile'; profile: string }
@@ -102,6 +102,33 @@ function isAgent(value: unknown): value is NativeAgent {
     && typeof value.icon === 'string'
 }
 
+function isGivenValue(value: unknown, ancestors: Set<object>): boolean {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true
+  if (typeof value === 'number') return Number.isFinite(value)
+  if (typeof value !== 'object' || ancestors.has(value)) return false
+  ancestors.add(value)
+  try {
+    if (Array.isArray(value)) {
+      return value.every((entry, index) => Object.prototype.hasOwnProperty.call(value, index) && isGivenValue(entry, ancestors))
+    }
+    const prototype = Object.getPrototypeOf(value)
+    if (prototype !== Object.prototype && prototype !== null) return false
+    return Reflect.ownKeys(value).every((key) => {
+      if (typeof key !== 'string') return false
+      const descriptor = Object.getOwnPropertyDescriptor(value, key)
+      return Boolean(descriptor && !descriptor.get && !descriptor.set && isGivenValue(descriptor.value, ancestors))
+    })
+  } finally {
+    ancestors.delete(value)
+  }
+}
+
+function isGiven(value: unknown): value is StoryDescriptor['given'] {
+  return Array.isArray(value)
+    ? value.every((entry) => typeof entry === 'string')
+    : isGivenValue(value, new Set()) && Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
 function isStory(value: unknown): value is NativeStory {
   return isRecord(value)
     && value.__agentbookType === 'story'
@@ -109,7 +136,7 @@ function isStory(value: unknown): value is NativeStory {
     && typeof value.name === 'string'
     && isAgent(value.agent)
     && typeof value.description === 'string'
-    && Array.isArray(value.given)
+    && isGiven(value.given)
     && typeof value.prompt === 'string'
     && Array.isArray(value.expectations)
 }
@@ -124,6 +151,14 @@ function isProfile(value: unknown): value is NativeExecutionProfile {
 
 function cloneRecord<T extends Readonly<Record<string, unknown>>>(value: T): T {
   return structuredClone(value)
+}
+
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value)
+    for (const nested of Object.values(value)) deepFreeze(nested)
+  }
+  return value
 }
 
 async function allFiles(root: string, directories: string[]): Promise<string[]> {
@@ -310,6 +345,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
     this.bindings = new Map()
 
     const descriptors = stories.map(({ value: story, source }): StoryDescriptor => {
+      deepFreeze(story)
       if (!agentIds.has(story.agent.id)) {
         throw new TypeScriptAdapterError('UNKNOWN_STORY_AGENT', `Story ${story.id} references unknown Agent ${story.agent.id}.`)
       }

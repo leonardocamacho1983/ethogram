@@ -11,12 +11,16 @@ const prettyJson = (value) => {
   try { return JSON.stringify(JSON.parse(value), null, 2) } catch { return value }
 }
 
-const givenEntries = (story) => story.given.map((line) => {
-  const separator = line.indexOf(':')
-  return separator === -1
-    ? { key: line, value: '' }
-    : { key: line.slice(0, separator).trim(), value: line.slice(separator + 1).trim() }
-})
+const displayGivenValue = (value) => typeof value === 'string' ? value : JSON.stringify(value)
+
+const givenEntries = (story) => Array.isArray(story.given)
+  ? story.given.map((line) => {
+      const separator = line.indexOf(':')
+      return separator === -1
+        ? { key: line, value: '' }
+        : { key: line.slice(0, separator).trim(), value: line.slice(separator + 1).trim() }
+    })
+  : Object.entries(story.given).map(([key, value]) => ({ key, value: displayGivenValue(value) }))
 
 function panel(title, content, right = '') {
   return `<section class="panel"><header><strong>${title}</strong>${right}</header>${content}</section>`

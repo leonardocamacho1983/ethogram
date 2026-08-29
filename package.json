@@ -11,6 +11,7 @@
     "cli:build": "npm run build -w @agentbook/cli",
     "test:package": "node --test tests/installable-package-boundary.test.mjs",
     "test:onboarding": "node --test tests/five-minute-developer-onboarding.integration.mjs",
+    "test:existing-agent": "node --test tests/bring-your-own-agent.integration.mjs",
     "stories:discover": "node scripts/generate-story-registry.mjs",
     "predev": "npm run core:build && node scripts/generate-story-registry.mjs",
     "dev": "next dev",

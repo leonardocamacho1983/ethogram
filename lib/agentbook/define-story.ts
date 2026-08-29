@@ -1,4 +1,4 @@
-import type { Agent, DisplayStory, Story, StoryInput } from './domain'
+import type { Agent, DisplayStory, Story, StoryGiven, StoryGivenValue, StoryInput } from './domain'
 
 const forbiddenExpectationVerdictKeys = ['passed', 'failed', 'status', 'verdict'] as const
 
@@ -10,6 +10,56 @@ function assertVerdictFreeExpectations(expectations: Story['expectations']): voi
       }
     }
   }
+}
+
+function assertStructuredGivenValue(value: unknown, location: string, ancestors: Set<object>): asserts value is StoryGivenValue {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) throw new Error(`${location} must contain only finite numbers.`)
+    return
+  }
+  if (typeof value !== 'object') throw new Error(`${location} contains unsupported value type "${typeof value}".`)
+  if (ancestors.has(value)) throw new Error(`${location} must not contain cyclic values.`)
+  ancestors.add(value)
+  try {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) {
+        if (!Object.prototype.hasOwnProperty.call(value, index)) throw new Error(`${location}[${index}] must not be undefined or sparse.`)
+        assertStructuredGivenValue(value[index], `${location}[${index}]`, ancestors)
+      }
+      return
+    }
+    const prototype = Object.getPrototypeOf(value)
+    if (prototype !== Object.prototype && prototype !== null) throw new Error(`${location} must contain only plain records and arrays.`)
+    for (const key of Reflect.ownKeys(value)) {
+      if (typeof key !== 'string') throw new Error(`${location} must not contain symbol keys.`)
+      const descriptor = Object.getOwnPropertyDescriptor(value, key)
+      if (!descriptor || descriptor.get || descriptor.set) throw new Error(`${location}.${key} must be a plain data property.`)
+      assertStructuredGivenValue(descriptor.value, `${location}.${key}`, ancestors)
+    }
+  } finally {
+    ancestors.delete(value)
+  }
+}
+
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value)
+    for (const nested of Object.values(value)) deepFreeze(nested)
+  }
+  return value
+}
+
+function validatedGiven(given: StoryGiven | undefined): StoryGiven {
+  if (given === undefined) return []
+  if (Array.isArray(given)) {
+    for (const [index, value] of given.entries()) {
+      if (typeof value !== 'string') throw new Error(`Story given[${index}] must be a string.`)
+    }
+    return given
+  }
+  assertStructuredGivenValue(given, 'Story given', new Set())
+  return deepFreeze(structuredClone(given))
 }
 
 export function defineAgent<const TAgent extends Agent>(agent: TAgent): TAgent {
@@ -28,7 +78,7 @@ export function defineStory(input: StoryInput): Story {
     name: input.name,
     agent: input.agent,
     description: input.description,
-    given: input.given ?? [],
+    given: validatedGiven(input.given),
     prompt,
     expectations,
   }

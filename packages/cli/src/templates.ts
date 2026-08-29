@@ -1,16 +1,24 @@
 export type StarterFile = { relativePath: string; content: string }
 
-export function starterFiles(projectName: string): StarterFile[] {
-  return [
-    {
-      relativePath: 'agentbook.config.mjs',
-      content: `export default {
+function configurationFile(projectName: string): StarterFile {
+  return {
+    relativePath: 'agentbook.config.mjs',
+    content: `export default {
   name: ${JSON.stringify(projectName)},
   agentDirectories: ['agents'],
   storyDirectories: ['stories'],
   executionDirectories: ['execution'],
 }\n`,
-    },
+  }
+}
+
+export function existingProjectFiles(projectName: string): StarterFile[] {
+  return [configurationFile(projectName)]
+}
+
+export function starterFiles(projectName: string): StarterFile[] {
+  return [
+    configurationFile(projectName),
     {
       relativePath: 'agents/access-request.agent.ts',
       content: `import { defineAgent } from '@agentbook/core'

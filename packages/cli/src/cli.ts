@@ -4,23 +4,25 @@ import path from 'node:path'
 import { constants } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { startDeveloperServer } from './server.js'
-import { starterFiles } from './templates.js'
+import { existingProjectFiles, starterFiles } from './templates.js'
 import { TypeScriptAdapterError } from './typescript-adapter.js'
 
 const help = `Agentbook CLI (codename)
 
 Usage:
-  agentbook init
+  agentbook init [--existing]
   agentbook dev [--project <path>] [--port <number>] [--no-open]
   agentbook --help
   agentbook --version
 
 Commands:
   init  Create a starter Agent, Story, and local execution profile in the current project.
+        Use --existing to create configuration only for an existing agent project.
   dev   Start the local Agentbook developer UI. The current directory is the default project.
 
 Examples:
   npx agentbook init
+  npx agentbook init --existing
   npx agentbook dev
   npx agentbook dev --project ./my-agent-project --port 4317 --no-open
 `
@@ -42,11 +44,11 @@ async function projectPackage(root: string): Promise<{ name: string }> {
   }
 }
 
-async function initialize(): Promise<void> {
+async function initialize(options: { existing: boolean }): Promise<void> {
   const root = await realpath(process.cwd())
   if (!(await stat(root)).isDirectory()) throw new Error(`INIT_PROJECT_INVALID: ${root} is not a directory.`)
   const packageJson = await projectPackage(root)
-  const files = starterFiles(packageJson.name)
+  const files = options.existing ? existingProjectFiles(packageJson.name) : starterFiles(packageJson.name)
   const matching: string[] = []
   const missing: string[] = []
   const conflicts: string[] = []
@@ -83,6 +85,9 @@ async function initialize(): Promise<void> {
     process.stdout.write(`Agentbook initialized in ${root}.\n`)
     for (const relativePath of missing) process.stdout.write(`Created ${relativePath}\n`)
     for (const relativePath of matching) process.stdout.write(`Preserved ${relativePath}\n`)
+  }
+  if (options.existing) {
+    process.stdout.write('Add an Agent descriptor, behavioral Story, and thin execution profile for your existing agent.\n')
   }
   process.stdout.write('Next: npx agentbook dev\n')
 }
@@ -130,8 +135,11 @@ async function main(): Promise<void> {
     return
   }
   if (command === 'init') {
-    if (args.length !== 1) throw new Error('CLI_USAGE: agentbook init does not accept options in Test 07.')
-    await initialize()
+    const initArgs = args.slice(1)
+    if (initArgs.some((argument) => argument !== '--existing') || initArgs.filter((argument) => argument === '--existing').length > 1) {
+      throw new Error('CLI_USAGE: agentbook init accepts only the optional --existing flag.')
+    }
+    await initialize({ existing: initArgs.includes('--existing') })
     return
   }
   if (command === 'dev') {

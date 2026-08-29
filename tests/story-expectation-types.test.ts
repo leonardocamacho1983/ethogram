@@ -1,4 +1,4 @@
-import type { StoryExpectation } from '../lib/agentbook/domain'
+import type { StoryExpectation, StoryGiven, StoryGivenValue } from '../lib/agentbook/domain'
 
 const validExpectation: StoryExpectation = {
   id: 'valid-expectation',
@@ -16,3 +16,13 @@ const invalidExpectation: StoryExpectation = {
 
 void validExpectation
 void invalidExpectation
+
+const structuredGiven: StoryGiven = {
+  purchaseAmount: 500,
+  requesterLevel: 'employee',
+  approvalThreshold: 100,
+}
+const nestedGivenValue: StoryGivenValue = { flags: [true, null, 'safe'] }
+
+void structuredGiven
+void nestedGivenValue

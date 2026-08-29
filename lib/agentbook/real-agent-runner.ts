@@ -60,8 +60,11 @@ function observedToolCall(invocation: ControlledToolInvocation): ToolCall {
 }
 
 function storyPrompt(story: Story): string {
-  const context = story.given.length > 0
-    ? story.given.map((fact) => `- ${fact}`).join('\n')
+  const facts = Array.isArray(story.given)
+    ? story.given
+    : Object.entries(story.given).map(([key, value]) => `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
+  const context = facts.length > 0
+    ? facts.map((fact) => `- ${fact}`).join('\n')
     : '- No additional scenario facts were supplied.'
 
   return [

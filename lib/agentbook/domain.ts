@@ -140,13 +140,23 @@ export type StoryExecutionCapability =
   | { kind: 'real-agent'; profile: string }
   | { kind: 'external-profile'; profile: string }
 
+export type StoryGivenValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly StoryGivenValue[]
+  | { readonly [key: string]: StoryGivenValue }
+
+export type StoryGiven = string[] | Readonly<Record<string, StoryGivenValue>>
+
 export type StoryCore = {
   readonly __agentbookType: 'story'
   id: string
   name: string
   agent: Agent
   description: string
-  given: string[]
+  given: StoryGiven
   prompt: string
   expectations: StoryExpectation[]
   execution?: StoryExecutionCapability
@@ -181,7 +191,7 @@ type StoryInputBase = {
   status?: StoryPresentation['status']
   kind?: StoryPresentation['kind']
   tags?: string[]
-  given?: string[]
+  given?: StoryGiven
   result?: StoryResult
   tools?: ToolCall[]
   runs?: RecordedEvaluation[]

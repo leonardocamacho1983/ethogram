@@ -22,6 +22,8 @@ export type {
   RunStatus,
   Story,
   StoryExpectation,
+  StoryGiven,
+  StoryGivenValue,
   StoryInput,
   StoryExecutionCapability,
   ToolCall,

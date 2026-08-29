@@ -14,7 +14,7 @@ import {
   type SafeExecutionError,
 } from '@/lib/agentbook/execution-record'
 import { localStoryRunner } from '@/lib/agentbook/runner'
-import type { DisplayStory, RecordedEvaluation } from '@/lib/agentbook/domain'
+import type { DisplayStory, RecordedEvaluation, StoryGivenValue } from '@/lib/agentbook/domain'
 import { Activity, ArrowDown, Check, ChevronDown, ChevronRight, Clock3, Code2, Copy, Ellipsis, FlaskConical, GitCompare, Headphones, History, ListChecks, Moon, Play, Plus, Search, Settings2, Sun, Wrench, X } from 'lucide-react'
 
 const discoveredStories = discoverStories()
@@ -30,11 +30,22 @@ type UiRunState =
   | { kind: 'completed'; execution: CompletedExecutionRecord; boundaryEvidence?: ExecutionBoundaryEvidence; source: 'real' | 'external' | 'prototype-mock' }
   | { kind: 'execution-error'; error: SafeExecutionError }
 
-function parseGiven(story: DisplayStory): GivenState {
-  return Object.fromEntries(story.given.map((line) => {
+function displayGivenValue(value: StoryGivenValue): string {
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
+function givenEntries(story: DisplayStory): Array<{ key: string; value: string }> {
+  if (!Array.isArray(story.given)) {
+    return Object.entries(story.given).map(([key, value]) => ({ key, value: displayGivenValue(value) }))
+  }
+  return story.given.map((line) => {
     const [key, ...value] = line.split(':')
-    return [key.trim(), value.join(':').trim()]
-  }))
+    return { key: key.trim(), value: value.join(':').trim() }
+  })
+}
+
+function parseGiven(story: DisplayStory): GivenState {
+  return Object.fromEntries(givenEntries(story).map(({ key, value }) => [key, value]))
 }
 
 function isServerExecutable(story: DisplayStory): boolean {
@@ -81,7 +92,7 @@ function StoryHeader({ story, tab, setTab, onRun, running, theme, setTheme }: St
 }
 
 function GivenPanel({ story, values, setValue, executable }: { story: DisplayStory; values: GivenState; setValue: (key: string, value: string) => void; executable: boolean }) {
-  return <Panel title="Given" icon={FlaskConical} right={<span className="ab-muted-small">{executable ? 'Controlled execution' : 'Local mock'}</span>}><div className="ab-given-grid">{story.given.map((line) => { const [rawKey, ...rest] = line.split(':'); const key = rawKey.trim(); return <label className="ab-given-row" key={line}><span className="ab-key">{key}</span><input aria-label={key} value={values[key] ?? rest.join(':').trim()} readOnly={executable} onChange={(event) => setValue(key, event.target.value)} /></label> })}</div></Panel>
+  return <Panel title="Given" icon={FlaskConical} right={<span className="ab-muted-small">{executable ? 'Controlled execution' : 'Local mock'}</span>}><div className="ab-given-grid">{givenEntries(story).map(({ key, value }) => <label className="ab-given-row" key={key}><span className="ab-key">{key}</span><input aria-label={key} value={values[key] ?? value} readOnly={executable} onChange={(event) => setValue(key, event.target.value)} /></label>)}</div></Panel>
 }
 
 function ResultPanel({ state }: { state: UiRunState }) {
@@ -164,7 +175,7 @@ function CompareView({ story }: { story: DisplayStory }) {
 
 function createSessionVariant(story: DisplayStory, values: GivenState, execution: CompletedExecutionRecord): DisplayStory {
   const variant = story.simulation.kind === 'numeric-threshold' ? story.simulation.savedVariant : undefined
-  const given = story.given.map((line) => { const [key] = line.split(':'); return `${key}: ${values[key.trim()] ?? ''}` })
+  const given = givenEntries(story).map(({ key }) => `${key}: ${values[key] ?? ''}`)
   return { ...story, id: `${story.id}-local-variant`, name: variant?.name ?? `${story.name} Variant`, description: variant?.description ?? story.description, status: execution.evaluationResult.verdict === 'PASS' ? 'pass' : 'fail', given, result: { decision: execution.observedRun.decision, reason: execution.observedRun.reason }, tools: execution.observedRun.toolCalls, expectations: variant?.expectations ?? story.expectations, runs: [], source: { file: 'Unsaved local variant' }, simulation: { kind: 'static' }, execution: { kind: 'prototype-mock' } }
 }
 

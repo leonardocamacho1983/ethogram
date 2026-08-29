@@ -86,6 +86,8 @@ import type {
   ExternalToolSet,
   Story,
   StoryExpectation,
+  StoryGiven,
+  StoryGivenValue,
   StoryInput,
   ToolCalledMatcher,
   ToolNotCalledMatcher,
@@ -138,6 +140,20 @@ const storyInput: StoryInput = {
 const story: Story = defineStory(storyInput)
 const typedAgent: Agent = invoiceAgent
 void typedAgent
+
+const structuredGiven: StoryGiven = {
+  purchaseAmount: 500,
+  requesterLevel: 'employee',
+  approvalThreshold: 100,
+}
+const nestedGivenValue: StoryGivenValue = { flags: [true, null, 'safe'] }
+const structuredStory = defineStory({
+  ...storyInput,
+  id: 'structured-invoice-review',
+  name: 'Structured Invoice Review',
+  given: structuredGiven,
+})
+void nestedGivenValue
 
 const tools = {
   lookup_invoice: {
@@ -195,7 +211,10 @@ function assertVerdictFree(value: unknown, location = 'story'): void {
 assertVerdictFree(story)
 invariant(story.agent === invoiceAgent, 'Agent identity was not preserved.')
 invariant(story.prompt === 'Review this invoice for payment.', 'When/prompt was not preserved.')
-invariant(story.given.includes('invoiceId: INV-2048'), 'Given data was not preserved.')
+invariant(Array.isArray(story.given) && story.given.includes('invoiceId: INV-2048'), 'Given data was not preserved.')
+invariant(!Array.isArray(structuredStory.given), 'Structured GIVEN was not preserved.')
+invariant(structuredStory.given.purchaseAmount === 500, 'Structured GIVEN value was not preserved.')
+invariant(!Object.prototype.hasOwnProperty.call(structuredStory, 'scenario'), 'A parallel scenario property was introduced.')
 invariant(story.expectations[0].matcher.kind === 'tool-called', 'tool-called matcher was not preserved.')
 invariant(story.expectations[2].matcher.kind === 'tool-not-called', 'tool-not-called matcher was not preserved.')
 invariant(trace.join(',') === 'lookup_invoice,request_invoice_review', 'Consumer handlers were not invoked in order.')
