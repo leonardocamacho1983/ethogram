@@ -1,0 +1,23 @@
+{
+  "name": "@agentbook/cli",
+  "version": "0.0.0-test.7",
+  "description": "Local Agentbook initialization and developer runtime.",
+  "type": "module",
+  "bin": {
+    "agentbook": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.9"
+  },
+  "dependencies": {
+    "@agentbook/core": "0.0.0-test.6",
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-runtime.mjs"
+  }
+}

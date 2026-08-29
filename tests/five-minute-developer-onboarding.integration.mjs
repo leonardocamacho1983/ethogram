@@ -1,0 +1,464 @@
+import assert from 'node:assert/strict'
+import { execFileSync, spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import {
+  access,
+  chmod,
+  cp,
+  lstat,
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  readdir,
+  rm,
+  stat,
+  unlink,
+  writeFile,
+} from 'node:fs/promises'
+import { createServer as createNetServer } from 'node:net'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import test from 'node:test'
+
+const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
+const corePackageRoot = path.join(repositoryRoot, 'packages', 'agentbook')
+const cliPackageRoot = path.join(repositoryRoot, 'packages', 'cli')
+
+function cleanEnvironment() {
+  const environment = { ...process.env }
+  for (const key of [
+    'NODE_PATH',
+    'NODE_OPTIONS',
+    'TS_NODE_PROJECT',
+    'TSX_TSCONFIG_PATH',
+    'AGENTBOOK_PROJECT_ROOT',
+    'AI_GATEWAY_API_KEY',
+    'OPENAI_API_KEY',
+    'ANTHROPIC_API_KEY',
+  ]) delete environment[key]
+  environment.npm_config_update_notifier = 'false'
+  environment.npm_config_audit = 'false'
+  environment.npm_config_fund = 'false'
+  return environment
+}
+
+function run(command, args, cwd, options = {}) {
+  try {
+    return {
+      status: 0,
+      output: execFileSync(command, args, {
+        cwd,
+        env: cleanEnvironment(),
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        ...options,
+      }),
+    }
+  } catch (error) {
+    return {
+      status: error.status ?? 1,
+      output: `${error.stdout ?? ''}${error.stderr ?? ''}`,
+    }
+  }
+}
+
+function assertOutsideRepository(candidate) {
+  const relative = path.relative(repositoryRoot, candidate)
+  assert.notEqual(relative, '')
+  assert.equal(relative === '..' || relative.startsWith(`..${path.sep}`), true)
+  assert.equal(path.isAbsolute(relative), false)
+}
+
+async function listFiles(root, current = root) {
+  const entries = await readdir(current, { withFileTypes: true })
+  const files = []
+  for (const entry of entries) {
+    const absolute = path.join(current, entry.name)
+    if (entry.isDirectory()) files.push(...await listFiles(root, absolute))
+    else files.push(path.relative(root, absolute).split(path.sep).join('/'))
+  }
+  return files.sort()
+}
+
+async function sha256(filePath) {
+  return createHash('sha256').update(await readFile(filePath)).digest('hex')
+}
+
+function assertVerdictFree(value, location = 'observedRun') {
+  if (!value || typeof value !== 'object') return
+  for (const [key, nested] of Object.entries(value)) {
+    assert.equal(['passed', 'failed', 'verdict'].includes(key), false, `${location}.${key} contains a verdict field`)
+    assert.equal(nested === 'PASS' || nested === 'FAIL', false, `${location}.${key} contains a verdict value`)
+    assertVerdictFree(nested, `${location}.${key}`)
+  }
+}
+
+async function createOrdinaryProject(root, name) {
+  await mkdir(root, { recursive: true })
+  const packageJson = `${JSON.stringify({ name, version: '1.0.0', private: true }, null, 2)}\n`
+  await writeFile(path.join(root, 'package.json'), packageJson)
+  return packageJson
+}
+
+async function startDev(binary, cwd, args) {
+  const child = spawn(binary, ['dev', ...args], {
+    cwd,
+    env: cleanEnvironment(),
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  let output = ''
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  child.stdout.on('data', (chunk) => { output += chunk })
+  child.stderr.on('data', (chunk) => { output += chunk })
+  const url = await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for Agentbook dev.\n${output}`)), 15_000)
+    const inspect = () => {
+      const match = output.match(/Local URL: (http:\/\/127\.0\.0\.1:\d+\/)/)
+      if (!match) return
+      clearTimeout(timeout)
+      resolve(match[1])
+    }
+    child.stdout.on('data', inspect)
+    child.once('exit', (code) => {
+      clearTimeout(timeout)
+      reject(new Error(`Agentbook dev exited before readiness (${code}).\n${output}`))
+    })
+  })
+  return {
+    child,
+    url,
+    output: () => output,
+    async stop() {
+      child.kill('SIGINT')
+      await new Promise((resolve) => child.once('exit', resolve))
+      assert.match(output, /Agentbook developer server stopped\./)
+    },
+  }
+}
+
+async function installArtifacts(root, coreTarball, cliTarball) {
+  const install = run('npm', [
+    'install',
+    '--save-dev',
+    '--ignore-scripts',
+    '--no-audit',
+    '--no-fund',
+    '--offline',
+    coreTarball,
+    cliTarball,
+  ], root)
+  assert.equal(install.status, 0, install.output)
+  return install.output.trim()
+}
+
+async function installedBoundary(root) {
+  const core = await realpath(path.join(root, 'node_modules', '@agentbook', 'core'))
+  const cli = await realpath(path.join(root, 'node_modules', '@agentbook', 'cli'))
+  const binaryLink = path.join(root, 'node_modules', '.bin', 'agentbook')
+  const binaryTarget = await realpath(binaryLink)
+  for (const resolved of [core, cli, binaryTarget]) {
+    assert.equal(resolved.startsWith(`${await realpath(root)}${path.sep}`), true)
+    assert.equal(resolved.includes(repositoryRoot), false)
+  }
+  assert.equal((await lstat(core)).isSymbolicLink(), false)
+  assert.equal((await lstat(cli)).isSymbolicLink(), false)
+  return { core, cli, binary: binaryTarget }
+}
+
+test('Test 07 packed artifacts provide five-minute zero-config onboarding', { timeout: 300_000 }, async (t) => {
+  const scratchRoot = await mkdtemp(path.join(tmpdir(), 'agentbook-test07-'))
+  t.after(() => rm(scratchRoot, { recursive: true, force: true }))
+  assertOutsideRepository(scratchRoot)
+
+  const buildCore = run('npm', ['run', 'core:build'], repositoryRoot)
+  const buildCli = run('npm', ['run', 'cli:build'], repositoryRoot)
+  assert.equal(buildCore.status, 0, buildCore.output)
+  assert.equal(buildCli.status, 0, buildCli.output)
+
+  const artifactDirectory = path.join(scratchRoot, 'artifacts')
+  await mkdir(artifactDirectory)
+  const corePack = run('npm', ['pack', corePackageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
+  const cliPack = run('npm', ['pack', cliPackageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
+  assert.equal(corePack.status, 0, corePack.output)
+  assert.equal(cliPack.status, 0, cliPack.output)
+  const [corePackResult] = JSON.parse(corePack.output)
+  const [cliPackResult] = JSON.parse(cliPack.output)
+  const coreTarball = path.join(artifactDirectory, corePackResult.filename)
+  const cliTarball = path.join(artifactDirectory, cliPackResult.filename)
+
+  const extracted = path.join(scratchRoot, 'extracted')
+  await mkdir(extracted)
+  assert.equal(run('tar', ['-xzf', cliTarball, '-C', extracted], repositoryRoot).status, 0)
+  const cliManifest = await listFiles(path.join(extracted, 'package'))
+  const packedCliJson = JSON.parse(await readFile(path.join(extracted, 'package', 'package.json'), 'utf8'))
+  assert.equal(packedCliJson.name, '@agentbook/cli')
+  assert.equal(packedCliJson.bin.agentbook, './dist/cli.js')
+  assert.equal(packedCliJson.engines.node, '>=20.9')
+  assert.equal(packedCliJson.dependencies['@agentbook/core'], '0.0.0-test.6')
+  assert.match(packedCliJson.dependencies.esbuild, /^\^0\./)
+  for (const required of [
+    'dist/cli.js',
+    'dist/generic-engine.js',
+    'dist/evaluator.js',
+    'dist/typescript-adapter.js',
+    'dist/runtime/index.html',
+    'dist/runtime/app.js',
+    'dist/runtime/styles.css',
+  ]) assert.equal(cliManifest.includes(required), true, `CLI artifact is missing ${required}`)
+  const packedText = (await Promise.all(cliManifest
+    .filter((file) => !file.endsWith('.png'))
+    .map((file) => readFile(path.join(extracted, 'package', file), 'utf8')))).join('\n')
+  for (const forbidden of [repositoryRoot, '/Users/', 'AGENTBOOK_PROJECT_ROOT', 'AI_GATEWAY_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY']) {
+    assert.equal(packedText.includes(forbidden), false, `CLI artifact leaked ${forbidden}`)
+  }
+
+  const consumerOne = path.join(scratchRoot, 'consumer-one')
+  const initialPackageJson = await createOrdinaryProject(consumerOne, 'test07-clean-consumer')
+  assertOutsideRepository(consumerOne)
+  assert.deepEqual(await listFiles(consumerOne), ['package.json'])
+  assert.equal(initialPackageJson.includes('"type"'), false)
+  for (const forbiddenPackage of ['typescript', 'tsx', 'ts-node', 'esbuild']) {
+    assert.equal(initialPackageJson.includes(forbiddenPackage), false)
+  }
+  await assert.rejects(access(path.join(consumerOne, 'tsconfig.json')))
+  await assert.rejects(access(path.join(consumerOne, 'node_modules')))
+
+  const timerStartWall = new Date().toISOString()
+  const timerStart = process.hrtime.bigint()
+  const installOutput = await installArtifacts(consumerOne, coreTarball, cliTarball)
+  const boundary = await installedBoundary(consumerOne)
+  const binary = path.join(consumerOne, 'node_modules', '.bin', 'agentbook')
+  const packageAfterInstall = await readFile(path.join(consumerOne, 'package.json'), 'utf8')
+  assert.equal(JSON.parse(packageAfterInstall).type, undefined)
+  assert.equal(JSON.parse(packageAfterInstall).devDependencies.typescript, undefined)
+  assert.equal(JSON.parse(packageAfterInstall).devDependencies.tsx, undefined)
+  assert.equal(JSON.parse(packageAfterInstall).devDependencies['ts-node'], undefined)
+  assert.equal((await stat(path.join(consumerOne, 'node_modules', 'esbuild'))).isDirectory(), true)
+
+  const firstInit = run(binary, ['init'], consumerOne)
+  assert.equal(firstInit.status, 0, firstInit.output)
+  assert.match(firstInit.output, /Created agentbook\.config\.mjs/)
+  const packageAfterInit = await readFile(path.join(consumerOne, 'package.json'), 'utf8')
+  assert.equal(packageAfterInit, packageAfterInstall)
+  await assert.rejects(access(path.join(consumerOne, 'tsconfig.json')))
+  const generatedFiles = [
+    'agentbook.config.mjs',
+    'agents/access-request.agent.ts',
+    'stories/admin-access-requires-approval.agent.stories.ts',
+    'execution/access-request.profile.ts',
+  ]
+  for (const file of generatedFiles) assert.equal((await stat(path.join(consumerOne, file))).isFile(), true)
+  const generatedImports = (await Promise.all(generatedFiles.map((file) => readFile(path.join(consumerOne, file), 'utf8'))))
+    .flatMap((source) => [...source.matchAll(/from ['"]([^'"]+)['"]/g)].map((match) => match[1]))
+  assert.deepEqual([...new Set(generatedImports.filter((value) => !value.startsWith('.')))], ['@agentbook/core'])
+
+  const beforeSecondInit = await Promise.all(generatedFiles.map((file) => sha256(path.join(consumerOne, file))))
+  const secondInit = run(binary, ['init'], consumerOne)
+  assert.equal(secondInit.status, 0, secondInit.output)
+  assert.match(secondInit.output, /already initialized/)
+  assert.deepEqual(await Promise.all(generatedFiles.map((file) => sha256(path.join(consumerOne, file)))), beforeSecondInit)
+
+  const helpResult = run(binary, ['--help'], consumerOne)
+  const versionResult = run(binary, ['--version'], consumerOne)
+  assert.equal(helpResult.status, 0, helpResult.output)
+  assert.match(helpResult.output, /agentbook init/)
+  assert.match(helpResult.output, /--project <path>/)
+  assert.match(helpResult.output, /--no-open/)
+  assert.equal(versionResult.output.trim(), packedCliJson.version)
+
+  const dev = await startDev(binary, consumerOne, ['--no-open', '--port', '0'])
+  t.after(() => { if (dev.child.exitCode === null) dev.child.kill('SIGINT') })
+  assert.match(dev.output(), /Agentbook project: test07-clean-consumer/)
+  assert.match(dev.output(), new RegExp(`Project root: ${(await realpath(consumerOne)).replaceAll('\\', '\\\\')}`))
+  assert.match(dev.output(), /TypeScript adapter: ready \(1 Story\)/)
+  const html = await (await fetch(dev.url)).text()
+  const project = await (await fetch(new URL('/api/project', dev.url))).json()
+  assert.match(html, /Agentbook Developer/)
+  assert.equal(project.name, 'test07-clean-consumer')
+  assert.equal(project.adapter.id, 'typescript')
+  assert.deepEqual(project.agents.map(({ name }) => name), ['Access Request Agent'])
+  assert.deepEqual(project.stories.map(({ name }) => name), ['Admin Access Requires Approval'])
+  assert.equal(project.stories[0].source, 'stories/admin-access-requires-approval.agent.stories.ts')
+  assert.equal(JSON.stringify(project).includes('acme-agents'), false)
+  assert.equal(/refund|travel|invoice/i.test(JSON.stringify(project)), false)
+
+  const runResponse = await fetch(new URL('/api/run', dev.url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ storyId: 'admin-access-requires-approval' }),
+  })
+  const runPayload = await runResponse.json()
+  assert.equal(runResponse.status, 200)
+  assert.equal(runPayload.status, 'completed')
+  const { observedRun, evaluationResult } = runPayload.execution
+  assertVerdictFree(observedRun)
+  assert.deepEqual(observedRun.toolCalls.map(({ name }) => name), ['check_access_policy', 'request_access_approval'])
+  assert.equal(observedRun.toolCalls.some(({ name }) => name === 'grant_admin_access'), false)
+  assert.equal(evaluationResult.verdict, 'PASS')
+  assert.deepEqual(evaluationResult.expectations, {
+    'checks-access-policy': 'PASS',
+    'does-not-grant-directly': 'PASS',
+    'requests-approval': 'PASS',
+  })
+  assert.equal(runPayload.boundaryEvidence.storyUnchanged, true)
+  assert.equal(runPayload.boundaryEvidence.mockDataUsed, false)
+  assert.equal(runPayload.boundaryEvidence.adapter, 'typescript')
+  const timerEnd = process.hrtime.bigint()
+  const timerEndWall = new Date().toISOString()
+  const elapsedMs = Number(timerEnd - timerStart) / 1_000_000
+  assert.equal(elapsedMs <= 300_000, true, `Onboarding took ${elapsedMs}ms`)
+
+  await dev.stop()
+  const reusedPort = Number(new URL(dev.url).port)
+  const portReuse = createNetServer()
+  await new Promise((resolve, reject) => portReuse.listen(reusedPort, '127.0.0.1', resolve).once('error', reject))
+  await new Promise((resolve) => portReuse.close(resolve))
+
+  const consumerTwo = path.join(scratchRoot, 'consumer-two')
+  await createOrdinaryProject(consumerTwo, 'test07-portable-consumer')
+  await installArtifacts(consumerTwo, coreTarball, cliTarball)
+  const binaryTwo = path.join(consumerTwo, 'node_modules', '.bin', 'agentbook')
+  assert.equal(run(binaryTwo, ['init'], consumerTwo).status, 0)
+  await unlink(path.join(consumerTwo, 'execution', 'access-request.profile.ts'))
+  const partialInit = run(binaryTwo, ['init'], consumerTwo)
+  assert.equal(partialInit.status, 0, partialInit.output)
+  assert.match(partialInit.output, /Created execution\/access-request\.profile\.ts/)
+  assert.match(partialInit.output, /Preserved agentbook\.config\.mjs/)
+  const explicitDev = await startDev(binaryTwo, scratchRoot, ['--project', consumerTwo, '--no-open', '--port', '0'])
+  t.after(() => { if (explicitDev.child.exitCode === null) explicitDev.child.kill('SIGINT') })
+  const portableProject = await (await fetch(new URL('/api/project', explicitDev.url))).json()
+  assert.equal(portableProject.name, 'test07-portable-consumer')
+  await explicitDev.stop()
+
+  const conflictRoot = path.join(scratchRoot, 'conflict-consumer')
+  await createOrdinaryProject(conflictRoot, 'test07-conflict-consumer')
+  await installArtifacts(conflictRoot, coreTarball, cliTarball)
+  await mkdir(path.join(conflictRoot, 'agents'))
+  await writeFile(path.join(conflictRoot, 'agents', 'access-request.agent.ts'), 'user owned content\n')
+  const conflictBinary = path.join(conflictRoot, 'node_modules', '.bin', 'agentbook')
+  const conflictInit = run(conflictBinary, ['init'], conflictRoot)
+  assert.notEqual(conflictInit.status, 0)
+  assert.match(conflictInit.output, /Existing files were preserved; nothing was written/)
+  assert.equal(await readFile(path.join(conflictRoot, 'agents', 'access-request.agent.ts'), 'utf8'), 'user owned content\n')
+  await assert.rejects(access(path.join(conflictRoot, 'agentbook.config.mjs')))
+
+  const uninitializedRoot = path.join(scratchRoot, 'uninitialized-consumer')
+  await createOrdinaryProject(uninitializedRoot, 'test07-uninitialized')
+  await installArtifacts(uninitializedRoot, coreTarball, cliTarball)
+  const uninitializedBinary = path.join(uninitializedRoot, 'node_modules', '.bin', 'agentbook')
+  const beforeInitDev = run(uninitializedBinary, ['dev', '--no-open', '--port', '0'], uninitializedRoot)
+  assert.notEqual(beforeInitDev.status, 0)
+  assert.match(beforeInitDev.output, /Run "agentbook init" first/)
+  assert.doesNotMatch(beforeInitDev.output, /\n\s+at /)
+
+  const invalidRoot = path.join(scratchRoot, 'invalid-story-consumer')
+  await createOrdinaryProject(invalidRoot, 'test07-invalid-story')
+  await installArtifacts(invalidRoot, coreTarball, cliTarball)
+  const invalidBinary = path.join(invalidRoot, 'node_modules', '.bin', 'agentbook')
+  assert.equal(run(invalidBinary, ['init'], invalidRoot).status, 0)
+  await writeFile(path.join(invalidRoot, 'stories', 'admin-access-requires-approval.agent.stories.ts'), 'export const invalid = true\n')
+  const invalidStory = run(invalidBinary, ['dev', '--no-open', '--port', '0'], invalidRoot)
+  assert.notEqual(invalidStory.status, 0)
+  assert.match(invalidStory.output, /No valid Story export found.*admin-access-requires-approval\.agent\.stories\.ts/)
+  assert.doesNotMatch(invalidStory.output, /\n\s+at /)
+
+  const invalidProject = run(binaryTwo, ['dev', '--project', path.join(scratchRoot, 'missing'), '--no-open', '--port', '0'], scratchRoot)
+  assert.notEqual(invalidProject.status, 0)
+  assert.match(invalidProject.output, /Project root is not a readable directory/)
+
+  const occupied = createNetServer()
+  await new Promise((resolve, reject) => occupied.listen(0, '127.0.0.1', resolve).once('error', reject))
+  const occupiedAddress = occupied.address()
+  const occupiedPort = typeof occupiedAddress === 'object' ? occupiedAddress.port : 0
+  const occupiedResult = run(binaryTwo, ['dev', '--no-open', '--port', String(occupiedPort)], consumerTwo)
+  assert.notEqual(occupiedResult.status, 0)
+  assert.match(occupiedResult.output, new RegExp(`port ${occupiedPort} is already in use`))
+  assert.match(occupiedResult.output, /--port <number>/)
+  await new Promise((resolve) => occupied.close(resolve))
+
+  const runtimeIndex = path.join(consumerTwo, 'node_modules', '@agentbook', 'cli', 'dist', 'runtime', 'index.html')
+  await unlink(runtimeIndex)
+  const missingRuntime = run(binaryTwo, ['dev', '--no-open', '--port', '0'], consumerTwo)
+  assert.notEqual(missingRuntime.status, 0)
+  assert.match(missingRuntime.output, /Packaged developer runtime is incomplete.*Reinstall @agentbook\/cli/)
+
+  const genericEngineSource = await readFile(path.join(repositoryRoot, 'packages', 'cli', 'src', 'generic-engine.ts'), 'utf8')
+  const evaluatorSource = await readFile(path.join(repositoryRoot, 'packages', 'cli', 'src', 'evaluator.ts'), 'utf8')
+  for (const source of [genericEngineSource, evaluatorSource]) {
+    assert.doesNotMatch(source, /from ['"]esbuild['"]|profile\.execute|tool\.execute|\.agent\.stories\.|\.profile\./)
+  }
+  const adapterSource = await readFile(path.join(repositoryRoot, 'packages', 'cli', 'src', 'typescript-adapter.ts'), 'utf8')
+  assert.match(adapterSource, /from 'esbuild'/)
+  assert.match(adapterSource, /binding\.profile\.execute/)
+  assert.doesNotMatch(adapterSource, /evaluateStory|EvaluationResult/)
+  const runtimeSources = [
+    'packages/cli/src/generic-engine.ts',
+    'packages/cli/src/evaluator.ts',
+    'packages/cli/src/server.ts',
+    'packages/cli/src/runtime/app.js',
+  ]
+  const accessKnowledge = /Access Request|Admin Access|check_access_policy|grant_admin_access|request_access_approval/
+  for (const file of runtimeSources) {
+    assert.doesNotMatch(await readFile(path.join(repositoryRoot, file), 'utf8'), accessKnowledge)
+  }
+
+  const runtimeApplication = await readFile(
+    path.join(repositoryRoot, 'packages/cli/src/runtime/app.js'),
+    'utf8',
+  )
+  for (const renderedTarget of ['story-verdict', 'decision', 'final-response', 'assertion-count']) {
+    assert.match(
+      runtimeApplication,
+      new RegExp(`id=["']${renderedTarget}["']`),
+      `The browser runtime must render the #${renderedTarget} target that it updates after a Story run.`,
+    )
+  }
+
+  const evidence = {
+    artifacts: {
+      core: { filename: corePackResult.filename, sha256: await sha256(coreTarball), manifest: corePackResult.files.map(({ path: file }) => file).sort() },
+      cli: { filename: cliPackResult.filename, sha256: await sha256(cliTarball), manifest: cliManifest, dependencies: packedCliJson.dependencies },
+    },
+    consumer: {
+      root: await realpath(consumerOne),
+      initialFiles: ['package.json'],
+      initialPackageType: null,
+      preinstalledTypeScriptToolchain: [],
+      installedBoundary: boundary,
+      generatedFiles,
+      generatedImports,
+    },
+    onboarding: {
+      start: timerStartWall,
+      end: timerEndWall,
+      elapsedMs,
+      developerActions: [
+        'install @agentbook/core and @agentbook/cli tarballs',
+        'agentbook init',
+        'agentbook dev',
+        'open the reported local URL',
+        'click Run Story',
+      ],
+      developerActionCount: 5,
+      installOutput,
+    },
+    project,
+    observedRun,
+    evaluationResult,
+    boundaryEvidence: runPayload.boundaryEvidence,
+    help: helpResult.output.trim().split('\n'),
+    version: versionResult.output.trim(),
+    gracefulShutdown: 'PASS',
+    secondLocationPortability: 'PASS',
+    errorUx: 'PASS',
+    offlineInstall: true,
+    artifactOnlyReplacementAnswer: 'YES',
+    typescriptConfigurationAnswer: 'NO',
+    futureAdapterSubstitutionAnswer: 'YES',
+    genericEngineLanguageIndependenceAnswer: 'YES',
+  }
+  console.log(`TEST07_EVIDENCE ${JSON.stringify(evidence)}`)
+})

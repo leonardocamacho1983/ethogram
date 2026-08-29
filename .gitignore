@@ -13,6 +13,7 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 packages/agentbook/dist/
+packages/cli/dist/
 .DS_Store
 *.tsbuildinfo
 .playwright-cli/

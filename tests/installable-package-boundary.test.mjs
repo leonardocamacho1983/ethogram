@@ -399,6 +399,7 @@ test('Test 06 packs and consumes @agentbook/core across two clean filesystem bou
   const actualManifest = await listFiles(extractRoot)
   const expectedManifest = [
     'package/README.md',
+    'package/dist/index.cjs',
     'package/dist/index.d.ts',
     'package/dist/index.js',
     'package/package.json',
@@ -411,7 +412,7 @@ test('Test 06 packs and consumes @agentbook/core across two clean filesystem bou
   assert.equal(packedPackageJson.version, '0.0.0-test.6')
   assert.equal(packedPackageJson.type, 'module')
   assert.deepEqual(packedPackageJson.exports, {
-    '.': { types: './dist/index.d.ts', import: './dist/index.js' },
+    '.': { types: './dist/index.d.ts', import: './dist/index.js', require: './dist/index.cjs' },
   })
   assert.equal(packedPackageJson.types, './dist/index.d.ts')
   assert.deepEqual(packedPackageJson.engines, { node: '>=20' })

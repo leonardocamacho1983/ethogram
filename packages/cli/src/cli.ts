@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+import { access, mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { constants } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { startDeveloperServer } from './server.js'
+import { starterFiles } from './templates.js'
+import { TypeScriptAdapterError } from './typescript-adapter.js'
+
+const help = `Agentbook CLI (codename)
+
+Usage:
+  agentbook init
+  agentbook dev [--project <path>] [--port <number>] [--no-open]
+  agentbook --help
+  agentbook --version
+
+Commands:
+  init  Create a starter Agent, Story, and local execution profile in the current project.
+  dev   Start the local Agentbook developer UI. The current directory is the default project.
+
+Examples:
+  npx agentbook init
+  npx agentbook dev
+  npx agentbook dev --project ./my-agent-project --port 4317 --no-open
+`
+
+async function version(): Promise<string> {
+  const packagePath = fileURLToPath(new URL('../package.json', import.meta.url))
+  const packageJson = JSON.parse(await readFile(packagePath, 'utf8')) as { version: string }
+  return packageJson.version
+}
+
+async function projectPackage(root: string): Promise<{ name: string }> {
+  try {
+    const packagePath = path.join(root, 'package.json')
+    const value = JSON.parse(await readFile(packagePath, 'utf8')) as { name?: unknown }
+    if (typeof value.name !== 'string' || !value.name.trim()) throw new Error('missing-name')
+    return { name: value.name }
+  } catch {
+    throw new Error(`INIT_PROJECT_INVALID: ${root} must contain a package.json with a name.`)
+  }
+}
+
+async function initialize(): Promise<void> {
+  const root = await realpath(process.cwd())
+  if (!(await stat(root)).isDirectory()) throw new Error(`INIT_PROJECT_INVALID: ${root} is not a directory.`)
+  const packageJson = await projectPackage(root)
+  const files = starterFiles(packageJson.name)
+  const matching: string[] = []
+  const missing: string[] = []
+  const conflicts: string[] = []
+
+  await access(root, constants.R_OK | constants.W_OK)
+  for (const file of files) {
+    const target = path.join(root, file.relativePath)
+    try {
+      const existing = await readFile(target, 'utf8')
+      if (existing === file.content) matching.push(file.relativePath)
+      else conflicts.push(file.relativePath)
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code
+      if (code === 'ENOENT') missing.push(file.relativePath)
+      else throw new Error(`INIT_PREFLIGHT_FAILED: Could not inspect ${file.relativePath}.`)
+    }
+  }
+
+  if (conflicts.length > 0) {
+    throw new Error(`INIT_CONFLICT: Existing files were preserved; nothing was written. Conflicts: ${conflicts.join(', ')}`)
+  }
+
+  for (const relativePath of missing) {
+    const file = files.find((candidate) => candidate.relativePath === relativePath)
+    if (!file) continue
+    const target = path.join(root, relativePath)
+    await mkdir(path.dirname(target), { recursive: true })
+    await writeFile(target, file.content, { encoding: 'utf8', flag: 'wx' })
+  }
+
+  if (missing.length === 0) {
+    process.stdout.write(`Agentbook is already initialized in ${root}. No files were changed.\n`)
+  } else {
+    process.stdout.write(`Agentbook initialized in ${root}.\n`)
+    for (const relativePath of missing) process.stdout.write(`Created ${relativePath}\n`)
+    for (const relativePath of matching) process.stdout.write(`Preserved ${relativePath}\n`)
+  }
+  process.stdout.write('Next: npx agentbook dev\n')
+}
+
+function parseDevArguments(args: string[]): { projectRoot: string; port: number; openBrowser: boolean } {
+  let projectRoot = process.cwd()
+  let port = 4317
+  let openBrowser = true
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index]
+    if (argument === '--no-open') {
+      openBrowser = false
+      continue
+    }
+    if (argument === '--project') {
+      const value = args[index + 1]
+      if (!value) throw new Error('CLI_USAGE: --project requires a path.')
+      projectRoot = path.resolve(value)
+      index += 1
+      continue
+    }
+    if (argument === '--port') {
+      const value = Number(args[index + 1])
+      if (!Number.isInteger(value) || value < 0 || value > 65535) {
+        throw new Error('CLI_USAGE: --port requires an integer from 0 to 65535.')
+      }
+      port = value
+      index += 1
+      continue
+    }
+    throw new Error(`CLI_USAGE: Unknown dev option ${argument}.`)
+  }
+  return { projectRoot, port, openBrowser }
+}
+
+async function main(): Promise<void> {
+  const args = process.argv.slice(2)
+  const command = args[0]
+  if (!command || command === '--help' || command === '-h' || command === 'help') {
+    process.stdout.write(help)
+    return
+  }
+  if (command === '--version' || command === '-v') {
+    process.stdout.write(`${await version()}\n`)
+    return
+  }
+  if (command === 'init') {
+    if (args.length !== 1) throw new Error('CLI_USAGE: agentbook init does not accept options in Test 07.')
+    await initialize()
+    return
+  }
+  if (command === 'dev') {
+    await startDeveloperServer(parseDevArguments(args.slice(1)))
+    return
+  }
+  throw new Error(`CLI_USAGE: Unknown command ${command}. Run agentbook --help.`)
+}
+
+main().catch((error: unknown) => {
+  if (error instanceof TypeScriptAdapterError) {
+    process.stderr.write(`Agentbook ${error.code}: ${error.message}\n`)
+  } else if (error instanceof Error) {
+    process.stderr.write(`Agentbook error: ${error.message}\n`)
+  } else {
+    process.stderr.write('Agentbook error: The command could not be completed.\n')
+  }
+  process.exitCode = 1
+})
