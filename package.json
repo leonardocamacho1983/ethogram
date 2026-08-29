@@ -7,12 +7,16 @@
     "tests/fixtures/external-agent-project"
   ],
   "scripts": {
+    "core:build": "tsc -p packages/agentbook/tsconfig.build.json",
+    "test:package": "node --test tests/installable-package-boundary.test.mjs",
     "stories:discover": "node scripts/generate-story-registry.mjs",
-    "predev": "node scripts/generate-story-registry.mjs",
+    "predev": "npm run core:build && node scripts/generate-story-registry.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/generate-story-registry.mjs",
+    "prebuild": "npm run core:build && node scripts/generate-story-registry.mjs",
     "build": "next build",
+    "pretypecheck": "npm run core:build",
     "typecheck": "tsc --noEmit",
+    "pretest": "npm run core:build",
     "test": "node --test tests/*.test.mjs",
     "test:real-agent": "node --test tests/real-agent-runner.integration.mjs",
     "start": "next start"
