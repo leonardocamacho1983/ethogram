@@ -50,22 +50,45 @@ export type ExecutionRequest = {
   story: StoryDescriptor
 }
 
-export type ObservedToolCall = {
+type ObservedToolCallBase = {
   callId: string
   name: string
-  status: 'success' | 'error'
-  duration: string
   input: string
-  output: string
-  startedAt: string
-  endedAt: string
+  duration?: string
+  startedAt?: string
+  endedAt?: string
 }
+
+export type ObservedToolCall =
+  | (ObservedToolCallBase & {
+      status: 'success'
+      output?: string
+      error?: never
+    })
+  | (ObservedToolCallBase & {
+      status: 'error'
+      output?: never
+      error?: {
+        name?: string
+        message: string
+      }
+    })
 
 export type ObservedTimelineStep = {
   label: string
   detail: string
-  duration: string
+  duration?: string
 }
+
+export type ObservedTokenUsage =
+  | { availability: 'unavailable' }
+  | {
+      availability: 'available'
+      inputTokens?: number
+      outputTokens?: number
+      totalTokens?: number
+      reasoningTokens?: number
+    }
 
 export type ObservedRun = {
   decision: string
@@ -74,13 +97,13 @@ export type ObservedRun = {
   toolCalls: ObservedToolCall[]
   timeline: ObservedTimelineStep[]
   evidence: {
-    provider: string
-    model: string
-    startedAt: string
-    endedAt: string
-    latencyMs: number
-    finishReason: string
-    tokenUsage: { availability: 'unavailable' }
+    provider?: string
+    model?: string
+    startedAt?: string
+    endedAt?: string
+    latencyMs?: number
+    finishReason?: string
+    tokenUsage: ObservedTokenUsage
   }
 }
 

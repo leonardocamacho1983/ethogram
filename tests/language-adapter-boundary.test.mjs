@@ -117,7 +117,8 @@ test('generic engine, evaluator, and UI do not import or execute TypeScript-nati
   assert.doesNotMatch(adapterSource, /evaluateStory|EvaluationResult/)
 
   const contractSource = await readFile(path.join(repositoryRoot, 'packages/cli/src/contracts.ts'), 'utf8')
-  assert.match(contractSource, /provider: string/)
-  assert.match(contractSource, /model: string/)
+  assert.match(contractSource, /provider\?: string/)
+  assert.match(contractSource, /model\?: string/)
+  assert.match(contractSource, /tokenUsage: ObservedTokenUsage/)
   assert.doesNotMatch(contractSource, /provider: 'local-typescript-adapter'|model: 'offline-deterministic-profile'/)
 })

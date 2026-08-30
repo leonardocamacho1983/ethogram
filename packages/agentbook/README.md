@@ -12,6 +12,8 @@ Runtime values:
 - `defineStory`
 - `defineExecutionProfile`
 
-Public types cover Agent and Story authoring, legacy and structured GIVEN values, `tool-called` and `tool-not-called` matchers, and the generic external execution-profile/tool contract.
+Public types cover Agent and Story authoring, legacy and structured GIVEN values, `tool-called` and `tool-not-called` matchers, the generic external execution-profile/tool contract, and framework-neutral verdict-free external execution evidence.
+
+Execution profiles always declare `tools`, including `tools: {}` when a third-party framework owns tool dispatch. A completed profile may return optional `ExternalExecutionEvidence`; Agentbook retains ownership of canonical observation normalization and behavioral evaluation.
 
 Story expectations declare required behavior. They never contain behavioral verdicts.

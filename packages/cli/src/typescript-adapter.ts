@@ -9,6 +9,10 @@ import type {
   ProjectDescriptor,
   StoryDescriptor,
 } from './contracts.js'
+import {
+  ExternalEvidenceValidationError,
+  normalizeExternalExecutionEvidence,
+} from './external-evidence.js'
 
 type NativeAgent = {
   id: string
@@ -41,7 +45,7 @@ type NativeExecutionProfile = {
   execute(context: {
     story: NativeStory
     callTool(name: string, input: NativeToolInput): Promise<NativeToolOutput>
-  }): Promise<{ decision: string; finalResponse: string }>
+  }): Promise<{ decision: string; finalResponse: string; evidence?: unknown }>
 }
 
 type ProjectConfig = {
@@ -60,7 +64,8 @@ type Invocation = {
   callId: string
   name: string
   input: NativeToolInput
-  output: NativeToolOutput
+  output?: NativeToolOutput
+  error?: { name?: string; message: string }
   status: 'success' | 'error'
   startedAt: string
   endedAt: string
@@ -81,6 +86,8 @@ export type TypeScriptAdapterErrorCode =
   | 'DUPLICATE_EXECUTION_PROFILE_ID'
   | 'UNKNOWN_STORY_AGENT'
   | 'UNKNOWN_EXECUTION_PROFILE'
+  | 'INVALID_EXTERNAL_EXECUTION_EVIDENCE'
+  | 'CONFLICTING_OBSERVATION_SOURCES'
   | 'PROFILE_EXECUTION_FAILED'
 
 export class TypeScriptAdapterError extends Error {
@@ -230,16 +237,17 @@ function relative(root: string, filePath: string): string {
 }
 
 function toToolCall(invocation: Invocation): ObservedToolCall {
-  return {
+  const base = {
     callId: invocation.callId,
     name: invocation.name,
-    status: invocation.status,
     duration: `${invocation.durationMs}ms`,
     input: JSON.stringify(invocation.input),
-    output: JSON.stringify(invocation.output),
     startedAt: invocation.startedAt,
     endedAt: invocation.endedAt,
   }
+  return invocation.status === 'success'
+    ? { ...base, status: 'success', output: JSON.stringify(invocation.output) }
+    : { ...base, status: 'error', ...(invocation.error === undefined ? {} : { error: invocation.error }) }
 }
 
 export class TypeScriptAdapter implements LanguageAdapter {
@@ -397,7 +405,6 @@ export class TypeScriptAdapter implements LanguageAdapter {
             callId: `typescript-${trace.length + 1}`,
             name,
             input: cloneRecord(input),
-            output: {},
             status: 'success',
             startedAt: new Date(callStartedMs).toISOString(),
             endedAt: '',
@@ -410,7 +417,10 @@ export class TypeScriptAdapter implements LanguageAdapter {
             return cloneRecord(output)
           } catch (error) {
             invocation.status = 'error'
-            invocation.output = { error: error instanceof Error ? error.name : 'ToolExecutionError' }
+            invocation.output = undefined
+            invocation.error = error instanceof Error
+              ? { name: error.name, message: error.message }
+              : { message: 'The tool execution failed.' }
             throw error
           } finally {
             const endedAtMs = Date.now()
@@ -419,7 +429,30 @@ export class TypeScriptAdapter implements LanguageAdapter {
           }
         },
       })
+      if (outcome.evidence !== undefined && trace.length > 0) {
+        throw new TypeScriptAdapterError(
+          'CONFLICTING_OBSERVATION_SOURCES',
+          'CONFLICTING_OBSERVATION_SOURCES: A Run cannot use both Agentbook callTool evidence and external execution evidence.',
+        )
+      }
       const endedAtMs = Date.now()
+      if (outcome.evidence !== undefined) {
+        let normalized
+        try {
+          normalized = normalizeExternalExecutionEvidence(outcome.evidence)
+        } catch (error) {
+          if (error instanceof ExternalEvidenceValidationError) {
+            throw new TypeScriptAdapterError(error.code, error.message)
+          }
+          throw error
+        }
+        return {
+          decision: outcome.decision,
+          reason: outcome.finalResponse,
+          finalResponse: outcome.finalResponse,
+          ...normalized,
+        }
+      }
       return {
         decision: outcome.decision,
         reason: outcome.finalResponse,
@@ -441,6 +474,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
         },
       }
     } catch (error) {
+      if (error instanceof TypeScriptAdapterError) throw error
       const detail = error instanceof Error ? error.message : 'Unknown profile execution error.'
       throw new TypeScriptAdapterError('PROFILE_EXECUTION_FAILED', `TypeScript execution profile failed: ${detail}`)
     }

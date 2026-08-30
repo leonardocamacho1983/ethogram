@@ -71,6 +71,57 @@ export type StoryInput = {
 type ExternalToolInput = Readonly<Record<string, unknown>>
 type ExternalToolOutput = Readonly<Record<string, unknown>>
 
+export type ExternalExecutionEvidenceValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly ExternalExecutionEvidenceValue[]
+  | { readonly [key: string]: ExternalExecutionEvidenceValue }
+
+type ExternalToolCallEvidenceBase = {
+  callId: string
+  name: string
+  input: ExternalExecutionEvidenceValue
+  sequence: number
+  step?: number
+  startedAt?: string
+  endedAt?: string
+  durationMs?: number
+}
+
+export type ExternalToolCallEvidence =
+  | (ExternalToolCallEvidenceBase & {
+      status: 'success'
+      output?: ExternalExecutionEvidenceValue
+      error?: never
+    })
+  | (ExternalToolCallEvidenceBase & {
+      status: 'error'
+      output?: never
+      error?: {
+        name?: string
+        message: string
+      }
+    })
+
+export type ExternalExecutionEvidence = {
+  source: string
+  toolCalls: readonly ExternalToolCallEvidence[]
+  provider?: string
+  model?: string
+  startedAt?: string
+  endedAt?: string
+  latencyMs?: number
+  finishReason?: string
+  tokenUsage?: {
+    inputTokens?: number
+    outputTokens?: number
+    totalTokens?: number
+    reasoningTokens?: number
+  }
+}
+
 export type ExternalToolDefinition = {
   description: string
   execute(input: ExternalToolInput): ExternalToolOutput | Promise<ExternalToolOutput>
@@ -81,6 +132,7 @@ export type ExternalToolSet = Readonly<Record<string, ExternalToolDefinition>>
 export type ExternalExecutionOutcome = {
   decision: string
   finalResponse: string
+  evidence?: ExternalExecutionEvidence
 }
 
 export type ExternalExecutionContext = {
@@ -205,8 +257,5 @@ export function defineExecutionProfile(
   profile: Omit<ExternalExecutionProfile, '__agentbookType'>,
 ): ExternalExecutionProfile {
   requiredText(profile.id, 'Execution profile id')
-  if (Object.keys(profile.tools).length === 0) {
-    throw new Error('Execution profile must expose at least one tool.')
-  }
   return { __agentbookType: 'execution-profile', ...profile }
 }

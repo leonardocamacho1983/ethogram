@@ -11,6 +11,10 @@ const prettyJson = (value) => {
   try { return JSON.stringify(JSON.parse(value), null, 2) } catch { return value }
 }
 
+const availableText = (value, format = (entry) => String(entry)) => value === undefined
+  ? 'Unavailable'
+  : format(value)
+
 const displayGivenValue = (value) => typeof value === 'string' ? value : JSON.stringify(value)
 
 const givenEntries = (story) => Array.isArray(story.given)
@@ -93,12 +97,19 @@ function renderCompleted(story, payload) {
   document.querySelector('#timeline-count').textContent = `${observedRun.timeline.length} events`
   document.querySelector('#timeline').className = 'timeline'
   document.querySelector('#timeline').innerHTML = observedRun.timeline.map((item, index) => `
-    <div class="timeline-row"><span class="timeline-icon">✓</span><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small></div><code>${escapeHtml(item.duration)}</code></div>`).join('')
+    <div class="timeline-row"><span class="timeline-icon">✓</span><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small></div><code>${escapeHtml(availableText(item.duration))}</code></div>`).join('')
   document.querySelector('#tool-count').textContent = `${observedRun.toolCalls.length} calls`
   document.querySelector('#metric-tool-count').textContent = String(observedRun.toolCalls.length)
   document.querySelector('#tool-calls').className = 'tools'
-  document.querySelector('#tool-calls').innerHTML = observedRun.toolCalls.map((call) => `
-    <details class="tool-call" open><summary><code>${escapeHtml(call.name)}</code><span class="badge pass">${escapeHtml(call.status)}</span><small>${escapeHtml(call.duration)}</small></summary><div class="tool-json"><div><small>INPUT</small><pre>${escapeHtml(prettyJson(call.input))}</pre></div><div><small>OUTPUT</small><pre>${escapeHtml(prettyJson(call.output))}</pre></div></div></details>`).join('')
+  document.querySelector('#tool-calls').innerHTML = observedRun.toolCalls.map((call) => {
+    const resultLabel = call.status === 'error' ? 'ERROR' : 'OUTPUT'
+    const resultValue = call.status === 'error' ? call.error : call.output
+    const renderedResult = resultValue === undefined
+      ? 'Unavailable'
+      : typeof resultValue === 'string' ? prettyJson(resultValue) : JSON.stringify(resultValue, null, 2)
+    return `
+    <details class="tool-call" open><summary><code>${escapeHtml(call.name)}</code><span class="badge ${call.status === 'success' ? 'pass' : 'fail'}">${escapeHtml(call.status)}</span><small>${escapeHtml(availableText(call.duration))}</small></summary><div class="tool-json"><div><small>INPUT</small><pre>${escapeHtml(prettyJson(call.input))}</pre></div><div><small>${resultLabel}</small><pre>${escapeHtml(renderedResult)}</pre></div></div></details>`
+  }).join('')
   document.querySelectorAll('[data-testid="assertion"]').forEach((row) => {
     const id = row.dataset.expectationId
     const verdict = evaluationResult.expectations[id]
@@ -108,9 +119,9 @@ function renderCompleted(story, payload) {
     const expectation = story.expectations.find((candidate) => candidate.id === id)
     row.querySelector('small').textContent = `${expectation.matcher.kind}: ${expectation.matcher.tool}`
   })
-  document.querySelector('#provider').textContent = observedRun.evidence.provider
-  document.querySelector('#model').textContent = observedRun.evidence.model
-  document.querySelector('#latency').textContent = `${observedRun.evidence.latencyMs}ms`
+  document.querySelector('#provider').textContent = availableText(observedRun.evidence.provider)
+  document.querySelector('#model').textContent = availableText(observedRun.evidence.model)
+  document.querySelector('#latency').textContent = availableText(observedRun.evidence.latencyMs, (value) => `${value}ms`)
   document.querySelector('#execution-evidence').textContent = JSON.stringify(payload)
 }
 
