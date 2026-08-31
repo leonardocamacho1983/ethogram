@@ -46,7 +46,7 @@ npm requires an existing package before its first trusted publisher can be confi
 
 Publishing order is fixed: core, CLI, then MCP. Prereleases receive the npm `next` tag; stable versions receive `latest`. The workflow checks the GitHub tag, release kind, package names, versions, repository metadata, public access, and exact internal dependency pins before publishing.
 
-The publisher is safe to retry after a partial registry failure. It packs each workspace and compares npm's integrity digest. An already-published package is skipped only when its registry tarball exactly matches the current release artifact; a mismatch stops the release.
+The publisher is safe to retry after a partial registry failure. It packs each workspace and first compares npm's integrity digest. If archive metadata makes that digest platform-dependent, it uses `npm diff` to compare the actual packed file set with the published version. An existing package is skipped only when its artifact integrity or published package contents match. Mode-only differences are accepted solely for paths declared in the package's `bin` field; any content difference stops the release. The publisher normalizes those executable paths to mode `755` for future artifacts.
 
 ## Security boundary
 

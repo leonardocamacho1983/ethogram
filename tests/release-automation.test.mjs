@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import { parseNpmPackOutput } from '../scripts/parse-npm-pack-output.mjs'
 import { verifyRelease } from '../scripts/release-contract.mjs'
+import { isModeOnlyBinDiff } from '../scripts/verify-package-diff.mjs'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 
@@ -36,6 +37,20 @@ test('npm pack metadata accepts npm 11 and npm 12 JSON formats', () => {
   assert.throws(() => parseNpmPackOutput('{}'), /Expected one packed package/)
 })
 
+test('retry accepts mode-only diffs only for declared package bins', () => {
+  const diff = [
+    'diff --git a/dist/cli.js b/dist/cli.js',
+    'old mode 100644',
+    'new mode 100755',
+    'index v0.1.0-alpha.2..v0.1.0-alpha.2 ',
+    '--- a/dist/cli.js',
+    '+++ b/dist/cli.js',
+  ].join('\n')
+  assert.equal(isModeOnlyBinDiff(diff, ['dist/cli.js']), true)
+  assert.equal(isModeOnlyBinDiff(diff, []), false)
+  assert.equal(isModeOnlyBinDiff(`${diff}\n@@ -1 +1 @@\n-old\n+new`, ['dist/cli.js']), false)
+})
+
 test('publish workflow uses GitHub Release OIDC without a registry token', async () => {
   const workflow = await readFile(new URL('../.github/workflows/publish.yml', import.meta.url), 'utf8')
   const publisher = await readFile(new URL('../scripts/publish-release.mjs', import.meta.url), 'utf8')
@@ -45,5 +60,7 @@ test('publish workflow uses GitHub Release OIDC without a registry token', async
   assert.match(workflow, /actions\/setup-node@[a-f0-9]{40}/)
   assert.match(workflow, /npm run release:publish/)
   assert.match(publisher, /'--provenance'/)
+  assert.match(publisher, /'diff'/)
+  assert.match(publisher, /different package contents/)
   assert.doesNotMatch(workflow, /NODE_AUTH_TOKEN|NPM_TOKEN|secrets\./)
 })
