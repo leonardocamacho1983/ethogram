@@ -1,5 +1,5 @@
-import { createControlledRefundToolSandbox } from './controlled-refund-tools'
-import { RealAgentRunner } from './real-agent-runner'
+import { createControlledRefundToolSandbox } from './controlled-refund-tools.ts'
+import { RealAgentRunner } from './real-agent-runner.ts'
 
 export const REAL_AGENT_PROVIDER = 'vercel-ai-gateway'
 export const REAL_AGENT_MODEL = 'openai/gpt-5.4-mini'

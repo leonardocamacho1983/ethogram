@@ -1,4 +1,4 @@
-import { defineAgent } from '@agentbook/core'
+import { defineAgent } from '@ethogram/core'
 
 export const githubRepositoryAgent = defineAgent({
   id: 'github-repository-agent',

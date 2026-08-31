@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Ethogram Lab 04 Interface",
+  "sourceFile": "reference/Ethogram Lab 04 Interface.dc.html",
+  "sourceFormat": "design-canvas-export",
+  "sourceSha256": "7f0bc7a017c58f8c9f2f3818dacfd90a2ee2a11d66b7dd56962152417277e0af",
+  "brandSpecFile": "reference/ethogram-brand-spec.html",
+  "brandSpecSha256": "863cd385267714a8142f24dc6ad1f93ee6d7a758700403c36ad3e60da6bb17b7",
+  "runtimeDependencies": [
+    "reference/support.js",
+    "reference/image-slot.js",
+    "reference/.image-slots.state.json"
+  ],
+  "canonicalAssetRoot": "../../../public/brand/ethogram",
+  "tokens": {
+    "color": {
+      "carbon": "#0E1110",
+      "ivory": "#F5F2EC",
+      "moss": "oklch(0.76 0.16 150)",
+      "coral": "oklch(0.76 0.16 30)"
+    },
+    "type": {
+      "sans": "Archivo",
+      "mono": "JetBrains Mono",
+      "editorial": "Instrument Serif"
+    },
+    "motion": {
+      "microMs": 180,
+      "easing": "cubic-bezier(.2,.8,.2,1)"
+    },
+    "interface": {
+      "radius": 0,
+      "shadow": "none",
+      "focus": "2px moss outline with 2px offset",
+      "desktopTargetPx": 36,
+      "touchTargetPx": 44
+    }
+  },
+  "sections": [
+    {
+      "id": "01",
+      "name": "Buttons",
+      "components": ["B01", "B02", "B03", "B04"]
+    },
+    {
+      "id": "02",
+      "name": "Micro-interactions",
+      "components": ["X01", "X02", "X03", "X04", "X05", "X06"]
+    },
+    {
+      "id": "03",
+      "name": "Data components",
+      "components": ["D01", "D02", "D03"]
+    },
+    {
+      "id": "04",
+      "name": "Typography",
+      "components": ["TY01", "TY02", "TY03", "TY04", "TY05", "TY06", "TY07", "TY08", "TY09"]
+    },
+    {
+      "id": "05",
+      "name": "Kinetic typography",
+      "components": ["TP01", "TP02", "TP03", "TP04", "TP05", "TP06", "TP07", "TP08", "TP09"]
+    },
+    {
+      "id": "06",
+      "name": "Complete mark",
+      "components": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"]
+    },
+    {
+      "id": "07",
+      "name": "Aperture and portal",
+      "components": ["A01", "A02", "A03", "A04", "A05", "A06", "P01", "P02", "P03"]
+    }
+  ],
+  "decisions": {
+    "canonicalCandidates": ["TP01", "TP07", "TP08", "L03", "L04", "L05", "A03", "P02"],
+    "conditional": ["TP03", "TP04", "TP05"],
+    "cut": ["TP06", "polygon-as-letter-o", "word-inside-profile-interface-seal"],
+    "pending": [
+      "long-table-density",
+      "complete-keyboard-navigation",
+      "light-theme",
+      "profile-at-18px",
+      "error-screens",
+      "empty-states",
+      "reduced-motion",
+      "responsive-layout",
+      "real-runtime-states",
+      "accessibility-validation"
+    ]
+  }
+}

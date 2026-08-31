@@ -4,7 +4,7 @@ import test from 'node:test'
 import { executionMetrics, observableTimeline } from '../lib/agentbook/execution-record.ts'
 
 const actionSourceUrl = new URL('../app/actions/run-real-story.ts', import.meta.url)
-const pageSourceUrl = new URL('../app/page.tsx', import.meta.url)
+const pageSourceUrl = new URL('../app/app/app-client.tsx', import.meta.url)
 const profileSourceUrl = new URL('../lib/agentbook/real-agent-profile.server.ts', import.meta.url)
 
 function fixtureRun() {

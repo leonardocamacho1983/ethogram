@@ -1,0 +1,49 @@
+/* ethogram — fontes autohospedadas. Coloque a pasta fonts/ ao lado deste arquivo. */
+
+/* Archivo — afirmação. Variável (peso 400–700, largura 62–125). */
+@font-face {
+  font-family: 'Archivo';
+  src: url('fonts/archivo/Archivo[wdth,wght].ttf') format('truetype-variations');
+  font-weight: 400 700;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+/* Fallback estático — carregue estes em vez do variável se precisar de woff2. */
+@font-face { font-family: 'Archivo Static'; src: url('fonts/archivo/Archivo-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Archivo Static'; src: url('fonts/archivo/Archivo-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Archivo Static'; src: url('fonts/archivo/Archivo-SemiBold.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+
+/* JetBrains Mono — evidência. Variável, um arquivo para todos os pesos. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('fonts/jetbrains-mono/JetBrainsMono[wght].woff2') format('woff2-variations');
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+/* Instrument Serif — apenas capa e ensaio. Nunca em produto. */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('fonts/instrument-serif/InstrumentSerif-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('fonts/instrument-serif/InstrumentSerif-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --eg-sans: 'Archivo', 'Archivo Static', system-ui, sans-serif;
+  --eg-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --eg-serif: 'Instrument Serif', Georgia, serif;
+  --eg-carbon: #0E1110;
+  --eg-ivory: #F5F2EC;
+  --eg-moss: oklch(0.76 0.16 150);
+  --eg-coral: oklch(0.76 0.16 30);
+}

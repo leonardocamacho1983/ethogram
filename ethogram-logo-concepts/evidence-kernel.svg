@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="title desc">
+  <title id="title">Ethogram — Evidence Kernel</title>
+  <desc id="desc">Four bold directional modules surround a protected central kernel, paired with the Ethogram wordmark.</desc>
+  <rect width="960" height="300" fill="#F3F0E8"/>
+  <g transform="translate(72 58)" fill="#0B0C0C">
+    <path d="M0 0H78V34H34V78H0Z"/>
+    <path d="M106 0H184V78H150V34H106Z"/>
+    <path d="M0 106H34V150H78V184H0Z"/>
+    <path d="M150 106H184V184H106V150H150Z"/>
+    <rect x="72" y="72" width="40" height="40" rx="8" transform="rotate(45 92 92)"/>
+  </g>
+  <text x="322" y="180" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="102" font-weight="600" letter-spacing="-4">Ethogram</text>
+</svg>

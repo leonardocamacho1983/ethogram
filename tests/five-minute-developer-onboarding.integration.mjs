@@ -33,7 +33,7 @@ function cleanEnvironment() {
     'NODE_OPTIONS',
     'TS_NODE_PROJECT',
     'TSX_TSCONFIG_PATH',
-    'AGENTBOOK_PROJECT_ROOT',
+    'ETHOGRAM_PROJECT_ROOT',
     'AI_GATEWAY_API_KEY',
     'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY',
@@ -114,7 +114,7 @@ async function startDev(binary, cwd, args) {
   child.stdout.on('data', (chunk) => { output += chunk })
   child.stderr.on('data', (chunk) => { output += chunk })
   const url = await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for Agentbook dev.\n${output}`)), 15_000)
+    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for Ethogram dev.\n${output}`)), 15_000)
     const inspect = () => {
       const match = output.match(/Local URL: (http:\/\/127\.0\.0\.1:\d+\/)/)
       if (!match) return
@@ -124,7 +124,7 @@ async function startDev(binary, cwd, args) {
     child.stdout.on('data', inspect)
     child.once('exit', (code) => {
       clearTimeout(timeout)
-      reject(new Error(`Agentbook dev exited before readiness (${code}).\n${output}`))
+      reject(new Error(`Ethogram dev exited before readiness (${code}).\n${output}`))
     })
   })
   return {
@@ -134,7 +134,7 @@ async function startDev(binary, cwd, args) {
     async stop() {
       child.kill('SIGINT')
       await new Promise((resolve) => child.once('exit', resolve))
-      assert.match(output, /Agentbook developer server stopped\./)
+      assert.match(output, /Ethogram developer server stopped\./)
     },
   }
 }
@@ -155,9 +155,9 @@ async function installArtifacts(root, coreTarball, cliTarball) {
 }
 
 async function installedBoundary(root) {
-  const core = await realpath(path.join(root, 'node_modules', '@agentbook', 'core'))
-  const cli = await realpath(path.join(root, 'node_modules', '@agentbook', 'cli'))
-  const binaryLink = path.join(root, 'node_modules', '.bin', 'agentbook')
+  const core = await realpath(path.join(root, 'node_modules', '@ethogram', 'core'))
+  const cli = await realpath(path.join(root, 'node_modules', '@ethogram', 'cli'))
+  const binaryLink = path.join(root, 'node_modules', '.bin', 'ethogram')
   const binaryTarget = await realpath(binaryLink)
   for (const resolved of [core, cli, binaryTarget]) {
     assert.equal(resolved.startsWith(`${await realpath(root)}${path.sep}`), true)
@@ -194,10 +194,10 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   assert.equal(run('tar', ['-xzf', cliTarball, '-C', extracted], repositoryRoot).status, 0)
   const cliManifest = await listFiles(path.join(extracted, 'package'))
   const packedCliJson = JSON.parse(await readFile(path.join(extracted, 'package', 'package.json'), 'utf8'))
-  assert.equal(packedCliJson.name, '@agentbook/cli')
-  assert.equal(packedCliJson.bin.agentbook, './dist/cli.js')
+  assert.equal(packedCliJson.name, '@ethogram/cli')
+  assert.equal(packedCliJson.bin.ethogram, './dist/cli.js')
   assert.equal(packedCliJson.engines.node, '>=20.9')
-  assert.equal(packedCliJson.dependencies['@agentbook/core'], '0.0.0-test.6')
+  assert.equal(packedCliJson.dependencies['@ethogram/core'], '0.1.0-alpha.0')
   assert.match(packedCliJson.dependencies.esbuild, /^\^0\./)
   for (const required of [
     'dist/cli.js',
@@ -211,7 +211,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const packedText = (await Promise.all(cliManifest
     .filter((file) => !file.endsWith('.png'))
     .map((file) => readFile(path.join(extracted, 'package', file), 'utf8')))).join('\n')
-  for (const forbidden of [repositoryRoot, '/Users/', 'AGENTBOOK_PROJECT_ROOT', 'AI_GATEWAY_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY']) {
+  for (const forbidden of [repositoryRoot, '/Users/', 'ETHOGRAM_PROJECT_ROOT', 'AI_GATEWAY_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY']) {
     assert.equal(packedText.includes(forbidden), false, `CLI artifact leaked ${forbidden}`)
   }
 
@@ -230,7 +230,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const timerStart = process.hrtime.bigint()
   const installOutput = await installArtifacts(consumerOne, coreTarball, cliTarball)
   const boundary = await installedBoundary(consumerOne)
-  const binary = path.join(consumerOne, 'node_modules', '.bin', 'agentbook')
+  const binary = path.join(consumerOne, 'node_modules', '.bin', 'ethogram')
   const packageAfterInstall = await readFile(path.join(consumerOne, 'package.json'), 'utf8')
   assert.equal(JSON.parse(packageAfterInstall).type, undefined)
   assert.equal(JSON.parse(packageAfterInstall).devDependencies.typescript, undefined)
@@ -240,12 +240,12 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const firstInit = run(binary, ['init'], consumerOne)
   assert.equal(firstInit.status, 0, firstInit.output)
-  assert.match(firstInit.output, /Created agentbook\.config\.mjs/)
+  assert.match(firstInit.output, /Created ethogram\.config\.mjs/)
   const packageAfterInit = await readFile(path.join(consumerOne, 'package.json'), 'utf8')
   assert.equal(packageAfterInit, packageAfterInstall)
   await assert.rejects(access(path.join(consumerOne, 'tsconfig.json')))
   const generatedFiles = [
-    'agentbook.config.mjs',
+    'ethogram.config.mjs',
     'agents/access-request.agent.ts',
     'stories/admin-access-requires-approval.agent.stories.ts',
     'execution/access-request.profile.ts',
@@ -253,7 +253,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   for (const file of generatedFiles) assert.equal((await stat(path.join(consumerOne, file))).isFile(), true)
   const generatedImports = (await Promise.all(generatedFiles.map((file) => readFile(path.join(consumerOne, file), 'utf8'))))
     .flatMap((source) => [...source.matchAll(/from ['"]([^'"]+)['"]/g)].map((match) => match[1]))
-  assert.deepEqual([...new Set(generatedImports.filter((value) => !value.startsWith('.')))], ['@agentbook/core'])
+  assert.deepEqual([...new Set(generatedImports.filter((value) => !value.startsWith('.')))], ['@ethogram/core'])
 
   const beforeSecondInit = await Promise.all(generatedFiles.map((file) => sha256(path.join(consumerOne, file))))
   const secondInit = run(binary, ['init'], consumerOne)
@@ -264,19 +264,19 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const helpResult = run(binary, ['--help'], consumerOne)
   const versionResult = run(binary, ['--version'], consumerOne)
   assert.equal(helpResult.status, 0, helpResult.output)
-  assert.match(helpResult.output, /agentbook init/)
+  assert.match(helpResult.output, /ethogram init/)
   assert.match(helpResult.output, /--project <path>/)
   assert.match(helpResult.output, /--no-open/)
   assert.equal(versionResult.output.trim(), packedCliJson.version)
 
   const dev = await startDev(binary, consumerOne, ['--no-open', '--port', '0'])
   t.after(() => { if (dev.child.exitCode === null) dev.child.kill('SIGINT') })
-  assert.match(dev.output(), /Agentbook project: test07-clean-consumer/)
+  assert.match(dev.output(), /Ethogram project: test07-clean-consumer/)
   assert.match(dev.output(), new RegExp(`Project root: ${(await realpath(consumerOne)).replaceAll('\\', '\\\\')}`))
   assert.match(dev.output(), /TypeScript adapter: ready \(1 Story\)/)
   const html = await (await fetch(dev.url)).text()
   const project = await (await fetch(new URL('/api/project', dev.url))).json()
-  assert.match(html, /Agentbook Developer/)
+  assert.match(html, /Ethogram Developer/)
   assert.equal(project.name, 'test07-clean-consumer')
   assert.equal(project.adapter.id, 'typescript')
   assert.deepEqual(project.agents.map(({ name }) => name), ['Access Request Agent'])
@@ -288,7 +288,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const runResponse = await fetch(new URL('/api/run', dev.url), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ storyId: 'admin-access-requires-approval' }),
+    body: JSON.stringify({ storyId: 'admin-access-requires-approval', ...project.runtime }),
   })
   const runPayload = await runResponse.json()
   assert.equal(runResponse.status, 200)
@@ -306,6 +306,45 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   assert.equal(runPayload.boundaryEvidence.storyUnchanged, true)
   assert.equal(runPayload.boundaryEvidence.mockDataUsed, false)
   assert.equal(runPayload.boundaryEvidence.adapter, 'typescript')
+
+  const storyPath = path.join(consumerOne, 'stories', 'admin-access-requires-approval.agent.stories.ts')
+  const storyBeforeReload = await readFile(storyPath, 'utf8')
+  await writeFile(storyPath, storyBeforeReload.replace(
+    "name: 'Admin Access Requires Approval',",
+    "name: 'Admin Access Requires Approval Reloaded',",
+  ))
+  let reloadedProject
+  const reloadDeadline = Date.now() + 10_000
+  while (Date.now() < reloadDeadline) {
+    const response = await fetch(new URL('/api/project', dev.url))
+    if (response.ok) {
+      const candidate = await response.json()
+      if (candidate.runtime.revision > project.runtime.revision) {
+        reloadedProject = candidate
+        break
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  assert.ok(reloadedProject, 'Ethogram did not reload the edited Story')
+  assert.deepEqual(reloadedProject.stories.map(({ name }) => name), ['Admin Access Requires Approval Reloaded'])
+  const staleRunResponse = await fetch(new URL('/api/run', dev.url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ storyId: 'admin-access-requires-approval', ...project.runtime }),
+  })
+  const staleRunPayload = await staleRunResponse.json()
+  assert.equal(staleRunResponse.status, 400)
+  assert.equal(staleRunPayload.error.code, 'STALE_PROJECT')
+  assert.equal(JSON.stringify(staleRunPayload).includes('PASS'), false)
+  const currentRunResponse = await fetch(new URL('/api/run', dev.url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ storyId: 'admin-access-requires-approval', ...reloadedProject.runtime }),
+  })
+  const currentRunPayload = await currentRunResponse.json()
+  assert.equal(currentRunResponse.status, 200)
+  assert.equal(currentRunPayload.execution.evaluationResult.verdict, 'PASS')
   const timerEnd = process.hrtime.bigint()
   const timerEndWall = new Date().toISOString()
   const elapsedMs = Number(timerEnd - timerStart) / 1_000_000
@@ -320,13 +359,13 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const consumerTwo = path.join(scratchRoot, 'consumer-two')
   await createOrdinaryProject(consumerTwo, 'test07-portable-consumer')
   await installArtifacts(consumerTwo, coreTarball, cliTarball)
-  const binaryTwo = path.join(consumerTwo, 'node_modules', '.bin', 'agentbook')
+  const binaryTwo = path.join(consumerTwo, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(binaryTwo, ['init'], consumerTwo).status, 0)
   await unlink(path.join(consumerTwo, 'execution', 'access-request.profile.ts'))
   const partialInit = run(binaryTwo, ['init'], consumerTwo)
   assert.equal(partialInit.status, 0, partialInit.output)
   assert.match(partialInit.output, /Created execution\/access-request\.profile\.ts/)
-  assert.match(partialInit.output, /Preserved agentbook\.config\.mjs/)
+  assert.match(partialInit.output, /Preserved ethogram\.config\.mjs/)
   const explicitDev = await startDev(binaryTwo, scratchRoot, ['--project', consumerTwo, '--no-open', '--port', '0'])
   t.after(() => { if (explicitDev.child.exitCode === null) explicitDev.child.kill('SIGINT') })
   const portableProject = await (await fetch(new URL('/api/project', explicitDev.url))).json()
@@ -338,26 +377,26 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   await installArtifacts(conflictRoot, coreTarball, cliTarball)
   await mkdir(path.join(conflictRoot, 'agents'))
   await writeFile(path.join(conflictRoot, 'agents', 'access-request.agent.ts'), 'user owned content\n')
-  const conflictBinary = path.join(conflictRoot, 'node_modules', '.bin', 'agentbook')
+  const conflictBinary = path.join(conflictRoot, 'node_modules', '.bin', 'ethogram')
   const conflictInit = run(conflictBinary, ['init'], conflictRoot)
   assert.notEqual(conflictInit.status, 0)
   assert.match(conflictInit.output, /Existing files were preserved; nothing was written/)
   assert.equal(await readFile(path.join(conflictRoot, 'agents', 'access-request.agent.ts'), 'utf8'), 'user owned content\n')
-  await assert.rejects(access(path.join(conflictRoot, 'agentbook.config.mjs')))
+  await assert.rejects(access(path.join(conflictRoot, 'ethogram.config.mjs')))
 
   const uninitializedRoot = path.join(scratchRoot, 'uninitialized-consumer')
   await createOrdinaryProject(uninitializedRoot, 'test07-uninitialized')
   await installArtifacts(uninitializedRoot, coreTarball, cliTarball)
-  const uninitializedBinary = path.join(uninitializedRoot, 'node_modules', '.bin', 'agentbook')
+  const uninitializedBinary = path.join(uninitializedRoot, 'node_modules', '.bin', 'ethogram')
   const beforeInitDev = run(uninitializedBinary, ['dev', '--no-open', '--port', '0'], uninitializedRoot)
   assert.notEqual(beforeInitDev.status, 0)
-  assert.match(beforeInitDev.output, /Run "agentbook init" first/)
+  assert.match(beforeInitDev.output, /Run "ethogram init" first/)
   assert.doesNotMatch(beforeInitDev.output, /\n\s+at /)
 
   const invalidRoot = path.join(scratchRoot, 'invalid-story-consumer')
   await createOrdinaryProject(invalidRoot, 'test07-invalid-story')
   await installArtifacts(invalidRoot, coreTarball, cliTarball)
-  const invalidBinary = path.join(invalidRoot, 'node_modules', '.bin', 'agentbook')
+  const invalidBinary = path.join(invalidRoot, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(invalidBinary, ['init'], invalidRoot).status, 0)
   await writeFile(path.join(invalidRoot, 'stories', 'admin-access-requires-approval.agent.stories.ts'), 'export const invalid = true\n')
   const invalidStory = run(invalidBinary, ['dev', '--no-open', '--port', '0'], invalidRoot)
@@ -379,11 +418,11 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   assert.match(occupiedResult.output, /--port <number>/)
   await new Promise((resolve) => occupied.close(resolve))
 
-  const runtimeIndex = path.join(consumerTwo, 'node_modules', '@agentbook', 'cli', 'dist', 'runtime', 'index.html')
+  const runtimeIndex = path.join(consumerTwo, 'node_modules', '@ethogram', 'cli', 'dist', 'runtime', 'index.html')
   await unlink(runtimeIndex)
   const missingRuntime = run(binaryTwo, ['dev', '--no-open', '--port', '0'], consumerTwo)
   assert.notEqual(missingRuntime.status, 0)
-  assert.match(missingRuntime.output, /Packaged developer runtime is incomplete.*Reinstall @agentbook\/cli/)
+  assert.match(missingRuntime.output, /Packaged developer runtime is incomplete.*Reinstall @ethogram\/cli/)
 
   const genericEngineSource = await readFile(path.join(repositoryRoot, 'packages', 'cli', 'src', 'generic-engine.ts'), 'utf8')
   const evaluatorSource = await readFile(path.join(repositoryRoot, 'packages', 'cli', 'src', 'evaluator.ts'), 'utf8')
@@ -436,9 +475,9 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
       end: timerEndWall,
       elapsedMs,
       developerActions: [
-        'install @agentbook/core and @agentbook/cli tarballs',
-        'agentbook init',
-        'agentbook dev',
+        'install @ethogram/core and @ethogram/cli tarballs',
+        'ethogram init',
+        'ethogram dev',
         'open the reported local URL',
         'click Run Story',
       ],

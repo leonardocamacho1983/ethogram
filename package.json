@@ -1,6 +1,16 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "ethogram",
+  "version": "0.1.0-alpha.0",
+  "description": "Local, code-first behavioral testing for TypeScript and Node.js agents.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonardocamacho1983/ethogram.git"
+  },
+  "homepage": "https://github.com/leonardocamacho1983/ethogram#readme",
+  "bugs": {
+    "url": "https://github.com/leonardocamacho1983/ethogram/issues"
+  },
   "private": true,
   "workspaces": [
     "packages/*",
@@ -8,7 +18,7 @@
   ],
   "scripts": {
     "core:build": "tsc -p packages/agentbook/tsconfig.build.json && tsc -p packages/agentbook/tsconfig.cjs.json && node packages/agentbook/scripts/finish-cjs-build.mjs",
-    "cli:build": "npm run build -w @agentbook/cli",
+    "cli:build": "npm run build -w @ethogram/cli",
     "test:package": "node --test tests/installable-package-boundary.test.mjs",
     "test:onboarding": "node --test tests/five-minute-developer-onboarding.integration.mjs",
     "test:existing-agent": "node --test tests/bring-your-own-agent.integration.mjs",
@@ -23,6 +33,7 @@
     "pretest": "npm run core:build && npm run cli:build",
     "test": "node --test tests/*.test.mjs",
     "test:real-agent": "node --test tests/real-agent-runner.integration.mjs",
+    "test:seo:schemas": "node scripts/validate-seo-schema.mjs",
     "start": "next start"
   },
   "dependencies": {

@@ -24,12 +24,12 @@ function deepFreeze<T>(value: T): T {
 }
 
 export async function runExternalStory(input: RunExternalStoryInput): Promise<RealStoryActionResult> {
-  const projectRoot = process.env.AGENTBOOK_PROJECT_ROOT?.trim()
+  const projectRoot = process.env.ETHOGRAM_PROJECT_ROOT?.trim()
   if (!projectRoot) {
     return {
       status: 'execution-error',
       storyEvaluation: 'NOT EVALUATED',
-      error: { code: 'REAL_AGENT_EXECUTION_FAILED', message: 'No external Agentbook project is configured.' },
+      error: { code: 'REAL_AGENT_EXECUTION_FAILED', message: 'No external Ethogram project is configured.' },
     }
   }
 

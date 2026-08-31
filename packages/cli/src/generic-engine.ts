@@ -33,7 +33,7 @@ export type EngineRunResult = {
   }
 }
 
-export class AgentbookEngine {
+export class EthogramEngine {
   private project?: ProjectDescriptor
 
   constructor(private readonly runner: LanguageAdapter) {}

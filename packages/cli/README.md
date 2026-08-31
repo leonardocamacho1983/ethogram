@@ -1,13 +1,17 @@
-# @agentbook/cli
+# Ethogram CLI
 
-Local Agentbook initialization and developer runtime for the Test 07 TypeScript/Node onboarding contract.
+Local Ethogram initialization and read-only developer runtime for TypeScript/Node projects.
+
+This package is prepared as `@ethogram/cli@0.1.0-alpha.0` but has not been published yet.
 
 ```bash
-npx agentbook init
-npx agentbook init --existing
-npx agentbook dev
+npx ethogram init
+npx ethogram init --existing
+npx ethogram dev
 ```
 
-Use `agentbook init --existing` to create only the minimal Agentbook configuration in a project that already owns an agent implementation. Normal `agentbook init` retains the deterministic Access Request starter.
+Use `ethogram init --existing` to create only `ethogram.config.mjs` in a project that already owns an agent implementation. Normal `ethogram init` adds the deterministic Access Request starter. Both modes preserve conflicting user-owned files and abort without partial writes.
 
-Agentbook is a codename. This package is not published by Test 07.
+`ethogram dev` accepts `--project <path>`, `--port <number>`, and `--no-open`. It serves a localhost-only, code-first UI: project files are the source of truth and the UI does not save edits. Relevant source changes reload automatically, and previous execution evidence is cleared or marked stale until the Story is rerun.
+
+Node.js 20.9 or newer is required. Ethogram does not persist run history.

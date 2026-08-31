@@ -1,4 +1,4 @@
-import { defineExecutionProfile } from '@agentbook/core'
+import { defineExecutionProfile } from '@ethogram/core'
 import { travelTools } from '../tools/travel-tools.ts'
 
 function storyFacts(given: readonly string[]): Record<string, string> {

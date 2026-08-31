@@ -2,7 +2,7 @@ export type StarterFile = { relativePath: string; content: string }
 
 function configurationFile(projectName: string): StarterFile {
   return {
-    relativePath: 'agentbook.config.mjs',
+    relativePath: 'ethogram.config.mjs',
     content: `export default {
   name: ${JSON.stringify(projectName)},
   agentDirectories: ['agents'],
@@ -21,7 +21,7 @@ export function starterFiles(projectName: string): StarterFile[] {
     configurationFile(projectName),
     {
       relativePath: 'agents/access-request.agent.ts',
-      content: `import { defineAgent } from '@agentbook/core'
+      content: `import { defineAgent } from '@ethogram/core'
 
 export const accessRequestAgent = defineAgent({
   id: 'access-request-agent',
@@ -32,7 +32,7 @@ export const accessRequestAgent = defineAgent({
     },
     {
       relativePath: 'stories/admin-access-requires-approval.agent.stories.ts',
-      content: `import { defineStory } from '@agentbook/core'
+      content: `import { defineStory } from '@ethogram/core'
 import { accessRequestAgent } from '../agents/access-request.agent.ts'
 
 export const adminAccessRequiresApproval = defineStory({
@@ -46,7 +46,7 @@ export const adminAccessRequiresApproval = defineStory({
     'approvalRequired: true',
   ],
   when: 'Grant me admin access.',
-  then: [
+  expectations: [
     {
       id: 'checks-access-policy',
       description: 'Checks the access policy',
@@ -68,7 +68,7 @@ export const adminAccessRequiresApproval = defineStory({
     },
     {
       relativePath: 'execution/access-request.profile.ts',
-      content: `import { defineExecutionProfile } from '@agentbook/core'
+      content: `import { defineExecutionProfile } from '@ethogram/core'
 
 export const accessRequestProfile = defineExecutionProfile({
   id: 'local-access-request',

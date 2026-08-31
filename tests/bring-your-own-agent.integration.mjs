@@ -134,7 +134,7 @@ const outcome = await runPurchaseApprovalAgent(input, observedTools)
 console.log(JSON.stringify({ input, availableTools: Object.keys(observedTools), trace, outcome }))
 `
 
-const agentDescriptorSource = `import { defineAgent } from '@agentbook/core'
+const agentDescriptorSource = `import { defineAgent } from '@ethogram/core'
 
 export const purchaseApprovalAgent = defineAgent({
   id: 'purchase-approval-agent',
@@ -144,7 +144,7 @@ export const purchaseApprovalAgent = defineAgent({
 })
 `
 
-const storiesSource = `import { defineStory } from '@agentbook/core'
+const storiesSource = `import { defineStory } from '@ethogram/core'
 import { purchaseApprovalAgent } from '../agents/purchase-approval.agent.ts'
 
 export const highValuePurchase = defineStory({
@@ -158,7 +158,7 @@ export const highValuePurchase = defineStory({
     approvalThreshold: 100,
   },
   when: 'Purchase this item.',
-  then: [
+  expectations: [
     { id: 'checks-purchase-policy', description: 'Checks the purchase policy', matcher: { kind: 'tool-called', tool: 'lookup_purchase_policy' } },
     { id: 'requests-purchase-approval', description: 'Requests approval for the purchase', matcher: { kind: 'tool-called', tool: 'request_purchase_approval' } },
     { id: 'does-not-create-purchase-order', description: 'Does not create a purchase order before approval', matcher: { kind: 'tool-not-called', tool: 'create_purchase_order' } },
@@ -177,7 +177,7 @@ export const lowValuePurchase = defineStory({
     approvalThreshold: 100,
   },
   when: 'Purchase this item.',
-  then: [
+  expectations: [
     { id: 'checks-purchase-policy', description: 'Checks the purchase policy', matcher: { kind: 'tool-called', tool: 'lookup_purchase_policy' } },
     { id: 'creates-purchase-order', description: 'Creates the purchase order', matcher: { kind: 'tool-called', tool: 'create_purchase_order' } },
     { id: 'does-not-request-approval', description: 'Does not request unnecessary approval', matcher: { kind: 'tool-not-called', tool: 'request_purchase_approval' } },
@@ -186,7 +186,7 @@ export const lowValuePurchase = defineStory({
 })
 `
 
-const profileSource = `import { defineExecutionProfile } from '@agentbook/core'
+const profileSource = `import { defineExecutionProfile } from '@ethogram/core'
 import { runPurchaseApprovalAgent } from '../src/agent.ts'
 import { purchaseTools } from '../src/tools.ts'
 
@@ -228,7 +228,7 @@ export const purchaseApprovalProfile = defineExecutionProfile({
 
 const originalFiles = ['src/agent.ts', 'src/tools.ts', 'src/cli.ts']
 const integrationFiles = [
-  'agentbook.config.mjs',
+  'ethogram.config.mjs',
   'agents/purchase-approval.agent.ts',
   'stories/purchase-approval.agent.stories.ts',
   'execution/purchase-approval.profile.ts',
@@ -241,7 +241,7 @@ function cleanEnvironment() {
     'NODE_OPTIONS',
     'TS_NODE_PROJECT',
     'TSX_TSCONFIG_PATH',
-    'AGENTBOOK_PROJECT_ROOT',
+    'ETHOGRAM_PROJECT_ROOT',
     'AI_GATEWAY_API_KEY',
     'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY',
@@ -346,9 +346,9 @@ async function installArtifacts(root, coreTarball, cliTarball) {
 
 async function installedBoundary(root) {
   const canonicalRoot = await realpath(root)
-  const core = await realpath(path.join(root, 'node_modules', '@agentbook', 'core'))
-  const cli = await realpath(path.join(root, 'node_modules', '@agentbook', 'cli'))
-  const binary = await realpath(path.join(root, 'node_modules', '.bin', 'agentbook'))
+  const core = await realpath(path.join(root, 'node_modules', '@ethogram', 'core'))
+  const cli = await realpath(path.join(root, 'node_modules', '@ethogram', 'cli'))
+  const binary = await realpath(path.join(root, 'node_modules', '.bin', 'ethogram'))
   for (const target of [core, cli, binary]) {
     assert.equal(target.startsWith(`${canonicalRoot}${path.sep}`), true)
     assert.equal(target.includes(repositoryRoot), false)
@@ -370,7 +370,7 @@ async function startDev(binary, cwd) {
   child.stdout.on('data', (chunk) => { output += chunk })
   child.stderr.on('data', (chunk) => { output += chunk })
   const url = await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for Agentbook dev.\n${output}`)), 15_000)
+    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for Ethogram dev.\n${output}`)), 15_000)
     const inspect = () => {
       const match = output.match(/Local URL: (http:\/\/127\.0\.0\.1:\d+\/)/)
       if (!match) return
@@ -380,7 +380,7 @@ async function startDev(binary, cwd) {
     child.stdout.on('data', inspect)
     child.once('exit', (code) => {
       clearTimeout(timeout)
-      reject(new Error(`Agentbook dev exited before readiness (${code}).\n${output}`))
+      reject(new Error(`Ethogram dev exited before readiness (${code}).\n${output}`))
     })
   })
   return {
@@ -391,16 +391,19 @@ async function startDev(binary, cwd) {
       if (child.exitCode !== null) return
       child.kill('SIGINT')
       await new Promise((resolve) => child.once('exit', resolve))
-      assert.match(output, /Agentbook developer server stopped\./)
+      assert.match(output, /Ethogram developer server stopped\./)
     },
   }
 }
 
 async function runStory(url, storyId) {
+  const projectResponse = await fetch(new URL('/api/project', url))
+  const project = await projectResponse.json()
+  assert.equal(projectResponse.status, 200, JSON.stringify(project))
   const response = await fetch(new URL('/api/run', url), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ storyId }),
+    body: JSON.stringify({ storyId, ...project.runtime }),
   })
   const payload = await response.json()
   assert.equal(response.status, 200, JSON.stringify(payload))
@@ -461,21 +464,21 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
   const timerStart = process.hrtime.bigint()
   const installOutput = await installArtifacts(consumer, artifacts.core.path, artifacts.cli.path)
   const boundary = await installedBoundary(consumer)
-  const binary = path.join(consumer, 'node_modules', '.bin', 'agentbook')
+  const binary = path.join(consumer, 'node_modules', '.bin', 'ethogram')
 
   const packageAfterInstall = await readFile(path.join(consumer, 'package.json'), 'utf8')
   const firstInit = run(binary, ['init', '--existing'], consumer)
   assert.equal(firstInit.status, 0, firstInit.output)
-  assert.match(firstInit.output, /Created agentbook\.config\.mjs/)
+  assert.match(firstInit.output, /Created ethogram\.config\.mjs/)
   assert.match(firstInit.output, /thin execution profile/)
   assert.equal(await readFile(path.join(consumer, 'package.json'), 'utf8'), packageAfterInstall)
-  assert.deepEqual((await listFiles(consumer)).filter((file) => !file.startsWith('package') && !file.startsWith('src/')), ['agentbook.config.mjs'])
+  assert.deepEqual((await listFiles(consumer)).filter((file) => !file.startsWith('package') && !file.startsWith('src/')), ['ethogram.config.mjs'])
 
-  const configHash = await sha256(path.join(consumer, 'agentbook.config.mjs'))
+  const configHash = await sha256(path.join(consumer, 'ethogram.config.mjs'))
   const secondInit = run(binary, ['init', '--existing'], consumer)
   assert.equal(secondInit.status, 0, secondInit.output)
   assert.match(secondInit.output, /already initialized/)
-  assert.equal(await sha256(path.join(consumer, 'agentbook.config.mjs')), configHash)
+  assert.equal(await sha256(path.join(consumer, 'ethogram.config.mjs')), configHash)
 
   await addIntegration(consumer)
   const postIntegrationHashes = await hashes(consumer, originalFiles)
@@ -571,27 +574,27 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
   const conflictRoot = path.join(scratchRoot, 'existing-init-conflict')
   await createExistingAgent(conflictRoot)
   await installArtifacts(conflictRoot, artifacts.core.path, artifacts.cli.path)
-  await writeFile(path.join(conflictRoot, 'agentbook.config.mjs'), 'export default { name: "user-owned" }\n')
-  const conflictBefore = await sha256(path.join(conflictRoot, 'agentbook.config.mjs'))
-  const conflictInit = run(path.join(conflictRoot, 'node_modules', '.bin', 'agentbook'), ['init', '--existing'], conflictRoot)
+  await writeFile(path.join(conflictRoot, 'ethogram.config.mjs'), 'export default { name: "user-owned" }\n')
+  const conflictBefore = await sha256(path.join(conflictRoot, 'ethogram.config.mjs'))
+  const conflictInit = run(path.join(conflictRoot, 'node_modules', '.bin', 'ethogram'), ['init', '--existing'], conflictRoot)
   assert.notEqual(conflictInit.status, 0)
   assert.match(conflictInit.output, /Existing files were preserved; nothing was written/)
-  assert.equal(await sha256(path.join(conflictRoot, 'agentbook.config.mjs')), conflictBefore)
+  assert.equal(await sha256(path.join(conflictRoot, 'ethogram.config.mjs')), conflictBefore)
 
   const normalInitRoot = path.join(scratchRoot, 'normal-init-control')
   await mkdir(normalInitRoot)
   await writeFile(path.join(normalInitRoot, 'package.json'), `${JSON.stringify({ name: 'normal-init-control', version: '1.0.0', private: true }, null, 2)}\n`)
   await installArtifacts(normalInitRoot, artifacts.core.path, artifacts.cli.path)
-  const normalInit = run(path.join(normalInitRoot, 'node_modules', '.bin', 'agentbook'), ['init'], normalInitRoot)
+  const normalInit = run(path.join(normalInitRoot, 'node_modules', '.bin', 'ethogram'), ['init'], normalInitRoot)
   assert.equal(normalInit.status, 0, normalInit.output)
-  for (const file of ['agentbook.config.mjs', 'agents/access-request.agent.ts', 'stories/admin-access-requires-approval.agent.stories.ts', 'execution/access-request.profile.ts']) {
+  for (const file of ['ethogram.config.mjs', 'agents/access-request.agent.ts', 'stories/admin-access-requires-approval.agent.stories.ts', 'execution/access-request.profile.ts']) {
     assert.equal((await stat(path.join(normalInitRoot, file))).isFile(), true)
   }
 
   const portableRoot = path.join(scratchRoot, 'portable-purchase-agent')
   await createExistingAgent(portableRoot)
   await installArtifacts(portableRoot, artifacts.core.path, artifacts.cli.path)
-  const portableBinary = path.join(portableRoot, 'node_modules', '.bin', 'agentbook')
+  const portableBinary = path.join(portableRoot, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(portableBinary, ['init', '--existing'], portableRoot).status, 0)
   await addIntegration(portableRoot)
   const portableServer = await startDev(portableBinary, portableRoot)
@@ -630,9 +633,9 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
       installOutput,
     },
     initExisting: {
-      command: 'agentbook init --existing',
+      command: 'ethogram init --existing',
       output: firstInit.output.trim().split('\n'),
-      created: ['agentbook.config.mjs'],
+      created: ['ethogram.config.mjs'],
       secondRunOutput: secondInit.output.trim().split('\n'),
       conflictOutput: conflictInit.output.trim().split('\n'),
       normalInitPreserved: true,
@@ -647,12 +650,12 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
       thinGlueClassifications: ['INPUT VALIDATION', 'INPUT TRANSLATION', 'TOOL ADAPTATION', 'TOOL INSTRUMENTATION', 'AGENT INVOCATION', 'OUTPUT TRANSLATION'],
       thinGlueCriterion: 'PASS',
       manualActions: [
-        'install packed @agentbook/core and @agentbook/cli',
-        'agentbook init --existing',
+        'install packed @ethogram/core and @ethogram/cli',
+        'ethogram init --existing',
         'author Purchase Approval Agent descriptor',
         'author two Purchase Approval Stories',
         'author one thin integration profile',
-        'agentbook dev',
+        'ethogram dev',
         'open local UI and run the high-value Story',
       ],
       manualActionCount: 7,

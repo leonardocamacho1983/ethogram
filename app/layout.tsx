@@ -1,35 +1,43 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN } from '@/lib/seo/site'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Agentbook — AI Agent Testing',
-  description: 'Storybook para testar, depurar e comparar AI agents.',
-  generator: 'v0.app',
+  metadataBase: new URL(SITE_ORIGIN),
+  title: {
+    default: 'Ethogram — Behavioral Testing for TypeScript AI Agents',
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  manifest: '/site.webmanifest',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
+        url: '/favicon.svg',
         type: 'image/svg+xml',
+        sizes: 'any',
+      },
+      {
+        url: '/favicon-32.png',
+        type: 'image/png',
+        sizes: '32x32',
+      },
+      {
+        url: '/favicon-16.png',
+        type: 'image/png',
+        sizes: '16x16',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
+    { media: '(prefers-color-scheme: light)', color: '#F5F2EC' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E1110' },
   ],
 }
 
@@ -39,7 +47,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className="bg-background">
+    <html lang="en" className="bg-background">
+      <head>
+        <link rel="stylesheet" href="/brand/ethogram/fonts.css" />
+      </head>
       <body className="antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

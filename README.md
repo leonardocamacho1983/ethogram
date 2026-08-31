@@ -1,33 +1,46 @@
-# agentbook
+# Ethogram
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Ethogram is a local, code-first behavioral testing tool for TypeScript and Node.js agents.
 
-## Built with v0
+> Public alpha preparation: `0.1.0-alpha.0`. The `@ethogram` npm scope is controlled and the package manifests use the final public names. Nothing has been published yet.
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+Ethogram is read-only by design. Agents, Stories, execution profiles, GIVEN values, WHEN input, and EXPECTATIONS live in your project files. The local UI discovers and runs that code; it does not edit or save it.
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_WGUZV1eOAHchwUP5gH9RglYastJn)
+## Alpha scope
 
-## Getting Started
+- TypeScript/Node projects on Node.js 20.9 or newer
+- local developer operation through `ethogram init` and `ethogram dev`
+- `tool-called` and `tool-not-called` expectations
+- consumer-owned execution profiles and framework-owned, verdict-free execution evidence
+- ephemeral current-run evidence only
 
-First, run the development server:
+Ethogram does not currently provide Python support, hosted or cloud operation, a PR bot, CI comments, run history, Compare, or tool-order matchers.
+
+## Quickstart
+
+After the alpha packages are published:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npm install --save-dev @ethogram/core@0.1.0-alpha.0 @ethogram/cli@0.1.0-alpha.0
+npx ethogram init
+npx ethogram dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`ethogram init` creates `ethogram.config.mjs`, an Agent descriptor, a Story, and a local execution profile. The generated Story uses `given`, `when`, and canonical `expectations`. The UI evaluates those EXPECTATIONS against tool-call facts produced by the execution.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Editing an Agent, Story, execution profile, or imported TypeScript/JavaScript source triggers an automatic project reload. Rerun the Story to produce current evidence.
 
-## Learn More
+## Guides
 
-To learn more, take a look at the following resources:
+- [New-project quickstart](docs/quickstart.md)
+- [Integrate an existing agent](docs/existing-agent.md)
+- [Framework-owned execution evidence](docs/execution-evidence.md)
+- [Packages](docs/packages.md)
+- [Alpha limitations](docs/limitations.md)
+- [Release preparation and package-scope migration](docs/RELEASE-READINESS.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+The executable Tests 01–09 under [`tests/`](tests/) are the frozen architectural baseline. Their historical records retain the Agentbook name where that was accurate at the time.
+
+## License and feedback
+
+Ethogram is available under the [MIT License](LICENSE). Report alpha issues in the [GitHub repository](https://github.com/leonardocamacho1983/ethogram/issues).

@@ -80,5 +80,5 @@ if (scriptPath === invokedPath) {
     'lib/agentbook/generated-story-registry.ts',
   )
   const storyFiles = await generateRegistry({ rootDirectory, registryPath })
-  console.log(`Discovered ${storyFiles.length} Agentbook Story file(s).`)
+  console.log(`Discovered ${storyFiles.length} Ethogram Story file(s).`)
 }

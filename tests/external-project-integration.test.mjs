@@ -76,15 +76,15 @@ test('Test 05 loads an isolated consumer project through the public boundary', a
     }
   }
   assert.deepEqual(imports, [
-    { file: 'agents/travel-approval.agent.ts', specifier: '@agentbook/core' },
-    { file: 'stories/international-trip.agent.stories.ts', specifier: '@agentbook/core' },
+    { file: 'agents/travel-approval.agent.ts', specifier: '@ethogram/core' },
+    { file: 'stories/international-trip.agent.stories.ts', specifier: '@ethogram/core' },
     { file: 'stories/international-trip.agent.stories.ts', specifier: '../agents/travel-approval.agent.ts' },
-    { file: 'execution/travel-approval-profile.ts', specifier: '@agentbook/core' },
+    { file: 'execution/travel-approval-profile.ts', specifier: '@ethogram/core' },
     { file: 'execution/travel-approval-profile.ts', specifier: '../tools/travel-tools.ts' },
-    { file: 'tools/travel-tools.ts', specifier: '@agentbook/core' },
+    { file: 'tools/travel-tools.ts', specifier: '@ethogram/core' },
   ])
   for (const { specifier } of imports) {
-    assert.equal(specifier === '@agentbook/core' || specifier.startsWith('../'), true)
+    assert.equal(specifier === '@ethogram/core' || specifier.startsWith('../'), true)
     assert.doesNotMatch(specifier, /app\/|generated-story-registry|demo\.agent|tests\/0[1-4]|real-agent-runner|evaluator/)
   }
 })
@@ -176,8 +176,8 @@ test('Test 05 loader reports missing, invalid, invalid-export, and duplicate ide
 
   const duplicateStoryRoot = await createTemporaryProject({
     'agents/valid.agent.mjs': `export const agent = { id: 'valid-agent', name: 'Valid Agent', description: 'Valid', icon: 'target' }`,
-    'stories/first.agent.stories.mjs': `export const story = { __agentbookType: 'story', id: 'duplicate-story', name: 'First', agent: { id: 'valid-agent', name: 'Valid Agent', description: 'Valid', icon: 'target' }, description: 'First', given: [], prompt: 'Run', expectations: [] }`,
-    'stories/second.agent.stories.mjs': `export const story = { __agentbookType: 'story', id: 'duplicate-story', name: 'Second', agent: { id: 'valid-agent', name: 'Valid Agent', description: 'Valid', icon: 'target' }, description: 'Second', given: [], prompt: 'Run', expectations: [] }`,
+    'stories/first.agent.stories.mjs': `export const story = { __ethogramType: 'story', id: 'duplicate-story', name: 'First', agent: { id: 'valid-agent', name: 'Valid Agent', description: 'Valid', icon: 'target' }, description: 'First', given: [], prompt: 'Run', expectations: [] }`,
+    'stories/second.agent.stories.mjs': `export const story = { __ethogramType: 'story', id: 'duplicate-story', name: 'Second', agent: { id: 'valid-agent', name: 'Valid Agent', description: 'Valid', icon: 'target' }, description: 'Second', given: [], prompt: 'Run', expectations: [] }`,
   })
   await assertLoadError(duplicateStoryRoot, 'DUPLICATE_STORY_ID')
 })
@@ -185,8 +185,8 @@ test('Test 05 loader reports missing, invalid, invalid-export, and duplicate ide
 test('Test 05 generic boundaries load and execute a replacement domain unchanged', async () => {
   const replacementRoot = await createTemporaryProject({
     'agents/warehouse.agent.mjs': `export const agent = { id: 'warehouse-agent', name: 'Warehouse Agent', description: 'Records inventory', icon: 'search' }`,
-    'stories/inventory.agent.stories.mjs': `export const story = { __agentbookType: 'story', id: 'record-inventory', name: 'Record Inventory', agent: { id: 'warehouse-agent', name: 'Warehouse Agent', description: 'Records inventory', icon: 'search' }, description: 'Records a received item', given: ['sku: W-1'], prompt: 'Record this item.', expectations: [{ id: 'records-item', description: 'Records inventory', matcher: { kind: 'tool-called', tool: 'record_inventory' } }], execution: { kind: 'external-profile', profile: 'warehouse-profile' } }`,
-    'execution/warehouse.profile.mjs': `export const profile = { __agentbookType: 'execution-profile', id: 'warehouse-profile', tools: { record_inventory: { description: 'Record inventory', execute: async (input) => ({ ...input, recorded: true }) } }, execute: async ({ callTool }) => { await callTool('record_inventory', { sku: 'W-1' }); return { decision: 'Record inventory', finalResponse: 'Inventory recorded.' } } }`,
+    'stories/inventory.agent.stories.mjs': `export const story = { __ethogramType: 'story', id: 'record-inventory', name: 'Record Inventory', agent: { id: 'warehouse-agent', name: 'Warehouse Agent', description: 'Records inventory', icon: 'search' }, description: 'Records a received item', given: ['sku: W-1'], prompt: 'Record this item.', expectations: [{ id: 'records-item', description: 'Records inventory', matcher: { kind: 'tool-called', tool: 'record_inventory' } }], execution: { kind: 'external-profile', profile: 'warehouse-profile' } }`,
+    'execution/warehouse.profile.mjs': `export const profile = { __ethogramType: 'execution-profile', id: 'warehouse-profile', tools: { record_inventory: { description: 'Record inventory', execute: async (input) => ({ ...input, recorded: true }) } }, execute: async ({ callTool }) => { await callTool('record_inventory', { sku: 'W-1' }); return { decision: 'Record inventory', finalResponse: 'Inventory recorded.' } } }`,
   })
 
   const project = await loadAgentbookProject(replacementRoot)
@@ -201,7 +201,7 @@ test('Test 05 generic boundaries load and execute a replacement domain unchanged
 
 test('Test 05 application plumbing is generic and contains no fixture-specific knowledge', async () => {
   const genericFiles = [
-    'app/page.tsx',
+    'app/app/app-client.tsx',
     'app/actions/load-agentbook-project.ts',
     'app/actions/run-external-story.ts',
     'lib/agentbook/external-execution.ts',
@@ -217,7 +217,7 @@ test('Test 05 application plumbing is generic and contains no fixture-specific k
     assert.doesNotMatch(source, forbiddenFixtureKnowledge, `${file} contains fixture-specific logic`)
   }
 
-  const pageSource = await readFile(path.join(repositoryRoot, 'app/page.tsx'), 'utf8')
+  const pageSource = await readFile(path.join(repositoryRoot, 'app/app/app-client.tsx'), 'utf8')
   assert.match(pageSource, /loadConfiguredAgentbookProject/)
   assert.match(pageSource, /story\.execution\?\.kind === 'external-profile'/)
   assert.match(pageSource, /runExternalStory\(\{ agentId: story\.agent\.id, storyId: story\.id \}\)/)

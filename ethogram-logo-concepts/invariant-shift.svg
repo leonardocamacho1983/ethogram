@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="title desc">
+  <title id="title">Ethogram — Invariant Shift</title>
+  <desc id="desc">A bold square field with two mirrored shifting channels, paired with the Ethogram wordmark.</desc>
+  <rect width="960" height="300" fill="#F3F0E8"/>
+  <g transform="translate(70 56)">
+    <rect width="188" height="188" fill="#0B0C0C"/>
+    <path d="M0 44H47C75 44 80 64 108 64H188V88H108C73 88 68 68 43 68H0Z" fill="#F3F0E8"/>
+    <path d="M0 144H43C68 144 73 124 108 124H188V148H108C80 148 75 168 47 168H0Z" fill="#F3F0E8"/>
+  </g>
+  <text x="322" y="180" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="102" font-weight="600" letter-spacing="-4">Ethogram</text>
+</svg>

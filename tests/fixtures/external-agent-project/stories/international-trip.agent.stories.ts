@@ -1,4 +1,4 @@
-import { defineStory } from '@agentbook/core'
+import { defineStory } from '@ethogram/core'
 import { travelApprovalAgent } from '../agents/travel-approval.agent.ts'
 
 export const internationalTripRequiresApproval = defineStory({
@@ -13,7 +13,7 @@ export const internationalTripRequiresApproval = defineStory({
     'automaticApprovalLimit: 2500',
   ],
   when: 'Book this trip for me.',
-  then: [
+  expectations: [
     {
       id: 'checks-trip-policy',
       description: 'Checks the travel policy',

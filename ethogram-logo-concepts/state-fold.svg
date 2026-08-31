@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="title desc">
+  <title id="title">Ethogram — State Fold</title>
+  <desc id="desc">A bold continuous folded path paired with the Ethogram wordmark.</desc>
+  <rect width="960" height="300" fill="#F3F0E8"/>
+  <g transform="translate(70 56)" fill="none" stroke="#0B0C0C" stroke-width="34" stroke-linecap="square" stroke-linejoin="round">
+    <path d="M18 18H145C179 18 179 67 145 67H73C39 67 39 116 73 116H145C179 116 179 165 145 165H18"/>
+  </g>
+  <text x="322" y="180" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="102" font-weight="600" letter-spacing="-4">Ethogram</text>
+</svg>

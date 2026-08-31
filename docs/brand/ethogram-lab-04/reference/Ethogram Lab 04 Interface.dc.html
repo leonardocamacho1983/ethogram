@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#0E1110; }
+  a { color:#F5F2EC; text-decoration:none; }
+  a:hover { color: oklch(0.82 0.15 150); }
+  @keyframes eg-draw { 0% { stroke-dashoffset: 400 } 100% { stroke-dashoffset: 0 } }
+  @keyframes eg-bar { 0% { transform: translateX(-100%) } 100% { transform: translateX(300%) } }
+  @keyframes eg-caret { 0%,49% { opacity:1 } 50%,100% { opacity:0 } }
+  @keyframes eg-skel { 0%,100% { opacity:.22 } 50% { opacity:.5 } }
+  @keyframes eg-in { 0% { opacity:0; transform:translateY(4px) } 100% { opacity:1; transform:translateY(0) } }
+  @keyframes eg-collapse { 0%,70%,100% { transform:scaleY(1) } 84% { transform:scaleY(.58) } }
+  @keyframes eg-marquee { 0% { transform:translateY(0) } 100% { transform:translateY(-50%) } }
+  @keyframes eg-breathe { 0%,100% { letter-spacing:-.045em } 50% { letter-spacing:.015em } }
+  @keyframes eg-bgshift { 0% { background-position:0% 50% } 100% { background-position:220% 50% } }
+  @keyframes eg-slide-x { 0% { transform:translateX(0) } 100% { transform:translateX(-50%) } }
+  @keyframes eg-word { 0% { opacity:0; transform:translateY(6px) } 14%,86% { opacity:1; transform:translateY(0) } 100% { opacity:1; transform:translateY(0) } }
+  @keyframes eg-reveal-x { 0%,18% { clip-path: inset(0 100% 0 0) } 42%,92% { clip-path: inset(0 0 0 0) } 100% { clip-path: inset(0 100% 0 0) } }
+  @keyframes eg-draw-hold { 0% { stroke-dashoffset: 400 } 30%,92% { stroke-dashoffset: 0 } 100% { stroke-dashoffset: 400 } }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+
+<div style="background:#0E1110;color:#F5F2EC;font-family:Archivo,system-ui,sans-serif;padding:0 0 140px;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 64px;">
+
+    <header style="padding:88px 0 60px;border-bottom:1px solid rgba(245,242,236,.14);display:grid;grid-template-columns:1fr 400px;gap:64px;align-items:end;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.18em;color:oklch(0.80 0.15 150);margin-bottom:24px;">ETHOGRAM · LAB 04 · INTERFACE</div>
+        <h1 style="font-size:64px;line-height:.98;letter-spacing:-.035em;font-weight:600;margin:0 0 20px;max-width:860px;text-wrap:balance;">Tudo aqui é clicável.</h1>
+        <p style="font-size:17px;line-height:1.55;color:rgba(245,242,236,.62);max-width:640px;margin:0;text-wrap:pretty;">Botões, micro-interações e componentes de dado sob a física do Lab 03: contorno sem preenchimento, canto reto, cor só em estado, movimento sem elástico. Ainda é exploração — mas exploração que funciona no dedo.</p>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:2.1;color:rgba(245,242,236,.55);border-left:1px solid rgba(245,242,236,.14);padding-left:28px;">
+        <div>micro &nbsp;&nbsp;<span style="color:#F5F2EC;">180ms · cubic-bezier(.2,.8,.2,1)</span></div>
+        <div>foco &nbsp;&nbsp;&nbsp;<span style="color:#F5F2EC;">contorno musgo, 2px, sem glow</span></div>
+        <div>alvo &nbsp;&nbsp;&nbsp;<span style="color:#F5F2EC;">altura mínima 36px em desktop</span></div>
+      </div>
+    </header>
+
+    <!-- BOTÕES -->
+    <section style="padding:64px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">01</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Botões</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">passe o mouse · todos com hover, active e foco reais</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">B01 · PRIMÁRIO</div>
+          <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
+            <button style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#F5F2EC;color:#0E1110;padding:13px 20px;border:none;cursor:pointer;transition:filter .18s cubic-bezier(.2,.8,.2,1);" style-hover="filter:brightness(.92)" style-active="filter:brightness(.84)" style-focus="outline:2px solid oklch(0.76 0.16 150);outline-offset:2px">npx ethogram init</button>
+            <button style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#F5F2EC;color:#0E1110;padding:9px 14px;border:none;cursor:pointer;transition:filter .18s cubic-bezier(.2,.8,.2,1);" style-hover="filter:brightness(.92)">pequeno</button>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">marfim sólido, sem raio. um por tela.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">B02 · SECUNDÁRIO</div>
+          <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
+            <button style="font-family:'JetBrains Mono',monospace;font-size:13px;background:transparent;color:rgba(245,242,236,.85);padding:13px 20px;border:1px solid rgba(245,242,236,.28);cursor:pointer;transition:border-color .18s cubic-bezier(.2,.8,.2,1),color .18s;" style-hover="border-color:rgba(245,242,236,.75);color:#F5F2EC" style-active="border-color:oklch(0.76 0.16 150)">read the docs</button>
+            <button style="font-family:'JetBrains Mono',monospace;font-size:13px;background:transparent;color:rgba(245,242,236,.3);padding:13px 20px;border:1px solid rgba(245,242,236,.12);cursor:not-allowed;">desabilitado</button>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a borda acende, o fundo nunca preenche.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">B03 · FANTASMA E DESTRUTIVO</div>
+          <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
+            <button style="font-family:'JetBrains Mono',monospace;font-size:13px;background:transparent;color:rgba(245,242,236,.6);padding:11px 4px;border:none;border-bottom:1px solid transparent;cursor:pointer;transition:color .18s,border-color .18s;" style-hover="color:#F5F2EC;border-color:oklch(0.76 0.16 150)">ver evidência</button>
+            <button style="font-family:'JetBrains Mono',monospace;font-size:13px;background:transparent;color:oklch(0.84 0.14 30);padding:13px 20px;border:1px solid oklch(0.62 0.16 30);cursor:pointer;transition:background .18s,color .18s;" style-hover="background:oklch(0.76 0.16 30 / .12)">descartar run</button>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">coral só em ação irreversível.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">B04 · ÍCONE E GRUPO</div>
+          <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
+            <button style="width:38px;height:38px;background:transparent;border:1px solid rgba(245,242,236,.24);display:grid;place-items:center;cursor:pointer;transition:border-color .18s;" style-hover="border-color:#F5F2EC">
+              <svg width="17" height="17" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5"><path d="{{ master }}"></path></svg>
+            </button>
+            <div style="display:flex;flex-wrap:wrap;border:1px solid rgba(245,242,236,.24);max-width:100%;">
+              <button style="font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(245,242,236,.08);color:#F5F2EC;padding:10px 14px;border:none;border-right:1px solid rgba(245,242,236,.24);cursor:pointer;">exp</button>
+              <button style="font-family:'JetBrains Mono',monospace;font-size:12px;background:transparent;color:rgba(245,242,236,.55);padding:10px 14px;border:none;border-right:1px solid rgba(245,242,236,.24);cursor:pointer;transition:color .18s;" style-hover="color:#F5F2EC">obs</button>
+              <button style="font-family:'JetBrains Mono',monospace;font-size:12px;background:transparent;color:rgba(245,242,236,.55);padding:10px 14px;border:none;cursor:pointer;transition:color .18s;" style-hover="color:#F5F2EC">diff</button>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">grupo dividido por 1px, nunca por gap.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MICRO-INTERAÇÕES -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">02</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Micro-interações</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">clique · a resposta é sempre informação, nunca celebração</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X01 · COPIAR</div>
+          <button onClick="{{ copy }}" style="font-family:'JetBrains Mono',monospace;font-size:13px;background:transparent;color:#F5F2EC;padding:13px 16px;border:1px solid rgba(245,242,236,.24);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;transition:border-color .18s;" style-hover="border-color:rgba(245,242,236,.7)">
+            <span>npx ethogram init</span>
+            <span style="color:{{ copyColor }};font-size:11px;">{{ copyLabel }}</span>
+          </button>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">o rótulo troca por 1.6s. sem ícone de check, sem animação de sucesso.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X02 · ALTERNAR CAMADA</div>
+          <div style="display:flex;align-items:center;gap:18px;">
+            <button onClick="{{ toggleView }}" style="width:52px;height:26px;border:1px solid rgba(245,242,236,.3);background:transparent;position:relative;cursor:pointer;padding:0;">
+              <span style="position:absolute;top:2px;bottom:2px;width:22px;left:{{ knobLeft }};background:{{ knobColor }};transition:left .18s cubic-bezier(.2,.8,.2,1);"></span>
+            </button>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.75);">{{ viewLabel }}</span>
+          </div>
+          <svg viewBox="0 0 64 64" style="width:88px;height:88px;" fill="none">
+            <path d="{{ master }}" stroke="rgba(245,242,236,.22)" stroke-width="1.6" stroke-dasharray="3 3"></path>
+            <path d="{{ viewPath }}" stroke="{{ viewColor }}" stroke-width="2.8"></path>
+          </svg>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">o contrato fica de fantasma; a camada ativa troca sem fade.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X03 · RODAR</div>
+          <button onClick="{{ run }}" style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#F5F2EC;color:#0E1110;padding:13px 18px;border:none;cursor:pointer;text-align:left;transition:filter .18s;" style-hover="filter:brightness(.92)">{{ runLabel }}</button>
+          <div style="height:6px;background:rgba(245,242,236,.1);overflow:hidden;position:relative;">
+            <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;width:34%;background:oklch(0.76 0.16 150);animation:eg-bar 1.4s cubic-bezier(.55,0,.45,1) infinite;"></div>
+            </sc-if>
+            <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;inset:0;background:linear-gradient(90deg, oklch(0.76 0.16 150) 0 91.6%, oklch(0.76 0.16 30) 91.6% 100%);"></div>
+            </sc-if>
+          </div>
+          <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.6);animation:eg-in .18s cubic-bezier(.2,.8,.2,1) both;">
+              <div><span style="color:oklch(0.82 0.15 150);">11 pass</span> · <span style="color:oklch(0.84 0.14 30);">1 fail</span></div>
+              <div style="color:oklch(0.84 0.14 30);">pii_redaction · política</div>
+            </div>
+          </sc-if>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">indeterminado enquanto roda; ao terminar, a barra vira o próprio resultado.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X04 · PERFIL INTERATIVO</div>
+          <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+            <svg viewBox="0 0 64 64" style="width:104px;height:104px;flex:none;" fill="none">
+              <path d="{{ master }}" stroke="rgba(245,242,236,.75)" stroke-width="2.6"></path>
+              <sc-for list="{{ hoverAxes }}" as="a" hint-placeholder-count="6">
+                <path d="{{ a.d }}" stroke="{{ a.stroke }}" stroke-width="7" onMouseEnter="{{ a.enter }}" onMouseLeave="{{ a.leave }}" style="cursor:crosshair;"></path>
+              </sc-for>
+            </svg>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.55);min-width:0;">
+              <div style="color:#F5F2EC;">{{ axisName }}</div>
+              <div>{{ axisDesc }}</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a marca é a legenda. hover no eixo, sem tooltip flutuante.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X05 · EXPANDIR</div>
+          <div style="border:1px solid rgba(245,242,236,.16);">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+              <div>
+                <button onClick="{{ r.toggle }}" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(245,242,236,.1);padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:rgba(245,242,236,.7);transition:background .18s;" style-hover="background:rgba(245,242,236,.05)">
+                  <span>{{ r.name }}</span>
+                  <span style="color:{{ r.color }};">{{ r.status }}</span>
+                </button>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:12px 16px 16px;border-bottom:1px solid rgba(245,242,236,.1);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:2;color:rgba(245,242,236,.5);animation:eg-in .18s cubic-bezier(.2,.8,.2,1) both;">
+                    <div>01 &nbsp;policy_lookup &nbsp;<span style="color:oklch(0.82 0.15 150);">ok</span></div>
+                    <div>02 &nbsp;db_query &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:oklch(0.82 0.15 150);">ok</span></div>
+                    <div>03 &nbsp;redact_pii &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:{{ r.color }};">{{ r.detail }}</span></div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">abre sem altura animada — só entrada de 180ms. altura animada mente sobre o conteúdo.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">X06 · SELEÇÃO E AVISO</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ checks }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.toggle }}" style="background:transparent;border:none;padding:0;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ c.color }};transition:color .18s;" style-hover="color:#F5F2EC">
+                <span style="width:14px;height:14px;border:1px solid {{ c.box }};display:grid;place-items:center;flex:none;">
+                  <sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+                    <span style="width:6px;height:6px;background:oklch(0.76 0.16 150);"></span>
+                  </sc-if>
+                </span>
+                <span>{{ c.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ fireToast }}" style="font-family:'JetBrains Mono',monospace;font-size:12.5px;background:transparent;color:rgba(245,242,236,.85);padding:11px 16px;border:1px solid rgba(245,242,236,.28);cursor:pointer;align-self:flex-start;transition:border-color .18s;" style-hover="border-color:rgba(245,242,236,.7)">salvar seleção</button>
+          <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+            <div style="border-left:2px solid oklch(0.76 0.16 150);padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:rgba(245,242,236,.7);background:rgba(245,242,236,.04);animation:eg-in .18s cubic-bezier(.2,.8,.2,1) both;">{{ toastMsg }}</div>
+          </sc-if>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">aviso entra no fluxo, não flutua sobre a tela. quadrado marca quadrado.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPONENTES DE DADO -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">03</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Componentes de dado</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">onde o produto realmente vive</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+        <div style="border:1px solid rgba(245,242,236,.14);padding:28px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:22px;">D01 · SELOS E ESTADOS</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border:1px solid oklch(0.62 0.16 150);color:oklch(0.82 0.15 150);">pass</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border:1px solid oklch(0.62 0.16 30);color:oklch(0.84 0.14 30);">fail</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border:1px solid rgba(245,242,236,.24);color:rgba(245,242,236,.55);">skipped</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border:1px dashed rgba(245,242,236,.3);color:rgba(245,242,236,.5);">not run</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;background:#F5F2EC;color:#0E1110;">crítico</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border:1px solid rgba(245,242,236,.24);color:rgba(245,242,236,.75);display:flex;align-items:center;gap:8px;">
+              <svg width="11" height="11" viewBox="0 0 64 64" fill="none" stroke="oklch(0.76 0.16 150)" stroke-width="6" stroke-dasharray="26 400" style="animation:eg-draw 1.4s linear infinite;"><path d="{{ master }}"></path></svg>
+              rodando
+            </span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:26px;align-items:center;flex-wrap:wrap;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.45);">atalho</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 8px;border:1px solid rgba(245,242,236,.24);border-bottom-width:2px;color:rgba(245,242,236,.8);">⌘</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 8px;border:1px solid rgba(245,242,236,.24);border-bottom-width:2px;color:rgba(245,242,236,.8);">R</span>
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(245,242,236,.14);padding:28px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:22px;">D02 · CAMPO E BUSCA</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="border:1px solid rgba(245,242,236,.24);padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color .18s;" style-hover="border-color:rgba(245,242,236,.55)">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.4);">story:</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#F5F2EC;">refund_</span>
+              <span style="display:inline-block;width:7px;height:14px;background:oklch(0.76 0.16 150);animation:eg-caret 1.05s step-end infinite;"></span>
+            </div>
+            <div style="border:1px solid oklch(0.62 0.16 30);padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.8);">policy_lookup(</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.84 0.14 30);">parêntese não fechado · linha 12</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+              <div style="height:11px;width:62%;background:rgba(245,242,236,.3);animation:eg-skel 1.6s ease-in-out infinite;"></div>
+              <div style="height:11px;width:38%;background:rgba(245,242,236,.3);animation:eg-skel 1.6s ease-in-out infinite;animation-delay:.2s;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(245,242,236,.14);min-width:0;grid-column:span 2;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">D03 · TABELA DE EXECUÇÕES · passe o mouse nas linhas</div>
+          <div>
+            <div style="display:grid;grid-template-columns:32px 1.6fr 90px 1fr 80px 70px;gap:16px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:rgba(245,242,236,.4);border-bottom:1px solid rgba(245,242,236,.12);">
+              <span></span><span>STORY</span><span>PERFIL</span><span>EIXO DIVERGENTE</span><span>DESDE</span><span>TEMPO</span>
+            </div>
+            <sc-for list="{{ table }}" as="t" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:32px 1.6fr 90px 1fr 80px 70px;gap:16px;padding:13px 20px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:rgba(245,242,236,.7);border-bottom:1px solid rgba(245,242,236,.08);transition:background .18s;cursor:pointer;" style-hover="background:rgba(245,242,236,.05)">
+                <svg width="18" height="18" viewBox="0 0 64 64" fill="none" stroke="{{ t.color }}" stroke-width="5"><path d="{{ t.d }}"></path></svg>
+                <span style="color:#F5F2EC;">{{ t.name }}</span>
+                <span style="color:{{ t.color }};">{{ t.status }}</span>
+                <span style="color:rgba(245,242,236,.55);">{{ t.axis }}</span>
+                <span style="color:rgba(245,242,236,.45);">{{ t.since }}</span>
+                <span style="color:rgba(245,242,236,.45);">{{ t.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIPOGRAFIA -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">04</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Tipografia</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">a marca fala inglês · espécimes reais, não lorem</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:24px;margin-bottom:24px;">
+
+        <div style="border:1px solid rgba(245,242,236,.14);padding:32px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:28px;">TY01 · ESCALA E TRACKING ÓTICO</div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">72 / −.04</span>
+              <span style="font-size:72px;line-height:.94;font-weight:600;letter-spacing:-.04em;">Behavior</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">40 / −.032</span>
+              <span style="font-size:40px;line-height:1.05;font-weight:600;letter-spacing:-.032em;">that holds under change</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">24 / −.025</span>
+              <span style="font-size:24px;line-height:1.25;font-weight:500;letter-spacing:-.025em;">Expected behavior is not observed behavior.</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">17 / −.005</span>
+              <span style="font-size:17px;line-height:1.55;color:rgba(245,242,236,.72);letter-spacing:-.005em;">Run real agents and compare what happened against what should have happened.</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">12.5 / 0</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.7);">.ethogram/runs/0198 · 11 passed · 1 failed</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:20px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);width:64px;flex:none;">11 / +.16</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">BEHAVIORAL TESTING FOR AI AGENTS</span>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(245,242,236,.5);margin-top:28px;border-top:1px solid rgba(245,242,236,.12);padding-top:18px;">o tracking negativo cresce com o corpo e zera em 14px. abaixo disso, só mono — e mono só abre em caps.</div>
+        </div>
+
+        <div style="border:1px solid rgba(245,242,236,.14);padding:32px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:28px;">TY02 · DIVISÃO DE PAPÉIS</div>
+          <div style="display:flex;flex-direction:column;gap:26px;">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(245,242,236,.35);margin-bottom:12px;">ARCHIVO · AFIRMAÇÃO</div>
+              <div style="font-size:23px;line-height:1.25;font-weight:600;letter-spacing:-.028em;">One critical behavior changed in this pull request.</div>
+            </div>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(245,242,236,.35);margin-bottom:12px;">JETBRAINS MONO · EVIDÊNCIA</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:2;color:rgba(245,242,236,.7);">
+                <div style="color:oklch(0.84 0.14 30);">FAIL &nbsp;pii_redaction</div>
+                <div>&nbsp;&nbsp;expected &nbsp;redact_pii before emit</div>
+                <div>&nbsp;&nbsp;observed &nbsp;—</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(245,242,236,.5);margin-top:28px;border-top:1px solid rgba(245,242,236,.12);padding-top:18px;">a regra é semântica, não estética: sans afirma, mono comprova. nunca o contrário.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY03 · TRÊS DISPLAYS</div>
+          <div style="display:flex;flex-direction:column;gap:22px;">
+            <div>
+              <div style="font-size:29px;line-height:1.02;font-weight:600;letter-spacing:-.035em;">Behavior that holds.</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.4);margin-top:8px;">archivo 600 · atual</div>
+            </div>
+            <div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:29px;line-height:1.02;font-weight:500;letter-spacing:-.03em;">Behavior that holds.</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.4);margin-top:8px;">space grotesk 500 · mais idiossincrático</div>
+            </div>
+            <div>
+              <div style="font-family:'Instrument Serif',serif;font-size:34px;line-height:1;letter-spacing:-.02em;">Behavior that holds.</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.4);margin-top:8px;">instrument serif · registro editorial do board</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">o serifado vem das referências editoriais do moodboard. dá autoridade e tira ferramenta — usar só em capa e ensaio, nunca em produto.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY04 · NUMERAIS TABULARES</div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.95;color:rgba(245,242,236,.75);font-variant-numeric:tabular-nums;">
+                <div style="display:flex;justify-content:space-between;"><span>refund_policy</span><span>1.914s</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>escalation_path</span><span>12.408s</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>pii_redaction</span><span>3.117s</span></div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.80 0.15 150);margin-top:10px;">tabular-nums · a coluna alinha</div>
+            </div>
+            <div>
+              <div style="font-family:Archivo,sans-serif;font-size:15px;line-height:1.95;color:rgba(245,242,236,.6);">
+                <div style="display:flex;justify-content:space-between;"><span>refund_policy</span><span>1.914s</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>escalation_path</span><span>12.408s</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>pii_redaction</span><span>3.117s</span></div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.4);margin-top:10px;">archivo proporcional · a vírgula dança</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">todo número comparável vai em mono. número em prosa pode ir em sans.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY05 · CÓDIGO NA PROSA</div>
+          <div style="display:flex;flex-direction:column;gap:20px;font-size:15.5px;line-height:1.65;color:rgba(245,242,236,.72);">
+            <div>Each Story declares an <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#F5F2EC;">.expect()</span> for every behavior you care about.</div>
+            <div>Each Story declares an <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;background:rgba(245,242,236,.09);padding:2px 6px;color:#F5F2EC;">.expect()</span> for every behavior you care about.</div>
+            <div>Each Story declares an <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#F5F2EC;border-bottom:1px solid oklch(0.76 0.16 150 / .55);">.expect()</span> for every behavior you care about.</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a primeira. a pílula cinza fragmenta a linha e o sublinhado verde promete link que não existe.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY06 · ÊNFASE SEM ITÁLICO</div>
+          <div style="display:flex;flex-direction:column;gap:18px;font-size:15.5px;line-height:1.65;color:rgba(245,242,236,.7);">
+            <div>The regression that matters rarely breaks an <span style="font-weight:600;color:#F5F2EC;">assertion</span>.</div>
+            <div>The regression that matters rarely breaks an <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#F5F2EC;">assertion</span>.</div>
+            <div>The regression that matters rarely breaks an <span style="font-style:italic;">assertion</span>.</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">Archivo não tem itálico real — o terceiro é oblíquo sintético e mostra. ênfase é peso 600 ou troca para mono.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY07 · MEDIDA E QUEBRA</div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div>
+              <div style="font-size:15px;line-height:1.6;color:rgba(245,242,236,.72);max-width:34ch;text-wrap:pretty;">Agents are probabilistic systems. Behavior changes when you edit a prompt, a model, a tool.</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.80 0.15 150);margin-top:10px;">34ch · pretty</div>
+            </div>
+            <div>
+              <div style="font-size:15px;line-height:1.6;color:rgba(245,242,236,.5);max-width:100%;">Agents are probabilistic systems. Behavior changes when you edit a prompt, a model, a tool.</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.4);margin-top:10px;">sem limite · linha longa demais</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">prosa entre 34ch e 62ch. título sempre com text-wrap balance, parágrafo com pretty.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TY08 · WORDMARK EM MICRO</div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+              <span style="font-size:13px;font-weight:600;letter-spacing:-.03em;">ethogram</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);margin-left:auto;">sans 13</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:-.01em;">ethogram</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);margin-left:auto;">mono 12</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(245,242,236,.85);">ETHOGRAM</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,242,236,.35);margin-left:auto;">mono caps</span>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">em CLI e barra de status ganha a mono caixa baixa: mora ao lado de comandos, não de títulos.</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid rgba(245,242,236,.14);margin-top:24px;padding:44px 48px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px, rgba(245,242,236,.1) 1px, transparent 1.4px);background-size:8px 8px;"></div>
+        <div style="position:relative;display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:end;">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:26px;">TY09 · LOCKUP EDITORIAL · CAPA</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:clamp(38px,5vw,70px);line-height:.98;letter-spacing:-.02em;max-width:16ch;text-wrap:balance;">Your agents change.</div>
+            <div style="font-size:clamp(38px,5vw,70px);line-height:.98;letter-spacing:-.04em;font-weight:600;max-width:20ch;text-wrap:balance;">Their critical behaviors shouldn't.</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.16em;color:oklch(0.80 0.15 150);margin-top:30px;">OPEN SOURCE · BEHAVIORAL TESTING FOR AI AGENTS</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.85;color:rgba(245,242,236,.5);border-left:1px solid rgba(245,242,236,.16);padding-left:24px;">serifado na premissa, sans na tese. o corte de família marca a virada da frase sem precisar de cor nem de tamanho.<br><br>é o experimento mais arriscado da folha e o único que dá voz de ensaio à marca.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRINCADEIRAS TIPOGRÁFICAS -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">05</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Tipografia cinética</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">a letra como comportamento observável</span>
+      </div>
+
+      <div style="border:1px solid rgba(245,242,236,.14);padding:56px 48px;margin-bottom:24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:32px;">TP01 · PALAVRA QUE TROCA</div>
+        <div style="font-size:clamp(32px,4.6vw,64px);line-height:1.06;letter-spacing:-.038em;font-weight:600;">
+          Your agents change. Their critical<br>
+          <span style="display:inline-block;border-bottom:2px solid oklch(0.76 0.16 150);min-width:{{ wordWidth }};">{{ rotatingWord }}</span>
+          shouldn't.
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:rgba(245,242,236,.5);margin-top:32px;max-width:70ch;">a frase não muda, o escopo muda. a régua embaixo da palavra fixa a largura do maior termo, então nada salta quando troca — o resto da linha fica imóvel.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP02 · LETRA QUE COLAPSA</div>
+          <div style="height:120px;display:grid;place-items:center;">
+            <div style="display:flex;font-size:42px;font-weight:600;letter-spacing:-.035em;">
+              <sc-for list="{{ letters }}" as="l" hint-placeholder-count="8">
+                <span style="display:inline-block;transform-origin:bottom;animation:eg-collapse 4.2s cubic-bezier(.2,.8,.2,1) infinite;animation-delay:{{ l.delay }};color:{{ l.color }};">{{ l.ch }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">cada letra é um eixo. uma encurta fora de hora — a wordmark faz o que o polígono faz.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP03 · MÁQUINA DE ESCREVER</div>
+          <div style="height:120px;display:flex;align-items:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.9;color:rgba(245,242,236,.75);overflow-wrap:anywhere;">
+              <span style="color:rgba(245,242,236,.4);">$ </span>{{ typedCmd }}<span style="display:inline-block;width:7px;height:15px;background:oklch(0.76 0.16 150);vertical-align:-3px;animation:eg-caret 1.05s step-end infinite;"></span>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">datilografia só em mono e só em comando real. em prosa, é truque.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP04 · DIFF TIPOGRÁFICO</div>
+          <div style="height:120px;display:flex;flex-direction:column;justify-content:center;gap:10px;">
+            <div style="font-size:20px;font-weight:500;letter-spacing:-.02em;line-height:1.35;">
+              redact_pii runs
+              <sc-if value="{{ diffOn }}" hint-placeholder-val="{{ true }}">
+                <span style="text-decoration:line-through;text-decoration-color:oklch(0.80 0.15 30);color:rgba(245,242,236,.4);">before</span>
+                <span style="color:oklch(0.84 0.14 30);animation:eg-in .18s cubic-bezier(.2,.8,.2,1) both;"> never</span>
+              </sc-if>
+              <sc-if value="{{ diffOff }}" hint-placeholder-val="{{ false }}">
+                <span style="color:oklch(0.82 0.15 150);">before</span>
+              </sc-if>
+              emit.
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a frase se corrige na frente do leitor. serve para hero e para changelog.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP05 · CONTADOR DE VEREDITO</div>
+          <div style="height:120px;display:flex;flex-direction:column;justify-content:center;gap:8px;font-variant-numeric:tabular-nums;">
+            <div style="font-size:46px;font-weight:600;letter-spacing:-.04em;line-height:1;color:oklch(0.82 0.15 150);">{{ passCount }}<span style="font-size:17px;font-weight:500;color:rgba(245,242,236,.5);margin-left:10px;">passed</span></div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-.03em;line-height:1;color:oklch(0.84 0.14 30);">{{ failCount }}<span style="font-size:14px;font-weight:500;color:rgba(245,242,236,.5);margin-left:10px;">failed</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">números contam durante a execução e param no resultado. tabular, senão o dígito empurra a palavra.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP06 · VARREDURA NO TEXTO</div>
+          <div style="height:120px;display:grid;place-items:center;">
+            <div style="font-size:33px;font-weight:600;letter-spacing:-.035em;background:linear-gradient(100deg, rgba(245,242,236,.32) 0 42%, #F5F2EC 48%, oklch(0.82 0.15 150) 52%, rgba(245,242,236,.32) 58% 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:eg-bgshift 4.6s linear infinite;">under observation</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a mesma varredura do M03, agora dentro da letra. um cursor de medição passando pela frase.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP07 · PALAVRA QUE RESPIRA</div>
+          <div style="height:120px;display:grid;place-items:center;">
+            <div style="font-size:40px;font-weight:600;animation:eg-breathe 5.2s ease-in-out infinite;">hold</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">tracking oscilando entre −.045 e +.015em. o mais sutil da folha e o único que eu deixaria num hero.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:24px;margin-top:24px;">
+
+        <div style="border:1px solid rgba(245,242,236,.14);overflow:hidden;position:relative;min-width:0;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);position:relative;z-index:2;">TP08 · FUNDO TIPOGRÁFICO · DERIVA HORIZONTAL</div>
+          <div style="height:300px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;width:200%;display:flex;flex-direction:column;gap:4px;animation:eg-slide-x 42s linear infinite;">
+              <sc-for list="{{ bgRows }}" as="r" hint-placeholder-count="7">
+                <div style="white-space:nowrap;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.06;color:{{ r.color }};">{{ r.text }}</div>
+              </sc-for>
+            </div>
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(14,17,16,.1) 0%, rgba(14,17,16,.86) 100%);"></div>
+            <div style="position:absolute;left:44px;bottom:40px;right:44px;">
+              <div style="font-size:38px;font-weight:600;letter-spacing:-.038em;line-height:1.04;max-width:24ch;text-wrap:balance;">Every behavior has a name. Every name has a record.</div>
+            </div>
+          </div>
+          <div style="padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);border-top:1px solid rgba(245,242,236,.12);">o fundo é o vocabulário do produto em corpo grande, deslizando devagar sob um véu. textura feita de palavras reais, não de lorem — e legível o suficiente para ser lida se alguém parar.</div>
+        </div>
+
+        <div style="border:1px solid rgba(245,242,236,.14);overflow:hidden;min-width:0;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">TP09 · CRÉDITOS DE EXECUÇÃO</div>
+          <div style="height:300px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;animation:eg-marquee 24s linear infinite;">
+              <sc-for list="{{ marquee }}" as="m" hint-placeholder-count="24">
+                <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ m.color }};font-variant-numeric:tabular-nums;">
+                  <span>{{ m.name }}</span><span>{{ m.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg, #0E1110 0%, transparent 22%, transparent 78%, #0E1110 100%);pointer-events:none;"></div>
+          </div>
+          <div style="padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);border-top:1px solid rgba(245,242,236,.12);">rolagem contínua de stories com veredito. funciona como fundo de tela de espera e como prova de volume.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:28px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.55);">
+        <div><span style="color:oklch(0.80 0.15 150);">o que fica</span> · TP01, TP07 e TP08. mudam sentido ou densidade sem chamar atenção para o truque.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">o que é condicional</span> · TP03 e TP04 só em contexto de comando ou changelog. TP05 só durante execução real.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">o que eu cortaria</span> · TP06, a varredura na letra: é a coisa mais bonita daqui e a mais parecida com landing de startup de IA.</div>
+      </div>
+    </section>
+
+    <!-- MARCA COMPLETA -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:36px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">06</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Marca completa</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">símbolo e palavra brincando juntos</span>
+      </div>
+
+      <div style="border:1px solid rgba(245,242,236,.14);padding:52px 48px;margin-bottom:24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);margin-bottom:38px;">L01 · O SÍMBOLO DENTRO DA PALAVRA</div>
+        <div style="display:flex;flex-direction:column;gap:36px;">
+
+          <div style="display:flex;align-items:baseline;gap:28px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:flex-end;font-size:58px;font-weight:600;letter-spacing:-.038em;line-height:1;">
+              <span>ethogram</span>
+              <svg width="17" height="17" viewBox="0 0 64 64" fill="none" stroke="oklch(0.76 0.16 150)" stroke-width="8" style="margin-left:9px;transform:translateY(-3px);"><path d="{{ master }}"></path></svg>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.45);">como ponto final · a marca fecha a frase, não abre</span>
+          </div>
+
+          <div style="display:flex;align-items:baseline;gap:28px;flex-wrap:wrap;">
+            <div style="position:relative;display:inline-block;">
+              <svg width="112" height="112" viewBox="0 0 64 64" fill="none" stroke="rgba(245,242,236,.22)" stroke-width="1.6" style="display:block;"><path d="{{ master }}"></path></svg>
+              <span style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.02em;color:#F5F2EC;white-space:nowrap;">ethogram</span>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.45);">palavra dentro do perfil · selo para adesivo e capa, nunca para produto</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L02 · ENTRADA SEQUENCIADA</div>
+          <div style="height:112px;display:flex;align-items:center;gap:14px;">
+            <svg width="46" height="46" viewBox="0 0 64 64" fill="none" style="flex:none;">
+              <path d="{{ master }}" stroke="rgba(245,242,236,.14)" stroke-width="4"></path>
+              <path d="{{ master }}" stroke="#F5F2EC" stroke-width="4" stroke-dasharray="400" style="animation:eg-draw-hold 5s cubic-bezier(.65,0,.35,1) infinite;"></path>
+            </svg>
+            <span style="font-size:31px;font-weight:600;letter-spacing:-.035em;animation:eg-reveal-x 5s cubic-bezier(.2,.8,.2,1) infinite;">ethogram</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">mede primeiro, nomeia depois. a palavra abre da esquerda, no eixo do tempo.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L03 · MARCA COMO CURSOR</div>
+          <div style="height:112px;display:flex;align-items:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(245,242,236,.75);display:flex;align-items:center;gap:8px;">
+              <span style="color:rgba(245,242,236,.4);">$</span><span>ethogram run</span>
+              <svg width="14" height="14" viewBox="0 0 64 64" fill="none" stroke="oklch(0.76 0.16 150)" stroke-width="8" style="animation:eg-caret 1.05s step-end infinite;"><path d="{{ master }}"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">o cursor do terminal é a marca. presença constante sem nunca ser logo.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L04 · REDUÇÃO PROGRESSIVA</div>
+          <div style="height:112px;display:flex;flex-direction:column;justify-content:center;gap:14px;">
+            <div style="display:flex;align-items:center;gap:11px;">
+              <svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="4.6"><path d="{{ master }}"></path></svg>
+              <span style="font-size:20px;font-weight:600;letter-spacing:-.035em;">ethogram</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <svg width="17" height="17" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:-.01em;">ethogram</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg width="14" height="14" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="6"><path d="{{ master }}"></path></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.7);">etho</span>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a palavra encolhe e trunca; o símbolo nunca cai. no fim sobra medição, não nome.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L05 · ASSINATURA DE EXECUÇÃO</div>
+          <div style="height:112px;display:flex;align-items:center;gap:16px;">
+            <svg width="52" height="52" viewBox="0 0 64 64" fill="none" style="flex:none;">
+              <path d="{{ master }}" stroke="rgba(245,242,236,.16)" stroke-width="1.6" stroke-dasharray="3 3"></path>
+              <path d="{{ runPath }}" stroke="{{ runColor }}" stroke-width="4"></path>
+            </svg>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:rgba(245,242,236,.6);font-variant-numeric:tabular-nums;min-width:0;">
+              <div style="color:#F5F2EC;">ethogram</div>
+              <div>run {{ runId }}</div>
+              <div style="color:{{ runColor }};">{{ runVerdict }}</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">cada execução gera o seu lockup. a marca deixa de ser fixa e passa a ser registro.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L06 · A PALAVRA MEDIDA</div>
+          <div style="height:112px;display:grid;place-items:center;">
+            <div style="position:relative;padding:22px 0;">
+              <div style="position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;">
+                <sc-for list="{{ ticks }}" as="t" hint-placeholder-count="8">
+                  <span style="width:1px;height:{{ t.h }};background:{{ t.color }};"></span>
+                </sc-for>
+              </div>
+              <span style="font-size:33px;font-weight:600;letter-spacing:-.035em;">ethogram</span>
+              <div style="position:absolute;left:0;right:0;bottom:6px;height:1px;background:rgba(245,242,236,.35);"></div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">régua de notação sobre a wordmark: cada letra é uma observação, uma delas fora de escala.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:30px 28px;display:flex;flex-direction:column;gap:22px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L07 · CICLO DE ESTADOS</div>
+          <div style="height:112px;display:flex;align-items:center;gap:14px;">
+            <svg width="46" height="46" viewBox="0 0 64 64" fill="none" style="flex:none;"><path d="{{ cyclePath }}" stroke="{{ cycleColor }}" stroke-width="4"></path></svg>
+            <div>
+              <div style="font-size:26px;font-weight:600;letter-spacing:-.035em;">ethogram</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ cycleColor }};margin-top:5px;">{{ cycleLabel }}</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a palavra fica parada e o perfil muda. serve de indicador de saúde em barra de status.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:24px;margin-top:24px;">
+
+        <div style="border:1px solid rgba(245,242,236,.14);min-width:0;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L08 · MARCA RECORTANDO TEXTURA</div>
+          <div style="padding:40px;display:grid;place-items:center;background:#0E1110;">
+            <svg viewBox="0 0 64 64" style="width:100%;max-width:300px;height:auto;display:block;" fill="none">
+              <defs>
+                <pattern id="egl-dots" width="4" height="4" patternUnits="userSpaceOnUse">
+                  <circle cx="1" cy="1" r="0.7" fill="rgba(245,242,236,.55)"></circle>
+                </pattern>
+                <clipPath id="egl-clip"><path d="{{ master }}"></path></clipPath>
+              </defs>
+              <g clip-path="url(#egl-clip)"><rect x="0" y="0" width="64" height="64" fill="url(#egl-dots)"></rect></g>
+              <path d="{{ master }}" stroke="rgba(245,242,236,.75)" stroke-width="1.4"></path>
+            </svg>
+          </div>
+          <div style="padding:20px;border-top:1px solid rgba(245,242,236,.12);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <svg width="15" height="15" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">ethogram</span>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.5);">o grão de evidência preenche o vazio · só em capa</span>
+          </div>
+        </div>
+
+        <div style="border:1px solid rgba(245,242,236,.14);min-width:0;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L09 · LOCKUP INTERATIVO · PASSE O MOUSE NAS LETRAS</div>
+          <div style="padding:44px 40px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+            <svg width="130" height="130" viewBox="0 0 64 64" fill="none" style="flex:none;">
+              <path d="{{ master }}" stroke="rgba(245,242,236,.18)" stroke-width="1.6" stroke-dasharray="3 3"></path>
+              <path d="{{ lockupPath }}" stroke="#F5F2EC" stroke-width="3" style="transition:none;"></path>
+            </svg>
+            <div style="min-width:0;">
+              <div style="display:flex;font-size:40px;font-weight:600;letter-spacing:-.035em;line-height:1;">
+                <sc-for list="{{ hoverLetters }}" as="l" hint-placeholder-count="8">
+                  <span onMouseEnter="{{ l.enter }}" style="cursor:crosshair;color:{{ l.color }};border-bottom:2px solid {{ l.rule }};">{{ l.ch }}</span>
+                </sc-for>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:rgba(245,242,236,.55);margin-top:18px;">
+                <div style="color:#F5F2EC;">{{ axisName }}</div>
+                <div>{{ axisDesc }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:18px 20px;border-top:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">as seis primeiras letras da palavra são os seis eixos do símbolo. a wordmark vira legenda do perfil — e nada além do eixo se move.</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid rgba(245,242,236,.14);margin-top:24px;">
+        <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">L10 · FAVICON · TAMANHO REAL, 16PX</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.12);">
+
+          <div style="background:#0E1110;padding:26px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+            <div style="background:#2A2D2C;padding:8px 8px 0;">
+              <div style="display:flex;gap:6px;align-items:stretch;">
+                <div style="background:#3D4140;padding:8px 12px;display:flex;align-items:center;gap:8px;min-width:0;border-radius:6px 6px 0 0;">
+                  <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5" style="flex:none;"><path d="{{ master }}"></path></svg>
+                  <span style="font-family:Archivo,sans-serif;font-size:11.5px;color:rgba(245,242,236,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">ethogram — behavioral tes…</span>
+                </div>
+                <div style="background:rgba(245,242,236,.06);padding:8px 12px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;border-radius:6px 6px 0 0;">
+                  <div style="width:16px;height:16px;background:rgba(245,242,236,.18);flex:none;"></div>
+                  <span style="font-family:Archivo,sans-serif;font-size:11.5px;color:rgba(245,242,236,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">aba</span>
+                </div>
+              </div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">tema escuro · marfim, traço 5.5. o vazio interno sobrevive porque só há seis vértices e nenhum detalhe menor que 3px.</div>
+          </div>
+
+          <div style="background:#0E1110;padding:26px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+            <div style="background:#DEDBD4;padding:8px 8px 0;">
+              <div style="display:flex;gap:6px;align-items:stretch;">
+                <div style="background:#F5F2EC;padding:8px 12px;display:flex;align-items:center;gap:8px;min-width:0;border-radius:6px 6px 0 0;">
+                  <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="#0E1110" stroke-width="5.5" style="flex:none;"><path d="{{ master }}"></path></svg>
+                  <span style="font-family:Archivo,sans-serif;font-size:11.5px;color:rgba(14,17,16,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">ethogram — behavioral tes…</span>
+                </div>
+                <div style="background:rgba(14,17,16,.06);padding:8px 12px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;border-radius:6px 6px 0 0;">
+                  <div style="width:16px;height:16px;background:rgba(14,17,16,.16);flex:none;"></div>
+                  <span style="font-family:Archivo,sans-serif;font-size:11.5px;color:rgba(14,17,16,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">aba</span>
+                </div>
+              </div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">tema claro · carbono. mesma geometria, mesma espessura — nenhuma versão especial de favicon.</div>
+          </div>
+
+          <div style="background:#0E1110;padding:26px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+            <div style="display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:6px 0;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="oklch(0.80 0.15 150)" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(245,242,236,.4);">passing</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="oklch(0.84 0.14 30)" stroke-width="5.5"><path d="{{ observedPath }}"></path></svg>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(245,242,236,.4);">failing</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="rgba(245,242,236,.55)" stroke-width="5.5" stroke-dasharray="26 400" style="animation:eg-draw 1.4s linear infinite;"><path d="{{ master }}"></path></svg>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(245,242,236,.4);">running</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <svg width="16" height="16" viewBox="0 0 64 64" fill="none" stroke="rgba(245,242,236,.3)" stroke-width="5.5" stroke-dasharray="3 3"><path d="{{ master }}"></path></svg>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:rgba(245,242,236,.4);">idle</span>
+              </div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">favicon vivo: em dashboard local, a aba passa a reportar o estado da suíte. o desenho não muda, só a cor e o tracejado.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:28px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.55);">
+        <div><span style="color:oklch(0.80 0.15 150);">o que fica</span> · L03 (marca como cursor), L04 (redução) e L05 (assinatura de run). os três são sistema, não piada.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">descartado</span> · o polígono no lugar do o. sem correspondência exata de largura de tinta, altura-x e sidebearing, ele lê como separador e não como letra. só volta se for desenhado como glifo.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">o que eu cortaria</span> · o selo com a palavra dentro do perfil. bonito em adesivo, ilegível em qualquer tamanho de interface.</div>
+      </div>
+    </section>
+
+    <!-- ABERTURA -->
+    <section style="padding:80px 0 0;">
+      <div style="display:flex;align-items:baseline;gap:22px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">07</span>
+        <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0;">Abertura</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">o símbolo deixa de ser desenho e passa a ser recorte</span>
+      </div>
+      <p style="font-size:15.5px;line-height:1.6;color:rgba(245,242,236,.65);max-width:760px;margin:0 0 36px;">Duas leituras do mesmo gesto. Dentro: o vazio do polígono guarda o que a ferramenta observou — trajetória, log, matriz. Atrás: o polígono é uma janela por onde se vê outra coisa. Em nenhum dos dois casos ele é preenchido; ele enquadra.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(245,242,236,.14);border:1px solid rgba(245,242,236,.14);">
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A01 · TRAJETÓRIA DENTRO</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;overflow:hidden;">
+                <svg viewBox="0 0 64 64" style="width:100%;height:100%;display:block;" fill="none">
+                  <g stroke="rgba(245,242,236,.1)" stroke-width=".6"><path d="M0 20h64"></path><path d="M0 32h64"></path><path d="M0 44h64"></path></g>
+                  <path d="M0 32h64" stroke="rgba(245,242,236,.5)" stroke-width="1" stroke-dasharray="2 2"></path>
+                  <path d="M0 34C12 20 22 44 34 30s16 22 30 6" stroke="oklch(0.76 0.16 150)" stroke-width="1.6" stroke-dasharray="400" style="animation:eg-draw-hold 5.4s ease-in-out infinite;"></path>
+                </svg>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">o contorno vira moldura de gráfico. a linha nasce e morre fora do quadro — sugere que a medição continua.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A02 · LOG DENTRO</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;overflow:hidden;">
+                <div style="position:absolute;top:0;left:0;right:0;animation:eg-marquee 18s linear infinite;">
+                  <sc-for list="{{ marquee }}" as="m" hint-placeholder-count="24">
+                    <div style="padding:2px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:7px;color:{{ m.color }};white-space:nowrap;">{{ m.name }} {{ m.status }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a marca cheia de evidência rolando. em 24px vira ruído legível; em 170px dá para ler os nomes.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A03 · MATRIZ DENTRO</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;display:grid;grid-template-columns:repeat(12,1fr);gap:2px;padding:6px;">
+                <sc-for list="{{ apMatrix }}" as="c" hint-placeholder-count="144">
+                  <div style="aspect-ratio:1;background:{{ c.color }};"></div>
+                </sc-for>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a matriz de execuções recortada pelo perfil. o melhor candidato a avatar de organização.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A04 · VARREDURA DENTRO</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;overflow:hidden;background-image:repeating-linear-gradient(90deg, rgba(245,242,236,.14) 0 1px, transparent 1px 9px);">
+                <div style="position:absolute;top:0;bottom:0;width:20%;background:linear-gradient(90deg,transparent,oklch(0.76 0.16 150 / .5),transparent);animation:eg-scan 3.2s linear infinite;"></div>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">estado de execução contido na própria marca. substitui spinner em tela cheia.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A05 · DIVERGÊNCIA DENTRO</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;overflow:hidden;background-image:radial-gradient(circle at 1px 1px, rgba(245,242,236,.22) 1px, transparent 1.4px);background-size:6px 6px;">
+                <div style="position:absolute;inset:0;background:linear-gradient(96deg, oklch(0.76 0.16 150 / 0) 0%, oklch(0.76 0.16 150 / .2) 46%, oklch(0.76 0.16 30 / .42) 100%);clip-path:polygon(0 100%, 0 88%, 100% 4%, 100% 100%);"></div>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">recorte dentro de recorte: a banda de divergência só existe dentro do perfil. cor entra sem colorir a marca.</div>
+        </div>
+
+        <div style="background:#0E1110;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">A06 · PERFIL DENTRO DO PERFIL</div>
+          <div style="height:170px;display:grid;place-items:center;">
+            <div style="position:relative;width:170px;height:170px;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};background:#08090A;display:grid;grid-template-columns:repeat(4,1fr);place-items:center;padding:8px;gap:2px;">
+                <sc-for list="{{ apField }}" as="f" hint-placeholder-count="16">
+                  <svg viewBox="0 0 64 64" style="width:100%;height:auto;" fill="none" stroke="{{ f.color }}" stroke-width="4"><path d="{{ f.d }}"></path></svg>
+                </sc-for>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.85)" stroke-width="1.4"></path></svg>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">recursão literal: o repertório dentro do repertório. arriscado — a leitura da silhueta se perde abaixo de 80px.</div>
+        </div>
+      </div>
+
+      <!-- PORTAL -->
+      <div style="display:flex;align-items:baseline;gap:22px;margin:64px 0 16px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:oklch(0.80 0.15 150);">07.B</span>
+        <h3 style="font-size:24px;font-weight:600;letter-spacing:-.022em;margin:0;">Portal</h3>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:rgba(245,242,236,.45);">arraste imagens para dentro das janelas</span>
+      </div>
+      <p style="font-size:15px;line-height:1.6;color:rgba(245,242,236,.6);max-width:760px;margin:0 0 28px;">As aberturas abaixo são espaços reais para imagem — arraste um arquivo para dentro de qualquer uma, ou clique no centro da janela para escolher. Sem foto, elas seguem sendo enquadramento; com foto, o polígono passa a funcionar como porta.</p>
+
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px;">
+
+        <div style="border:1px solid rgba(245,242,236,.14);min-width:0;">
+          <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">P01 · PORTA · CAPA DE SEÇÃO</div>
+          <div style="padding:0;position:relative;background:#08090A;">
+            <div style="position:relative;height:420px;overflow:hidden;">
+              <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(97deg, rgba(245,242,236,.06) 0 1px, transparent 1px 12px);"></div>
+              <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:330px;height:330px;clip-path:{{ clipMaster }};">
+                <image-slot id="ap-portal" shape="rect" placeholder="Solte uma foto"></image-slot>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:330px;height:330px;pointer-events:none;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.5)" stroke-width=".7"></path></svg>
+              <div style="position:absolute;left:32px;bottom:28px;right:32px;pointer-events:none;">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <svg width="17" height="17" viewBox="0 0 64 64" fill="none" stroke="#F5F2EC" stroke-width="5.5"><path d="{{ master }}"></path></svg>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(245,242,236,.85);">ethogram</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:18px 20px;border-top:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">a marca centralizada e grande deixa de ser logo e passa a ser vão. o traço fino de 0.7 mantém a borda desenhada por cima da foto — sem ele o recorte parece acidente.</div>
+        </div>
+
+        <div style="display:grid;grid-template-rows:auto auto;gap:24px;min-width:0;">
+
+          <div style="border:1px solid rgba(245,242,236,.14);min-width:0;">
+            <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">P02 · JANELA DE AGENTE</div>
+            <div style="padding:26px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+              <div style="position:relative;width:132px;height:132px;flex:none;">
+                <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};">
+                  <image-slot id="ap-agent" shape="rect" placeholder="foto"></image-slot>
+                </div>
+                <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.5)" stroke-width="1.4"></path></svg>
+              </div>
+              <div style="min-width:0;">
+                <div style="font-size:17px;font-weight:600;letter-spacing:-.02em;">support-agent-v4</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.55);margin-top:6px;">
+                  <div>12 stories · 24 runs</div>
+                  <div style="color:oklch(0.84 0.14 30);">1 comportamento em desvio</div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:16px 20px;border-top:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">avatar de agente ou de pessoa. resolve identidade sem círculo — e distingue o produto de qualquer painel.</div>
+          </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div style="border:1px solid rgba(245,242,236,.14);margin-top:24px;">
+        <div style="padding:14px 20px;border-bottom:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:rgba(245,242,236,.45);">P03 · TRÍPTICO · POST OU DOC</div>
+        <div style="padding:32px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;">
+          <div style="min-width:0;">
+            <div style="position:relative;aspect-ratio:1;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipWide }};">
+                <image-slot id="ap-tri-1" shape="rect" placeholder="Solte uma foto"></image-slot>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" fill="none"><path d="{{ wide }}" stroke="rgba(245,242,236,.5)" stroke-width="1"></path></svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.5);margin-top:16px;">perfil regular · contexto</div>
+          </div>
+          <div style="min-width:0;">
+            <div style="position:relative;aspect-ratio:1;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipMaster }};">
+                <image-slot id="ap-tri-2" shape="rect" placeholder="Solte uma foto"></image-slot>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" fill="none"><path d="{{ master }}" stroke="rgba(245,242,236,.5)" stroke-width="1"></path></svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#F5F2EC;margin-top:16px;">eixo curto · o assunto</div>
+          </div>
+          <div style="min-width:0;">
+            <div style="position:relative;aspect-ratio:1;">
+              <div style="position:absolute;inset:0;clip-path:{{ clipWide }};">
+                <image-slot id="ap-tri-3" shape="rect" placeholder="Solte uma foto"></image-slot>
+              </div>
+              <svg viewBox="0 0 64 64" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" fill="none"><path d="{{ wide }}" stroke="rgba(245,242,236,.5)" stroke-width="1"></path></svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(245,242,236,.5);margin-top:16px;">perfil regular · contexto</div>
+          </div>
+        </div>
+        <div style="padding:18px 20px;border-top:1px solid rgba(245,242,236,.12);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.75;color:rgba(245,242,236,.5);">três janelas com perfis diferentes: as laterais quase regulares, a central com o eixo curto. a irregularidade da marca aparece por comparação — e em 390px cada janela ainda é uma janela, não um selo.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:28px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,242,236,.55);">
+        <div><span style="color:oklch(0.80 0.15 150);">a regra que isso cria</span> · quando o polígono enquadra, o contorno continua desenhado por cima. recorte sem borda deixa de ser marca e vira máscara qualquer.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">o que fica</span> · A03 dentro (matriz) e P02 (janela de agente). os dois resolvem problemas que o produto tem de verdade.</div>
+        <div><span style="color:oklch(0.80 0.15 150);">limite</span> · abaixo de 80px nada pode viver dentro do perfil: a silhueta precisa do vazio para ser reconhecida.</div>
+      </div>
+    </section>
+
+    <section style="padding:72px 0 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:rgba(245,242,236,.45);margin-bottom:18px;">REGRAS QUE APARECERAM AQUI</div>
+        <div style="font-size:14.5px;line-height:1.65;color:rgba(245,242,236,.72);">
+          <p style="margin:0 0 14px;">Feedback é texto, não animação. Nada flutua sobre o conteúdo. Grupos são divididos por 1px. Cor entra só quando há estado. Foco é contorno musgo de 2px, sempre visível.</p>
+          <p style="margin:0 0 14px;">Na tipografia: sans afirma, mono comprova. Tracking negativo cresce com o corpo e zera aos 14px. Número comparável é sempre mono tabular. Ênfase é peso, nunca itálico.</p>
+          <p style="margin:0;">O perfil funciona como ícone, como selo de linha e como legenda interativa — três papéis, mesmo desenho.</p>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:rgba(245,242,236,.45);margin-bottom:18px;">O QUE FALTA TESTAR</div>
+        <div style="font-size:14.5px;line-height:1.65;color:rgba(245,242,236,.6);">
+          <p style="margin:0 0 14px;">Densidade em tabela longa, teclado completo, tema claro, e o perfil a 18px dentro de linha — o menor tamanho em que ele ainda precisa distinguir seis eixos.</p>
+          <p style="margin:0;">Falta também o oposto: telas de erro e de vazio, onde a marca não deve aparecer.</p>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:rgba(245,242,236,.45);margin-bottom:18px;">PRÓXIMO</div>
+        <div style="font-size:14.5px;line-height:1.65;color:rgba(245,242,236,.6);">
+          <p style="margin:0;">Com o Lab 03 e o Lab 04 na mesa, a fase 2 é extração: escolher o que fica, matar o resto e escrever as regras. Só depois o design system.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500}}">
+class Component extends DCLogic {
+  state = { copied: false, view: 'observed', running: false, done: false, open: {}, axis: 2, checks: { a: true, b: false, c: false }, toast: false, tick: 0 };
+  componentDidMount() { this._i = setInterval(() => this.setState(s => ({ tick: s.tick + 1 })), 110); }
+  componentWillUnmount() { clearTimeout(this._c); clearTimeout(this._r); clearTimeout(this._t); clearInterval(this._i); }
+
+  renderVals() {
+    const A = [-90, -30, 30, 90, 150, 210].map(d => d * Math.PI / 180);
+    const pt = (r, i) => ({
+      x: Math.round((32 + r * Math.cos(A[i])) * 10) / 10,
+      y: Math.round((32 + r * Math.sin(A[i])) * 10) / 10
+    });
+    const poly = (radii) => radii.map((r, i) => {
+      const p = pt(r, i);
+      return (i ? 'L' : 'M') + p.x + ' ' + p.y;
+    }).join('') + 'Z';
+
+    const MASTER = [22, 20, 9, 19, 16, 21];
+    const GREEN = 'oklch(0.82 0.15 150)', CORAL = 'oklch(0.84 0.14 30)';
+    const s = this.state;
+
+    const AXES = [
+      { name: 'sequência', desc: 'a ordem dos passos se manteve' },
+      { name: 'ferramentas', desc: 'as chamadas esperadas ocorreram' },
+      { name: 'política', desc: 'regra obrigatória não foi aplicada' },
+      { name: 'ancoragem', desc: 'a resposta se sustenta na evidência' },
+      { name: 'tom', desc: 'o registro combinado foi respeitado' },
+      { name: 'custo', desc: 'passos e latência dentro do orçamento' }
+    ];
+
+    const hoverAxes = AXES.map((a, i) => {
+      const p = pt(MASTER[i], i);
+      return {
+        d: 'M32 32L' + p.x + ' ' + p.y,
+        stroke: s.axis === i ? 'oklch(0.76 0.16 150 / .55)' : 'transparent',
+        enter: () => this.setState({ axis: i }),
+        leave: () => {}
+      };
+    });
+
+    const ROWS = [
+      { key: 'refund_policy', status: 'pass', color: GREEN, detail: 'ok' },
+      { key: 'pii_redaction', status: 'fail', color: CORAL, detail: 'ausente' },
+      { key: 'escalation_path', status: 'pass', color: GREEN, detail: 'ok' }
+    ];
+    const rows = ROWS.map(r => ({
+      name: r.key, status: r.status, color: r.color, detail: r.detail,
+      open: !!s.open[r.key],
+      toggle: () => this.setState(st => ({ open: Object.assign({}, st.open, { [r.key]: !st.open[r.key] }) }))
+    }));
+
+    const CHECKS = [
+      { key: 'a', label: 'stories críticas' },
+      { key: 'b', label: 'incluir skipped' },
+      { key: 'c', label: 'falhar CI em desvio' }
+    ];
+    const checks = CHECKS.map(c => ({
+      label: c.label, on: !!s.checks[c.key],
+      color: s.checks[c.key] ? '#F5F2EC' : 'rgba(245,242,236,.55)',
+      box: s.checks[c.key] ? 'oklch(0.76 0.16 150)' : 'rgba(245,242,236,.3)',
+      toggle: () => this.setState(st => ({ checks: Object.assign({}, st.checks, { [c.key]: !st.checks[c.key] }) }))
+    }));
+
+    const table = [
+      { name: 'refund_policy', status: 'pass', axis: '—', since: '—', time: '1.9s', radii: [22, 21, 20, 22, 19, 21], color: GREEN },
+      { name: 'escalation_path', status: 'pass', axis: '—', since: '—', time: '2.4s', radii: [20, 18, 17, 21, 14, 16], color: GREEN },
+      { name: 'pii_redaction', status: 'fail', axis: 'política', since: '7d2e08', time: '3.1s', radii: [21, 19, 8, 20, 17, 18], color: CORAL },
+      { name: 'tool_order', status: 'fail', axis: 'sequência', since: 'a3f19c', time: '2.8s', radii: [9, 18, 19, 17, 16, 20], color: CORAL },
+      { name: 'cost_ceiling', status: 'pass', axis: '—', since: '—', time: '4.0s', radii: [19, 20, 18, 19, 17, 12], color: GREEN }
+    ].map(t => ({ name: t.name, status: t.status, axis: t.axis, since: t.since, time: t.time, color: t.color, d: poly(t.radii) }));
+
+    const observed = poly([21, 19, 8, 20, 17, 18]);
+    const expected = poly([22, 21, 20, 22, 19, 21]);
+
+    // ——— tipografia cinética ———
+    const tick = s.tick;
+    const WORDS = ['behaviors', 'tool calls', 'policies', 'trajectories', 'guardrails'];
+    const rotatingWord = WORDS[Math.floor(tick / 17) % WORDS.length];
+
+    const CMD = 'npx ethogram run --story pii_redaction';
+    const tc = tick % 62;
+    const typedCmd = CMD.slice(0, Math.max(0, Math.min(CMD.length, Math.round((tc - 3) * 1.25))));
+
+    const cc = tick % 46;
+    const passCount = Math.min(11, Math.max(0, cc - 2));
+    const failCount = cc > 13 ? 1 : 0;
+
+    const diffOn = Math.floor(tick / 21) % 2 === 1;
+
+    const LETTERS = 'ethogram'.split('');
+    const letters = LETTERS.map((ch, i) => ({
+      ch,
+      delay: (i === 4 ? 0 : 1.6 + i * 0.12).toFixed(2) + 's',
+      color: i === 4 ? 'oklch(0.84 0.14 30)' : '#F5F2EC'
+    }));
+
+    const BG_WORDS = ['EXPECTED', 'OBSERVED', 'VERDICT', 'TRAJECTORY', 'EVIDENCE', 'DIVERGENCE', 'CONTRACT'];
+    const bgRows = BG_WORDS.map((w, i) => ({
+      text: (w + ' · ').repeat(6),
+      color: i % 3 === 1 ? 'rgba(245,242,236,.13)' : i % 3 === 2 ? 'oklch(0.76 0.16 150 / .16)' : 'rgba(245,242,236,.08)'
+    }));
+
+    const STORIES = ['refund_policy', 'pii_redaction', 'escalation_path', 'tool_order', 'cost_ceiling', 'grounding_check', 'tone_register', 'retry_budget', 'handoff_rules', 'schema_guard', 'citation_trace', 'timeout_path'];
+    const marquee = STORIES.concat(STORIES).map((n, i) => {
+      const fail = i % 7 === 3;
+      return { name: n, status: fail ? 'fail' : 'pass', color: fail ? CORAL : 'rgba(245,242,236,.5)' };
+    });
+
+    // ——— marca completa ———
+    const RUNS = [
+      { id: '0198', verdict: 'fail · política', radii: [21, 19, 8, 20, 17, 18], color: CORAL },
+      { id: '0199', verdict: 'pass', radii: [22, 21, 20, 22, 19, 21], color: GREEN },
+      { id: '0200', verdict: 'pass · margem baixa', radii: [20, 18, 17, 21, 14, 16], color: GREEN },
+      { id: '0201', verdict: 'fail · sequência', radii: [9, 18, 19, 17, 16, 20], color: CORAL }
+    ];
+    const run = RUNS[Math.floor(tick / 20) % RUNS.length];
+
+    const CYCLE = [
+      { label: 'all behaviors holding', radii: [22, 21, 20, 22, 19, 21], color: GREEN },
+      { label: 'drift on cost axis', radii: [21, 20, 19, 20, 18, 12], color: 'rgba(245,242,236,.75)' },
+      { label: 'policy axis collapsed', radii: [21, 19, 8, 20, 17, 18], color: CORAL }
+    ];
+    const cyc = CYCLE[Math.floor(tick / 24) % CYCLE.length];
+
+    const TICK_H = ['9px', '9px', '9px', '20px', '9px', '9px', '9px', '9px'];
+    const ticks = TICK_H.map((h, i) => ({ h, color: i === 3 ? 'oklch(0.76 0.16 30)' : 'rgba(245,242,236,.3)' }));
+
+    const hoverLetters = 'ethogram'.split('').map((ch, i) => ({
+      ch,
+      enter: () => { if (i < 6) this.setState({ axis: i }); },
+      color: i < 6 && s.axis === i ? '#F5F2EC' : i < 6 ? 'rgba(245,242,236,.72)' : 'rgba(245,242,236,.4)',
+      rule: i < 6 && s.axis === i ? 'oklch(0.76 0.16 150)' : 'transparent'
+    }));
+    const lockupRadii = MASTER.slice();
+    lockupRadii[s.axis] = 24;
+
+    // ——— abertura: o polígono como recorte ———
+    const rnd = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+    const apMatrix = [];
+    for (let i = 0; i < 144; i++) {
+      const n = rnd(i + 1);
+      apMatrix.push({ color: n < 0.07 ? 'rgba(245,242,236,.12)' : n < 0.2 ? 'oklch(0.66 0.16 30)' : 'oklch(0.66 0.16 150)' });
+    }
+    const apField = [];
+    for (let i = 0; i < 16; i++) {
+      const radii = MASTER.map((r, k) => Math.max(9, Math.min(24, r + (rnd(i * 13 + k) - 0.5) * 11)));
+      apField.push({ d: poly(radii), color: i === 9 ? 'oklch(0.72 0.16 30)' : 'rgba(245,242,236,.45)' });
+    }
+    const clipOf = (radii) => 'polygon(' + radii.map((r, i) => {
+      const p = pt(r, i);
+      return (p.x / 64 * 100).toFixed(2) + '% ' + (p.y / 64 * 100).toFixed(2) + '%';
+    }).join(', ') + ')';
+
+    return {
+      master: poly(MASTER),
+      wide: poly([23, 22, 21, 23, 21, 22]),
+      observedPath: observed,
+      clipMaster: clipOf(MASTER),
+      clipWide: clipOf([23, 22, 21, 23, 21, 22]),
+      apMatrix: apMatrix, apField: apField,
+      runPath: poly(run.radii), runId: run.id, runVerdict: run.verdict, runColor: run.color,
+      cyclePath: poly(cyc.radii), cycleLabel: cyc.label, cycleColor: cyc.color,
+      ticks, hoverLetters, lockupPath: poly(lockupRadii),
+      rotatingWord, wordWidth: '5.6ch', typedCmd, passCount, failCount,
+      diffOn, diffOff: !diffOn, letters, bgRows, marquee,
+      copyLabel: s.copied ? 'copiado' : 'copiar',
+      copyColor: s.copied ? GREEN : 'rgba(245,242,236,.45)',
+      copy: () => {
+        try { navigator.clipboard && navigator.clipboard.writeText('npx ethogram init'); } catch (e) {}
+        this.setState({ copied: true });
+        clearTimeout(this._c);
+        this._c = setTimeout(() => this.setState({ copied: false }), 1600);
+      },
+      viewLabel: s.view === 'observed' ? 'observed' : 'expected',
+      viewPath: s.view === 'observed' ? observed : expected,
+      viewColor: s.view === 'observed' ? CORAL : '#F5F2EC',
+      knobLeft: s.view === 'observed' ? '26px' : '2px',
+      knobColor: s.view === 'observed' ? 'oklch(0.76 0.16 30)' : 'rgba(245,242,236,.75)',
+      toggleView: () => this.setState(st => ({ view: st.view === 'observed' ? 'expected' : 'observed' })),
+      running: s.running, done: s.done,
+      runLabel: s.running ? 'rodando 12 stories…' : s.done ? 'rodar de novo' : 'ethogram run',
+      run: () => {
+        clearTimeout(this._r);
+        this.setState({ running: true, done: false });
+        this._r = setTimeout(() => this.setState({ running: false, done: true }), 1800);
+      },
+      hoverAxes,
+      axisName: AXES[s.axis].name,
+      axisDesc: AXES[s.axis].desc,
+      rows, checks, table,
+      toast: s.toast,
+      toastMsg: 'seleção salva em .ethogram/config.toml',
+      fireToast: () => {
+        this.setState({ toast: true });
+        clearTimeout(this._t);
+        this._t = setTimeout(() => this.setState({ toast: false }), 2600);
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

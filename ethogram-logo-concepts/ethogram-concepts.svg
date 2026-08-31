@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1280" role="img" aria-labelledby="title desc">
+  <title id="title">Ethogram — three logo concepts</title>
+  <desc id="desc">Professional comparison board showing State Fold, Evidence Kernel and Invariant Shift logo concepts.</desc>
+  <rect width="1600" height="1280" fill="#0B0C0C"/>
+
+  <text x="96" y="104" fill="#F3F0E8" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="48" font-weight="600" letter-spacing="-1.5">Ethogram</text>
+  <text x="96" y="145" fill="#858780" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" letter-spacing="1.2">LOGO EXPLORATION / 01</text>
+  <line x1="96" y1="184" x2="1504" y2="184" stroke="#343632"/>
+
+  <!-- Concept 01 -->
+  <g transform="translate(96 230)">
+    <rect width="1408" height="272" rx="2" fill="#F3F0E8"/>
+    <text x="42" y="48" fill="#767870" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" letter-spacing="1.4">01 / STATE FOLD</text>
+    <g transform="translate(52 74)" fill="none" stroke="#0B0C0C" stroke-width="28" stroke-linecap="square" stroke-linejoin="round">
+      <path d="M14 14H118C146 14 146 54 118 54H59C31 54 31 94 59 94H118C146 94 146 134 118 134H14"/>
+    </g>
+    <text x="268" y="177" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="88" font-weight="600" letter-spacing="-3.4">Ethogram</text>
+    <line x1="1036" y1="42" x2="1036" y2="230" stroke="#D7D4CC"/>
+    <g transform="translate(1084 74) scale(.86)" fill="none" stroke="#0B0C0C" stroke-width="28" stroke-linecap="square" stroke-linejoin="round">
+      <path d="M14 14H118C146 14 146 54 118 54H59C31 54 31 94 59 94H118C146 94 146 134 118 134H14"/>
+    </g>
+    <g transform="translate(1288 106) scale(.42)" fill="none" stroke="#0B0C0C" stroke-width="34" stroke-linecap="square" stroke-linejoin="round">
+      <path d="M14 14H118C146 14 146 54 118 54H59C31 54 31 94 59 94H118C146 94 146 134 118 134H14"/>
+    </g>
+    <text x="1084" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">PRIMARY</text>
+    <text x="1288" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">MICRO</text>
+  </g>
+
+  <!-- Concept 02 -->
+  <g transform="translate(96 532)">
+    <rect width="1408" height="272" rx="2" fill="#F3F0E8"/>
+    <text x="42" y="48" fill="#767870" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" letter-spacing="1.4">02 / EVIDENCE KERNEL</text>
+    <g transform="translate(52 70) scale(.82)" fill="#0B0C0C">
+      <path d="M0 0H78V34H34V78H0Z"/>
+      <path d="M106 0H184V78H150V34H106Z"/>
+      <path d="M0 106H34V150H78V184H0Z"/>
+      <path d="M150 106H184V184H106V150H150Z"/>
+      <rect x="72" y="72" width="40" height="40" rx="8" transform="rotate(45 92 92)"/>
+    </g>
+    <text x="268" y="177" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="88" font-weight="600" letter-spacing="-3.4">Ethogram</text>
+    <line x1="1036" y1="42" x2="1036" y2="230" stroke="#D7D4CC"/>
+    <g transform="translate(1084 70) scale(.82)" fill="#0B0C0C">
+      <path d="M0 0H78V34H34V78H0Z"/><path d="M106 0H184V78H150V34H106Z"/><path d="M0 106H34V150H78V184H0Z"/><path d="M150 106H184V184H106V150H150Z"/><rect x="72" y="72" width="40" height="40" rx="8" transform="rotate(45 92 92)"/>
+    </g>
+    <g transform="translate(1294 111) scale(.36)" fill="#0B0C0C">
+      <path d="M0 0H78V34H34V78H0Z"/><path d="M106 0H184V78H150V34H106Z"/><path d="M0 106H34V150H78V184H0Z"/><path d="M150 106H184V184H106V150H150Z"/><rect x="72" y="72" width="40" height="40" rx="6" transform="rotate(45 92 92)"/>
+    </g>
+    <text x="1084" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">PRIMARY</text>
+    <text x="1288" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">MICRO</text>
+  </g>
+
+  <!-- Concept 03 -->
+  <g transform="translate(96 834)">
+    <rect width="1408" height="272" rx="2" fill="#F3F0E8"/>
+    <text x="42" y="48" fill="#767870" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" letter-spacing="1.4">03 / INVARIANT SHIFT</text>
+    <g transform="translate(52 70) scale(.82)">
+      <rect width="188" height="188" fill="#0B0C0C"/>
+      <path d="M0 44H47C75 44 80 64 108 64H188V88H108C73 88 68 68 43 68H0Z" fill="#F3F0E8"/>
+      <path d="M0 144H43C68 144 73 124 108 124H188V148H108C80 148 75 168 47 168H0Z" fill="#F3F0E8"/>
+    </g>
+    <text x="268" y="177" fill="#0B0C0C" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="88" font-weight="600" letter-spacing="-3.4">Ethogram</text>
+    <line x1="1036" y1="42" x2="1036" y2="230" stroke="#D7D4CC"/>
+    <g transform="translate(1084 70) scale(.82)">
+      <rect width="188" height="188" fill="#0B0C0C"/><path d="M0 44H47C75 44 80 64 108 64H188V88H108C73 88 68 68 43 68H0Z" fill="#F3F0E8"/><path d="M0 144H43C68 144 73 124 108 124H188V148H108C80 148 75 168 47 168H0Z" fill="#F3F0E8"/>
+    </g>
+    <g transform="translate(1294 111) scale(.36)">
+      <rect width="188" height="188" fill="#0B0C0C"/><path d="M0 44H47C75 44 80 64 108 64H188V88H108C73 88 68 68 43 68H0Z" fill="#F3F0E8"/><path d="M0 144H43C68 144 73 124 108 124H188V148H108C80 148 75 168 47 168H0Z" fill="#F3F0E8"/>
+    </g>
+    <text x="1084" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">PRIMARY</text>
+    <text x="1288" y="224" fill="#92948D" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14">MICRO</text>
+  </g>
+
+  <text x="96" y="1186" fill="#F3F0E8" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="20" font-weight="500">Different paths. Same critical behavior.</text>
+  <text x="1504" y="1186" fill="#777972" text-anchor="end" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" letter-spacing=".8">BLACK / IVORY · VECTOR STUDY</text>
+</svg>

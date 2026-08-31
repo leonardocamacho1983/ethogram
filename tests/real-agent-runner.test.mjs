@@ -9,7 +9,7 @@ import { realAgentRefundStory } from './fixtures/real-agent-refund-story.mjs'
 
 test('Test 03 fixture and controlled boundary remain offline and verdict-free', async () => {
   assert.deepEqual(Object.keys(realAgentRefundStory).sort(), [
-    '__agentbookType',
+    '__ethogramType',
     'agent',
     'description',
     'expectations',

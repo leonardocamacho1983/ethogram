@@ -263,15 +263,15 @@ test('AI SDK translator rejects unmatched results and correlates by toolCallId',
 async function writeConflictProject(root) {
   await Promise.all(['agents', 'stories', 'execution'].map((directory) => mkdir(path.join(root, directory))))
   await writeFile(path.join(root, 'package.json'), '{"name":"test09-conflict","private":true,"type":"module"}\n')
-  await writeFile(path.join(root, 'agentbook.config.mjs'), 'export default {}\n')
-  await writeFile(path.join(root, 'agents/conflict.agent.ts'), `import { defineAgent } from '@agentbook/core'
+  await writeFile(path.join(root, 'ethogram.config.mjs'), 'export default {}\n')
+  await writeFile(path.join(root, 'agents/conflict.agent.ts'), `import { defineAgent } from '@ethogram/core'
 export const agent = defineAgent({ id: 'conflict-agent', name: 'Conflict Agent', description: 'Conflict test.', icon: 'target' })
 `)
-  await writeFile(path.join(root, 'stories/conflict.agent.stories.ts'), `import { defineStory } from '@agentbook/core'
+  await writeFile(path.join(root, 'stories/conflict.agent.stories.ts'), `import { defineStory } from '@ethogram/core'
 import { agent } from '../agents/conflict.agent.ts'
 export const story = defineStory({ id: 'conflict-story', name: 'Conflict Story', agent, description: 'Conflict test.', given: [], when: 'Run.', then: [], execution: { kind: 'external-profile', profile: 'conflict-profile' } })
 `)
-  await writeFile(path.join(root, 'execution/conflict.profile.ts'), `import { defineExecutionProfile } from '@agentbook/core'
+  await writeFile(path.join(root, 'execution/conflict.profile.ts'), `import { defineExecutionProfile } from '@ethogram/core'
 export const profile = defineExecutionProfile({
   id: 'conflict-profile',
   tools: { local_tool: { description: 'Local tool.', async execute() { return { ok: true } } } },

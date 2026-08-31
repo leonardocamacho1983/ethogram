@@ -1,7 +1,18 @@
 {
-  "name": "@agentbook/core",
-  "version": "0.0.0-test.6",
-  "description": "Code-first Agent and Story authoring contracts for Agentbook.",
+  "name": "@ethogram/core",
+  "version": "0.1.0-alpha.0",
+  "description": "Code-first Agent and Story authoring contracts for Ethogram.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonardocamacho1983/ethogram.git",
+    "directory": "packages/agentbook"
+  },
+  "homepage": "https://github.com/leonardocamacho1983/ethogram#readme",
+  "bugs": {
+    "url": "https://github.com/leonardocamacho1983/ethogram/issues"
+  },
+  "keywords": ["ai-agents", "behavioral-testing", "typescript", "developer-tools"],
   "type": "module",
   "exports": {
     ".": {
@@ -15,7 +26,10 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.9"
   }
 }

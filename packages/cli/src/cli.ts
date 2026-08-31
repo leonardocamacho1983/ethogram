@@ -7,24 +7,25 @@ import { startDeveloperServer } from './server.js'
 import { existingProjectFiles, starterFiles } from './templates.js'
 import { TypeScriptAdapterError } from './typescript-adapter.js'
 
-const help = `Agentbook CLI (codename)
+const help = `Ethogram CLI (alpha)
 
 Usage:
-  agentbook init [--existing]
-  agentbook dev [--project <path>] [--port <number>] [--no-open]
-  agentbook --help
-  agentbook --version
+  ethogram init [--existing]
+  ethogram dev [--project <path>] [--port <number>] [--no-open]
+  ethogram --help
+  ethogram --version
 
 Commands:
   init  Create a starter Agent, Story, and local execution profile in the current project.
         Use --existing to create configuration only for an existing agent project.
-  dev   Start the local Agentbook developer UI. The current directory is the default project.
+  dev   Start the local, read-only Ethogram developer UI. The current directory is the default project.
+        Agent, Story, and execution-profile files remain the source of truth and reload automatically.
 
 Examples:
-  npx agentbook init
-  npx agentbook init --existing
-  npx agentbook dev
-  npx agentbook dev --project ./my-agent-project --port 4317 --no-open
+  npx ethogram init
+  npx ethogram init --existing
+  npx ethogram dev
+  npx ethogram dev --project ./my-agent-project --port 4317 --no-open
 `
 
 async function version(): Promise<string> {
@@ -80,16 +81,16 @@ async function initialize(options: { existing: boolean }): Promise<void> {
   }
 
   if (missing.length === 0) {
-    process.stdout.write(`Agentbook is already initialized in ${root}. No files were changed.\n`)
+    process.stdout.write(`Ethogram is already initialized in ${root}. No files were changed.\n`)
   } else {
-    process.stdout.write(`Agentbook initialized in ${root}.\n`)
+    process.stdout.write(`Ethogram initialized in ${root}.\n`)
     for (const relativePath of missing) process.stdout.write(`Created ${relativePath}\n`)
     for (const relativePath of matching) process.stdout.write(`Preserved ${relativePath}\n`)
   }
   if (options.existing) {
     process.stdout.write('Add an Agent descriptor, behavioral Story, and thin execution profile for your existing agent.\n')
   }
-  process.stdout.write('Next: npx agentbook dev\n')
+  process.stdout.write('Next: npx ethogram dev\n')
 }
 
 function parseDevArguments(args: string[]): { projectRoot: string; port: number; openBrowser: boolean } {
@@ -137,7 +138,7 @@ async function main(): Promise<void> {
   if (command === 'init') {
     const initArgs = args.slice(1)
     if (initArgs.some((argument) => argument !== '--existing') || initArgs.filter((argument) => argument === '--existing').length > 1) {
-      throw new Error('CLI_USAGE: agentbook init accepts only the optional --existing flag.')
+      throw new Error('CLI_USAGE: ethogram init accepts only the optional --existing flag.')
     }
     await initialize({ existing: initArgs.includes('--existing') })
     return
@@ -146,16 +147,16 @@ async function main(): Promise<void> {
     await startDeveloperServer(parseDevArguments(args.slice(1)))
     return
   }
-  throw new Error(`CLI_USAGE: Unknown command ${command}. Run agentbook --help.`)
+  throw new Error(`CLI_USAGE: Unknown command ${command}. Run ethogram --help.`)
 }
 
 main().catch((error: unknown) => {
   if (error instanceof TypeScriptAdapterError) {
-    process.stderr.write(`Agentbook ${error.code}: ${error.message}\n`)
+    process.stderr.write(`Ethogram ${error.code}: ${error.message}\n`)
   } else if (error instanceof Error) {
-    process.stderr.write(`Agentbook error: ${error.message}\n`)
+    process.stderr.write(`Ethogram error: ${error.message}\n`)
   } else {
-    process.stderr.write('Agentbook error: The command could not be completed.\n')
+    process.stderr.write('Ethogram error: The command could not be completed.\n')
   }
   process.exitCode = 1
 })

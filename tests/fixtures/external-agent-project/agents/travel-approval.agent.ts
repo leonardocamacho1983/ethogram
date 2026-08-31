@@ -1,4 +1,4 @@
-import { defineAgent } from '@agentbook/core'
+import { defineAgent } from '@ethogram/core'
 
 export const travelApprovalAgent = defineAgent({
   id: 'travel-approval-agent',

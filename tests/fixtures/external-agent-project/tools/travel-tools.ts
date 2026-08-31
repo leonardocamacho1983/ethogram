@@ -1,4 +1,4 @@
-import type { ExternalToolSet } from '@agentbook/core'
+import type { ExternalToolSet } from '@ethogram/core'
 
 export const travelTools = {
   lookup_trip_policy: {

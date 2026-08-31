@@ -22,7 +22,7 @@ type NativeAgent = {
 }
 
 type NativeStory = {
-  readonly __agentbookType: 'story'
+  readonly __ethogramType: 'story'
   id: string
   name: string
   agent: NativeAgent
@@ -36,7 +36,7 @@ type NativeStory = {
 type NativeToolInput = Readonly<Record<string, unknown>>
 type NativeToolOutput = Readonly<Record<string, unknown>>
 type NativeExecutionProfile = {
-  readonly __agentbookType: 'execution-profile'
+  readonly __ethogramType: 'execution-profile'
   id: string
   tools: Readonly<Record<string, {
     description: string
@@ -75,8 +75,8 @@ type Invocation = {
 export type TypeScriptAdapterErrorCode =
   | 'INVALID_PROJECT_ROOT'
   | 'MISSING_PROJECT_PACKAGE'
-  | 'MISSING_AGENTBOOK_CONFIG'
-  | 'INVALID_AGENTBOOK_CONFIG'
+  | 'MISSING_ETHOGRAM_CONFIG'
+  | 'INVALID_ETHOGRAM_CONFIG'
   | 'NO_STORIES'
   | 'INVALID_AGENT_EXPORT'
   | 'INVALID_STORY_EXPORT'
@@ -138,7 +138,7 @@ function isGiven(value: unknown): value is StoryDescriptor['given'] {
 
 function isStory(value: unknown): value is NativeStory {
   return isRecord(value)
-    && value.__agentbookType === 'story'
+    && value.__ethogramType === 'story'
     && typeof value.id === 'string'
     && typeof value.name === 'string'
     && isAgent(value.agent)
@@ -150,7 +150,7 @@ function isStory(value: unknown): value is NativeStory {
 
 function isProfile(value: unknown): value is NativeExecutionProfile {
   return isRecord(value)
-    && value.__agentbookType === 'execution-profile'
+    && value.__ethogramType === 'execution-profile'
     && typeof value.id === 'string'
     && isRecord(value.tools)
     && typeof value.execute === 'function'
@@ -272,13 +272,13 @@ export class TypeScriptAdapter implements LanguageAdapter {
       throw new TypeScriptAdapterError('MISSING_PROJECT_PACKAGE', `Project ${root} must contain a package.json with a name.`)
     }
 
-    const configPath = path.join(root, 'agentbook.config.mjs')
+    const configPath = path.join(root, 'ethogram.config.mjs')
     try {
       if (!(await stat(configPath)).isFile()) throw new Error('not-file')
     } catch {
       throw new TypeScriptAdapterError(
-        'MISSING_AGENTBOOK_CONFIG',
-        `Project ${root} is not initialized. Run "agentbook init" first.`,
+        'MISSING_ETHOGRAM_CONFIG',
+        `Project ${root} is not initialized. Run "ethogram init" first.`,
       )
     }
 
@@ -289,9 +289,9 @@ export class TypeScriptAdapter implements LanguageAdapter {
       config = module.default as ProjectConfig
     } catch (error) {
       if (error instanceof TypeScriptAdapterError) {
-        throw new TypeScriptAdapterError('INVALID_AGENTBOOK_CONFIG', `Invalid agentbook.config.mjs in ${root}: ${error.message}`)
+        throw new TypeScriptAdapterError('INVALID_ETHOGRAM_CONFIG', `Invalid ethogram.config.mjs in ${root}: ${error.message}`)
       }
-      throw new TypeScriptAdapterError('INVALID_AGENTBOOK_CONFIG', `Invalid agentbook.config.mjs in ${root}.`)
+      throw new TypeScriptAdapterError('INVALID_ETHOGRAM_CONFIG', `Invalid ethogram.config.mjs in ${root}.`)
     }
 
     const agentDirectories = config.agentDirectories ?? ['agents']
@@ -300,7 +300,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
     if (![agentDirectories, storyDirectories, executionDirectories].every((entries) =>
       Array.isArray(entries) && entries.every((entry) => typeof entry === 'string' && entry.length > 0),
     )) {
-      throw new TypeScriptAdapterError('INVALID_AGENTBOOK_CONFIG', 'Agentbook directory configuration must contain string arrays.')
+      throw new TypeScriptAdapterError('INVALID_ETHOGRAM_CONFIG', 'Ethogram directory configuration must contain string arrays.')
     }
 
     const [agentFiles, storyFiles, profileFiles] = await Promise.all([
@@ -346,7 +346,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
     const agents = uniqueById(agentEntries, 'DUPLICATE_AGENT_ID', 'Agent')
     const stories = uniqueById(storyEntries, 'DUPLICATE_STORY_ID', 'Story')
     const profiles = uniqueById(profileEntries, 'DUPLICATE_EXECUTION_PROFILE_ID', 'execution profile')
-    if (stories.length === 0) throw new TypeScriptAdapterError('NO_STORIES', `No Agentbook Stories were found in ${root}.`)
+    if (stories.length === 0) throw new TypeScriptAdapterError('NO_STORIES', `No Ethogram Stories were found in ${root}.`)
 
     const agentIds = new Set(agents.map(({ value }) => value.id))
     const profilesById = new Map(profiles.map(({ value }) => [value.id, value]))
@@ -432,7 +432,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
       if (outcome.evidence !== undefined && trace.length > 0) {
         throw new TypeScriptAdapterError(
           'CONFLICTING_OBSERVATION_SOURCES',
-          'CONFLICTING_OBSERVATION_SOURCES: A Run cannot use both Agentbook callTool evidence and external execution evidence.',
+          'CONFLICTING_OBSERVATION_SOURCES: A Run cannot use both Ethogram callTool evidence and external execution evidence.',
         )
       }
       const endedAtMs = Date.now()

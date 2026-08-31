@@ -6,7 +6,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { createGithubAgent, PRESET_TOOLS } from '@github-tools/sdk'
-import { AgentbookEngine } from '../packages/cli/dist/generic-engine.js'
+import { EthogramEngine } from '../packages/cli/dist/generic-engine.js'
 import { TypeScriptAdapter } from '../packages/cli/dist/typescript-adapter.js'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
@@ -198,7 +198,7 @@ async function main() {
     process.env.AGENTBOOK_TEST09_CANDIDATE_MODULE = import.meta.resolve('@github-tools/sdk')
     globalThis.__AGENTBOOK_TEST09_NATIVE_EVIDENCE__ = undefined
     const adapter = new TypeScriptAdapter()
-    const engine = new AgentbookEngine(adapter)
+    const engine = new EthogramEngine(adapter)
     const project = await engine.loadProject(fixtureRoot)
     const story = project.stories.find((entry) => entry.id === 'identifies-github-agent-factory')
     assert.ok(story)

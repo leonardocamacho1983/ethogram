@@ -1,4 +1,4 @@
-import { defineStory } from '@agentbook/core'
+import { defineStory } from '@ethogram/core'
 import { githubRepositoryAgent } from '../agents/github-repository.agent.ts'
 
 export const identifiesGithubAgentFactory = defineStory({
@@ -12,7 +12,7 @@ export const identifiesGithubAgentFactory = defineStory({
     ref: '0dfd7d6d4bec7863363774401d88ca00d9860faa',
   },
   when: 'Read packages/github-tools/src/agents.ts at the configured ref and identify the exported factory that constructs the GitHub ToolLoopAgent.',
-  then: [
+  expectations: [
     {
       id: 'reads-agent-source',
       description: 'Reads the pinned agent source file',

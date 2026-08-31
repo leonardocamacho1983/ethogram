@@ -21,26 +21,26 @@ export type ExternalExecutionContext = {
 }
 
 export type ExternalExecutionProfile = {
-  readonly __agentbookType: 'execution-profile'
+  readonly __ethogramType: 'execution-profile'
   id: string
   tools: ExternalToolSet
   execute(context: ExternalExecutionContext): Promise<ExternalExecutionOutcome>
 }
 
 export function defineExecutionProfile(
-  profile: Omit<ExternalExecutionProfile, '__agentbookType'>,
+  profile: Omit<ExternalExecutionProfile, '__ethogramType'>,
 ): ExternalExecutionProfile {
   if (!profile.id.trim()) throw new Error('Execution profile id is required.')
   if (Object.keys(profile.tools).length === 0) throw new Error('Execution profile must expose at least one tool.')
-  return { __agentbookType: 'execution-profile', ...profile }
+  return { __ethogramType: 'execution-profile', ...profile }
 }
 
 export function isExternalExecutionProfile(value: unknown): value is ExternalExecutionProfile {
   return Boolean(
     value &&
     typeof value === 'object' &&
-    '__agentbookType' in value &&
-    value.__agentbookType === 'execution-profile' &&
+    '__ethogramType' in value &&
+    value.__ethogramType === 'execution-profile' &&
     'id' in value &&
     typeof value.id === 'string' &&
     'tools' in value &&

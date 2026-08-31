@@ -73,7 +73,7 @@ export function defineStory(input: StoryInput): Story {
   assertVerdictFreeExpectations(expectations)
 
   const story: Story = {
-    __agentbookType: 'story',
+    __ethogramType: 'story',
     id: input.id,
     name: input.name,
     agent: input.agent,
@@ -132,8 +132,8 @@ export function isStory(value: unknown): value is Story {
   return (
     typeof value === 'object' &&
     value !== null &&
-    '__agentbookType' in value &&
-    value.__agentbookType === 'story'
+    '__ethogramType' in value &&
+    value.__ethogramType === 'story'
   )
 }
 

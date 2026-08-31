@@ -75,7 +75,7 @@ import {
   defineAgent,
   defineExecutionProfile,
   defineStory,
-} from '@agentbook/core'
+} from '@ethogram/core'
 import type {
   Agent,
   ExpectationMatcher,
@@ -91,7 +91,7 @@ import type {
   StoryInput,
   ToolCalledMatcher,
   ToolNotCalledMatcher,
-} from '@agentbook/core'
+} from '@ethogram/core'
 
 function invariant(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message)
@@ -238,7 +238,7 @@ try {
 invariant(runtimeVerdictRejected, 'Runtime authoring validation accepted a verdict field.')
 
 console.log(JSON.stringify({
-  resolved: import.meta.resolve('@agentbook/core'),
+  resolved: import.meta.resolve('@ethogram/core'),
   agent: story.agent.name,
   story: story.name,
   given: story.given,
@@ -254,7 +254,7 @@ console.log(JSON.stringify({
 `
 
 const invalidConsumerSource = `
-import type { StoryExpectation } from '@agentbook/core'
+import type { StoryExpectation } from '@ethogram/core'
 
 const passedExpectation: StoryExpectation = {
   id: 'invalid-passed',
@@ -300,7 +300,7 @@ async function createConsumer(root, tarballSource) {
     version: '1.0.0',
     private: true,
     type: 'module',
-    dependencies: { '@agentbook/core': `file:./${tarballName}` },
+    dependencies: { '@ethogram/core': `file:./${tarballName}` },
   }, null, 2))
   const compilerOptions = {
     target: 'ES2022',
@@ -325,7 +325,7 @@ async function createConsumer(root, tarballSource) {
   const install = run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--offline'], root)
   assert.equal(install.status, 0, install.output)
 
-  const packageDirectory = path.join(root, 'node_modules', '@agentbook', 'core')
+  const packageDirectory = path.join(root, 'node_modules', '@ethogram', 'core')
   const packageStats = await lstat(packageDirectory)
   assert.equal(packageStats.isSymbolicLink(), false)
   const resolvedDirectory = await realpath(packageDirectory)
@@ -334,9 +334,9 @@ async function createConsumer(root, tarballSource) {
   assert.equal(resolvedDirectory.includes(repositoryRoot), false)
 
   const lock = JSON.parse(await readFile(path.join(root, 'package-lock.json'), 'utf8'))
-  assert.match(lock.packages[''].dependencies['@agentbook/core'], /^file:\.\/agentbook-core-/)
-  assert.equal(lock.packages['node_modules/@agentbook/core'].link, undefined)
-  assert.match(lock.packages['node_modules/@agentbook/core'].resolved, /^file:agentbook-core-/)
+  assert.match(lock.packages[''].dependencies['@ethogram/core'], /^file:\.\/ethogram-core-/)
+  assert.equal(lock.packages['node_modules/@ethogram/core'].link, undefined)
+  assert.match(lock.packages['node_modules/@ethogram/core'].resolved, /^file:ethogram-core-/)
 
   const compile = run(process.execPath, [compilerPath, '--project', 'tsconfig.json'], root)
   assert.equal(compile.status, 0, compile.output)
@@ -353,12 +353,12 @@ async function createConsumer(root, tarballSource) {
     )
   }
   assert.match(invalidCompile.output, /TS2322/)
-  assert.doesNotMatch(invalidCompile.output, /Cannot find module '@agentbook\/core'/)
+  assert.doesNotMatch(invalidCompile.output, /Cannot find module '@ethogram\/core'/)
 
   const privateImport = run(process.execPath, [
     '--input-type=module',
     '--eval',
-    "await import('@agentbook/core/internal-something')",
+    "await import('@ethogram/core/internal-something')",
   ], root)
   assert.notEqual(privateImport.status, 0)
   assert.match(privateImport.output, /ERR_PACKAGE_PATH_NOT_EXPORTED/)
@@ -366,7 +366,7 @@ async function createConsumer(root, tarballSource) {
   const runtime = run(process.execPath, ['dist/index.js'], root)
   assert.equal(runtime.status, 0, runtime.output)
   const runtimeEvidence = JSON.parse(runtime.output.trim())
-  assert.match(runtimeEvidence.resolved, /node_modules\/@agentbook\/core\/dist\/index\.js$/)
+  assert.match(runtimeEvidence.resolved, /node_modules\/@ethogram\/core\/dist\/index\.js$/)
   assert.equal(runtimeEvidence.resolved.includes(repositoryRoot), false)
   assert.equal(runtimeEvidence.agent, 'Invoice Review Agent')
   assert.equal(runtimeEvidence.story, 'Large Invoice Requires Review')
@@ -379,14 +379,14 @@ async function createConsumer(root, tarballSource) {
   return {
     root,
     packageDirectory: resolvedDirectory,
-    imports: ['@agentbook/core'],
+    imports: ['@ethogram/core'],
     invalidDiagnostic: invalidCompile.output.trim(),
     privateSubpathDiagnostic: 'ERR_PACKAGE_PATH_NOT_EXPORTED',
     runtime: runtimeEvidence,
   }
 }
 
-test('Test 06 packs and consumes @agentbook/core across two clean filesystem boundaries', async (t) => {
+test('Test 06 packs and consumes @ethogram/core across two clean filesystem boundaries', async (t) => {
   const scratchRoot = await mkdtemp(path.join(tmpdir(), 'agentbook-test06-'))
   t.after(() => rm(scratchRoot, { recursive: true, force: true }))
   assertOutsideRepository(scratchRoot)
@@ -427,14 +427,14 @@ test('Test 06 packs and consumes @agentbook/core across two clean filesystem bou
   assert.deepEqual(packResult.files.map(({ path: file }) => `package/${file}`).sort(), expectedManifest)
 
   const packedPackageJson = JSON.parse(await readFile(path.join(extractRoot, 'package', 'package.json'), 'utf8'))
-  assert.equal(packedPackageJson.name, '@agentbook/core')
-  assert.equal(packedPackageJson.version, '0.0.0-test.6')
+  assert.equal(packedPackageJson.name, '@ethogram/core')
+  assert.equal(packedPackageJson.version, '0.1.0-alpha.0')
   assert.equal(packedPackageJson.type, 'module')
   assert.deepEqual(packedPackageJson.exports, {
     '.': { types: './dist/index.d.ts', import: './dist/index.js', require: './dist/index.cjs' },
   })
   assert.equal(packedPackageJson.types, './dist/index.d.ts')
-  assert.deepEqual(packedPackageJson.engines, { node: '>=20' })
+  assert.deepEqual(packedPackageJson.engines, { node: '>=20.9' })
   assert.deepEqual(packedPackageJson.files, ['dist', 'README.md'])
   assert.equal(packedPackageJson.dependencies, undefined)
   assert.equal(packedPackageJson.private, undefined)

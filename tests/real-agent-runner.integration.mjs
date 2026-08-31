@@ -77,7 +77,7 @@ test('Test 03 executes one real agent run and evaluates its observation separate
     const story = deepFreeze(realAgentRefundStory)
     const storySnapshot = JSON.stringify(story)
     assert.deepEqual(Object.keys(story).sort(), [
-      '__agentbookType',
+      '__ethogramType',
       'agent',
       'description',
       'expectations',

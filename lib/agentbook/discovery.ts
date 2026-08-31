@@ -49,7 +49,7 @@ export function discoverStoryDefinitions(): Story[] {
   for (const story of stories) {
     const key = `${story.agent.id}/${story.id}`
     if (uniqueStories.has(key)) {
-      throw new Error(`Duplicate Agentbook Story discovered: ${key}`)
+      throw new Error(`Duplicate Ethogram Story discovered: ${key}`)
     }
     uniqueStories.set(key, story)
   }
@@ -66,7 +66,7 @@ export function discoverStories(): DisplayStory[] {
   for (const story of stories) {
     const key = `${story.agent.id}/${story.id}`
     if (uniqueStories.has(key)) {
-      throw new Error(`Duplicate Agentbook Story discovered: ${key}`)
+      throw new Error(`Duplicate Ethogram Story discovered: ${key}`)
     }
     uniqueStories.set(key, story)
   }

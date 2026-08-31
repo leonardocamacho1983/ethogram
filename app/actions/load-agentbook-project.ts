@@ -10,7 +10,7 @@ export type ConfiguredProjectResult =
   | { status: 'project-error'; code: string; message: string }
 
 export async function loadConfiguredAgentbookProject(): Promise<ConfiguredProjectResult> {
-  const projectRoot = process.env.AGENTBOOK_PROJECT_ROOT?.trim()
+  const projectRoot = process.env.ETHOGRAM_PROJECT_ROOT?.trim()
   if (!projectRoot) return { status: 'not-configured' }
 
   try {
@@ -28,7 +28,7 @@ export async function loadConfiguredAgentbookProject(): Promise<ConfiguredProjec
     return {
       status: 'project-error',
       code: 'EXTERNAL_PROJECT_LOAD_FAILED',
-      message: 'The configured external Agentbook project could not be loaded.',
+      message: 'The configured external Ethogram project could not be loaded.',
     }
   }
 }

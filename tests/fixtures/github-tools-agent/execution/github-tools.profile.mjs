@@ -1,4 +1,4 @@
-import { defineExecutionProfile } from '@agentbook/core'
+import { defineExecutionProfile } from '@ethogram/core'
 import { MockLanguageModelV4 } from 'ai/test'
 import {
   describeNormalizedPromptShape,

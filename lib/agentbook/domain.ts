@@ -151,7 +151,7 @@ export type StoryGivenValue =
 export type StoryGiven = string[] | Readonly<Record<string, StoryGivenValue>>
 
 export type StoryCore = {
-  readonly __agentbookType: 'story'
+  readonly __ethogramType: 'story'
   id: string
   name: string
   agent: Agent

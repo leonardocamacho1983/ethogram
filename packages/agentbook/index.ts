@@ -43,7 +43,7 @@ export type StoryGivenValue =
 export type StoryGiven = string[] | Readonly<Record<string, StoryGivenValue>>
 
 export type Story = {
-  readonly __agentbookType: 'story'
+  readonly __ethogramType: 'story'
   id: string
   name: string
   agent: Agent
@@ -141,7 +141,7 @@ export type ExternalExecutionContext = {
 }
 
 export type ExternalExecutionProfile = {
-  readonly __agentbookType: 'execution-profile'
+  readonly __ethogramType: 'execution-profile'
   id: string
   tools: ExternalToolSet
   execute(context: ExternalExecutionContext): Promise<ExternalExecutionOutcome>
@@ -241,7 +241,7 @@ export function defineStory(input: StoryInput): Story {
   assertVerdictFreeExpectations(expectations)
 
   return {
-    __agentbookType: 'story',
+    __ethogramType: 'story',
     id: input.id,
     name: input.name,
     agent: input.agent,
@@ -254,8 +254,8 @@ export function defineStory(input: StoryInput): Story {
 }
 
 export function defineExecutionProfile(
-  profile: Omit<ExternalExecutionProfile, '__agentbookType'>,
+  profile: Omit<ExternalExecutionProfile, '__ethogramType'>,
 ): ExternalExecutionProfile {
   requiredText(profile.id, 'Execution profile id')
-  return { __agentbookType: 'execution-profile', ...profile }
+  return { __ethogramType: 'execution-profile', ...profile }
 }

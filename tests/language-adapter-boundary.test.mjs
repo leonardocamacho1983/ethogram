@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import { AgentbookEngine } from '../packages/cli/dist/generic-engine.js'
+import { EthogramEngine } from '../packages/cli/dist/generic-engine.js'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 
@@ -73,7 +73,7 @@ test('generic engine evaluates canonical ObservedRun from a substitutable adapte
     },
   }
 
-  const engine = new AgentbookEngine(adapter)
+  const engine = new EthogramEngine(adapter)
   const project = await engine.loadProject('/ignored-by-test-adapter')
   const result = await engine.runStory('alternate-story')
 

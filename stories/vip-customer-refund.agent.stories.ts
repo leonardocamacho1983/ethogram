@@ -19,7 +19,7 @@ export default defineStory({
     'Reason: Item arrived damaged',
   ],
   when: 'Please issue a refund for my damaged order.',
-  then: [
+  expectations: [
     {
       id: 'recognizes-vip-eligibility',
       description: 'Recognizes VIP eligibility',
