@@ -1,27 +1,29 @@
 {
-  "name": "@ethogram/core",
+  "name": "@ethogram/mcp",
   "version": "0.1.0-alpha.2",
-  "description": "Code-first Agent and Story authoring contracts for Ethogram.",
+  "description": "Local MCP server for understanding Ethogram and running focused behavioral Stories.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leonardocamacho1983/ethogram.git",
-    "directory": "packages/agentbook"
+    "directory": "packages/mcp"
   },
   "homepage": "https://github.com/leonardocamacho1983/ethogram#readme",
   "bugs": {
     "url": "https://github.com/leonardocamacho1983/ethogram/issues"
   },
-  "keywords": ["ai-agents", "behavioral-testing", "typescript", "developer-tools"],
+  "keywords": ["ai-agents", "behavioral-testing", "mcp", "model-context-protocol"],
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     }
   },
   "types": "./dist/index.d.ts",
+  "bin": {
+    "ethogram-mcp": "dist/cli.js"
+  },
   "files": [
     "dist",
     "README.md"
@@ -31,5 +33,13 @@
   },
   "engines": {
     "node": ">=20.9"
+  },
+  "dependencies": {
+    "@ethogram/cli": "0.1.0-alpha.2",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "zod": "^4.2.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
   }
 }

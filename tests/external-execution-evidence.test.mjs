@@ -269,7 +269,7 @@ export const agent = defineAgent({ id: 'conflict-agent', name: 'Conflict Agent',
 `)
   await writeFile(path.join(root, 'stories/conflict.agent.stories.ts'), `import { defineStory } from '@ethogram/core'
 import { agent } from '../agents/conflict.agent.ts'
-export const story = defineStory({ id: 'conflict-story', name: 'Conflict Story', agent, description: 'Conflict test.', given: [], when: 'Run.', then: [], execution: { kind: 'external-profile', profile: 'conflict-profile' } })
+export const story = defineStory({ id: 'conflict-story', name: 'Conflict Story', agent, description: 'Conflict test.', given: [], when: 'Run.', expectations: [{ id: 'calls-local-tool', description: 'Calls the local tool', matcher: { kind: 'tool-called', tool: 'local_tool' } }], execution: { kind: 'external-profile', profile: 'conflict-profile' } })
 `)
   await writeFile(path.join(root, 'execution/conflict.profile.ts'), `import { defineExecutionProfile } from '@ethogram/core'
 export const profile = defineExecutionProfile({

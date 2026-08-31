@@ -83,10 +83,10 @@ export const PUBLIC_PAGES: PublicPage[] = [
     { title: 'Use the layers together', body: ['A failed Story should lead you into the trace or evidence. A passed Story says nothing about prose quality. A runtime policy can block an action that Ethogram is designed to test.'] },
   ], ['/behavioral-testing', '/how-it-works', '/guides/how-to-read-agent-evidence']),
 
-  page('/alpha', 'product', 'RELEASE / 0.1', 'Ethogram public alpha scope', 'What the Ethogram 0.1 alpha supports today, what it does not support, and what remains blocked before release.', 'The alpha is a local, code-first Story runner for TypeScript and Node.js agents. It evaluates required and forbidden tool calls and keeps only current-run evidence.', [
-    { title: 'Supported in the alpha', body: [], items: ['TypeScript and Node.js projects on Node 20.9+', 'Consumer-owned execution profiles', 'tool-called and tool-not-called matchers', 'Current-run evidence', 'Read-only local browser interface'] },
+  page('/alpha', 'product', 'RELEASE / 0.1', 'Ethogram public alpha scope', 'What the Ethogram 0.1 alpha supports today and what it does not support.', 'The alpha is a local, code-first Story runner for TypeScript and Node.js agents. It evaluates required and forbidden tool calls and keeps only current-run evidence.', [
+    { title: 'Supported in the alpha', body: [], items: ['TypeScript and Node.js projects on Node 20.9+', 'Consumer-owned execution profiles', 'tool-called and tool-not-called matchers', 'Current-run evidence', 'Read-only local browser interface', 'Optional local MCP inspection and one-Story execution'] },
     { title: 'Not supported', body: [], items: ['Python or hosted operation', 'Run history or Compare', 'Tool-order matchers', 'CI or pull-request comments', 'Visual Story editing'] },
-    { title: 'Release condition', body: ['Package installation commands become reliable only after the public npm packages are published. Until then, documentation that shows those commands is marked as pre-release.'] },
+    { title: 'Release status', body: ['Version 0.1.0-alpha.2 is published through the npm next tag. APIs may change between 0.x releases.'] },
   ], ['/roadmap', '/docs/limitations', '/changelog']),
 
   page('/for/engineering-leaders', 'guide', 'DECISION GUIDE', 'A plain-language guide to agent behavior risk', 'What engineering leaders need to know about testing the actions of tool-using AI agents.', 'If an agent can act, reviewing its final answer is not enough. The important question is whether critical actions followed the rules your team intended.', [
@@ -103,7 +103,7 @@ export const PUBLIC_PAGES: PublicPage[] = [
 
   page('/docs/quickstart', 'docs', 'DOCS / START', 'Quickstart', 'Prepare a TypeScript or Node.js project for Ethogram and run the access-request starter Story.', 'Install the published alpha packages, initialize the project, start the local interface, and run one deterministic Story.', [
     { title: 'Requirements', body: [], items: ['Node.js 20.9 or newer', 'A TypeScript or Node.js project', 'A named package.json'] },
-    { title: 'Install and initialize', body: ['These commands install the current public alpha.'], code: 'npm install --save-dev @ethogram/core@0.1.0-alpha.1 @ethogram/cli@0.1.0-alpha.1\nnpx ethogram init\nnpx ethogram dev' },
+    { title: 'Install and initialize', body: ['These commands install the current public alpha.'], code: 'npm install --save-dev @ethogram/core@next @ethogram/cli@next\nnpx ethogram init\nnpx ethogram dev' },
     { title: 'What initialization creates', body: ['Initialization creates missing files only. A conflict aborts instead of overwriting your work.'], items: ['ethogram.config.mjs', 'one Agent descriptor', 'one Story', 'one local execution profile'] },
   ], ['/docs/installation', '/examples/access-request-agent', '/docs/limitations']),
 
@@ -301,19 +301,20 @@ export const PUBLIC_PAGES: PublicPage[] = [
   ], ['/how-it-works', '/roadmap', '/contributing']),
 
   page('/roadmap', 'trust', 'PROJECT / ROADMAP', 'Ethogram roadmap', 'What is validated for the alpha, what is being prepared, and what remains a future direction.', 'The roadmap distinguishes committed alpha scope from ideas that still need design, implementation, and evidence.', [
-    { title: 'Alpha release', body: [], items: ['Public package scope and publication', 'Local Story runner', 'Read-only interface', 'Current-run evidence', 'Two tool-call matchers'] },
+    { title: 'Alpha release', body: [], items: ['Core, CLI, and MCP packages', 'Local Story runner', 'Read-only interface', 'Current-run evidence', 'Two tool-call matchers'] },
     { title: 'Candidate next steps', body: [], items: ['More matcher types', 'CI-oriented reporting', 'Run persistence and comparison', 'Evidence-backed framework guides'] },
     { title: 'No implied promise', body: ['Candidate work is not a compatibility or delivery commitment. Changelog entries record what actually ships.'] },
   ], ['/alpha', '/changelog', '/docs/limitations']),
 
-  page('/changelog', 'trust', 'PROJECT / CHANGES', 'Changelog', 'Public product changes for Ethogram, beginning with the 0.1 alpha.', 'The current release is 0.1.0-alpha.1. It defines the narrow local, code-first product boundary and supersedes alpha.0 package metadata.', [
+  page('/changelog', 'trust', 'PROJECT / CHANGES', 'Changelog', 'Public product changes for Ethogram, beginning with the 0.1 alpha.', 'The current release is 0.1.0-alpha.2. It adds the local MCP surface, stricter behavioral contracts, and a clearer first-run path.', [
+    { title: '0.1.0-alpha.2 — MCP and onboarding', body: [], items: ['New local @ethogram/mcp server', 'Revision-bound Story inspection and deliberate execution', 'Stricter expectation and execution-result validation', 'Structured starter input that drives observed behavior', 'Rewritten developer onboarding and package documentation'] },
     { title: '0.1.0-alpha.1 — public alpha', body: [], items: ['Corrected npm package READMEs and metadata', 'Ethogram public identity and brand system', 'Story discovery and real-agent execution', 'tool-called and tool-not-called evaluation', 'Current-run evidence invalidation', 'Read-only local interface', 'Public technical SEO foundation'] },
   ], ['/alpha', '/roadmap', '/docs']),
 
   page('/security', 'trust', 'TRUST / SECURITY', 'Security model', 'Understand what Ethogram tests, what it does not enforce, and how to report a security issue.', 'Ethogram is a testing tool, not a runtime authorization layer. Keep access control and policy enforcement in the systems that own the tools.', [
     { title: 'Trust boundary', body: ['Execution profiles run consumer code locally. Review profiles as test infrastructure and do not place secrets in Stories or captured evidence.'] },
     { title: 'Behavioral detection', body: ['A forbidden-action matcher can reveal that a call occurred. It cannot undo the side effect or prevent the action. Use safe test doubles or sandbox environments for consequential tools.'] },
-    { title: 'Reporting', body: ['Until a dedicated private channel is published, do not disclose sensitive vulnerability details in a public issue.'] },
+    { title: 'Reporting', body: ['Use GitHub private vulnerability reporting for sensitive findings. Do not disclose credentials, private prompts, or raw evidence in a public issue.'] },
   ], ['/docs/guides/test-forbidden-agent-actions', '/privacy', '/docs/limitations']),
 
   page('/privacy', 'trust', 'TRUST / PRIVACY', 'Privacy', 'The privacy boundary of the local Ethogram alpha and this public website.', 'Ethogram’s alpha is designed for local execution and does not provide a hosted run service. The public site should collect no agent execution evidence.', [

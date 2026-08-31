@@ -60,7 +60,11 @@ test('legacy GIVEN remains unchanged and omitted GIVEN still defaults to an empt
     agent,
     description: 'Defaults GIVEN.',
     when: 'Run.',
-    then: [],
+    expectations: [{
+      id: 'does-not-call-placeholder',
+      description: 'Does not call a placeholder tool',
+      matcher: { kind: 'tool-not-called', tool: 'placeholder_tool' },
+    }],
   })
   assert.deepEqual(omitted.given, [])
 })

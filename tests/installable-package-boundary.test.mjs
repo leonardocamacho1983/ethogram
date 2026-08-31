@@ -17,8 +17,10 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { parseNpmPackOutput } from '../scripts/parse-npm-pack-output.mjs'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
+const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 const packageRoot = path.join(repositoryRoot, 'packages', 'agentbook')
 const compilerPath = path.join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc')
 
@@ -52,11 +54,19 @@ function run(command, args, cwd, options = {}) {
   }
 }
 
+function runNpm(args, cwd) {
+  return process.env.npm_execpath
+    ? run(process.execPath, [process.env.npm_execpath, ...args], cwd)
+    : run(npmCommand, args, cwd)
+}
+
 function assertOutsideRepository(candidate) {
   const relative = path.relative(repositoryRoot, candidate)
   assert.notEqual(relative, '')
-  assert.equal(relative.startsWith(`..${path.sep}`) || relative === '..', true)
-  assert.equal(path.isAbsolute(relative), false)
+  assert.equal(
+    relative.startsWith(`..${path.sep}`) || relative === '..' || path.isAbsolute(relative),
+    true,
+  )
 }
 
 async function listFiles(root, current = root) {
@@ -322,7 +332,7 @@ async function createConsumer(root, tarballSource) {
   await writeFile(path.join(root, 'src', 'index.ts'), validConsumerSource)
   await writeFile(path.join(root, 'src', 'invalid.ts'), invalidConsumerSource)
 
-  const install = run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--offline'], root)
+  const install = runNpm(['install', '--ignore-scripts', '--no-audit', '--no-fund', '--offline'], root)
   assert.equal(install.status, 0, install.output)
 
   const packageDirectory = path.join(root, 'node_modules', '@ethogram', 'core')
@@ -388,15 +398,15 @@ async function createConsumer(root, tarballSource) {
 
 test('Test 06 packs and consumes @ethogram/core across two clean filesystem boundaries', async (t) => {
   const scratchRoot = await mkdtemp(path.join(tmpdir(), 'agentbook-test06-'))
-  t.after(() => rm(scratchRoot, { recursive: true, force: true }))
+  t.after(() => rm(scratchRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }))
   assertOutsideRepository(scratchRoot)
 
-  const build = run('npm', ['run', 'core:build'], repositoryRoot)
+  const build = runNpm(['run', 'core:build'], repositoryRoot)
   assert.equal(build.status, 0, build.output)
 
   const artifactDirectory = path.join(scratchRoot, 'artifact')
   await mkdir(artifactDirectory)
-  const packed = run('npm', [
+  const packed = runNpm([
     'pack',
     packageRoot,
     '--ignore-scripts',
@@ -405,7 +415,7 @@ test('Test 06 packs and consumes @ethogram/core across two clean filesystem boun
     artifactDirectory,
   ], repositoryRoot)
   assert.equal(packed.status, 0, packed.output)
-  const [packResult] = JSON.parse(packed.output)
+  const packResult = parseNpmPackOutput(packed.output, '@ethogram/core')
   const tarballPath = path.join(artifactDirectory, packResult.filename)
   const tarballBytes = await readFile(tarballPath)
   const sha256 = createHash('sha256').update(tarballBytes).digest('hex')
@@ -428,7 +438,7 @@ test('Test 06 packs and consumes @ethogram/core across two clean filesystem boun
 
   const packedPackageJson = JSON.parse(await readFile(path.join(extractRoot, 'package', 'package.json'), 'utf8'))
   assert.equal(packedPackageJson.name, '@ethogram/core')
-  assert.equal(packedPackageJson.version, '0.1.0-alpha.1')
+  assert.equal(packedPackageJson.version, '0.1.0-alpha.2')
   assert.equal(packedPackageJson.type, 'module')
   assert.deepEqual(packedPackageJson.exports, {
     '.': { types: './dist/index.d.ts', import: './dist/index.js', require: './dist/index.cjs' },

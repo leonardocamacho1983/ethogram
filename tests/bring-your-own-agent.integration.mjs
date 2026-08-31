@@ -17,10 +17,15 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { parseNpmPackOutput } from '../scripts/parse-npm-pack-output.mjs'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 const corePackageRoot = path.join(repositoryRoot, 'packages', 'agentbook')
 const cliPackageRoot = path.join(repositoryRoot, 'packages', 'cli')
+const esbuildPackageRoots = [
+  path.join(repositoryRoot, 'node_modules', 'esbuild'),
+  path.join(repositoryRoot, 'node_modules', '@esbuild', `${process.platform}-${process.arch}`),
+]
 
 const packageSource = `${JSON.stringify({
   name: 'purchase-approval-existing-agent',
@@ -249,6 +254,8 @@ function cleanEnvironment() {
   environment.npm_config_update_notifier = 'false'
   environment.npm_config_audit = 'false'
   environment.npm_config_fund = 'false'
+  environment.npm_config_cache = path.join(tmpdir(), 'ethogram-test08-npm-cache')
+  environment.npm_config_logs_dir = path.join(tmpdir(), 'ethogram-test08-npm-logs')
   return environment
 }
 
@@ -336,9 +343,9 @@ function standaloneRun(root, amount) {
   return JSON.parse(result.output.trim())
 }
 
-async function installArtifacts(root, coreTarball, cliTarball) {
+async function installArtifacts(root, coreTarball, cliTarball, dependencyTarballs) {
   const result = run('npm', [
-    'install', '--save-dev', '--ignore-scripts', '--no-audit', '--no-fund', '--offline', coreTarball, cliTarball,
+    'install', '--save-dev', '--ignore-scripts', '--no-audit', '--no-fund', '--offline', coreTarball, cliTarball, ...dependencyTarballs,
   ], root)
   assert.equal(result.status, 0, result.output)
   return result.output.trim()
@@ -410,7 +417,7 @@ async function runStory(url, storyId) {
   assert.equal(payload.status, 'completed')
   assertVerdictFree(payload.execution.observedRun)
   assert.equal(payload.boundaryEvidence.storyUnchanged, true)
-  assert.equal(payload.boundaryEvidence.mockDataUsed, false)
+  assert.equal(payload.boundaryEvidence.mockDataUsed, 'unknown')
   return payload
 }
 
@@ -429,11 +436,18 @@ async function packArtifacts(scratchRoot) {
   const cliPack = run('npm', ['pack', cliPackageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
   assert.equal(corePack.status, 0, corePack.output)
   assert.equal(cliPack.status, 0, cliPack.output)
-  const [core] = JSON.parse(corePack.output)
-  const [cli] = JSON.parse(cliPack.output)
+  const core = parseNpmPackOutput(corePack.output, '@ethogram/core')
+  const cli = parseNpmPackOutput(cliPack.output, '@ethogram/cli')
+  const dependencies = esbuildPackageRoots.map((packageRoot) => {
+    const packed = run('npm', ['pack', packageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
+    assert.equal(packed.status, 0, packed.output)
+    const metadata = parseNpmPackOutput(packed.output)
+    return path.join(artifactDirectory, metadata.filename)
+  })
   return {
     core: { ...core, path: path.join(artifactDirectory, core.filename) },
     cli: { ...cli, path: path.join(artifactDirectory, cli.filename) },
+    dependencies,
   }
 }
 
@@ -462,7 +476,7 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
   const artifacts = await packArtifacts(scratchRoot)
   const timerStartWall = new Date().toISOString()
   const timerStart = process.hrtime.bigint()
-  const installOutput = await installArtifacts(consumer, artifacts.core.path, artifacts.cli.path)
+  const installOutput = await installArtifacts(consumer, artifacts.core.path, artifacts.cli.path, artifacts.dependencies)
   const boundary = await installedBoundary(consumer)
   const binary = path.join(consumer, 'node_modules', '.bin', 'ethogram')
 
@@ -573,7 +587,7 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
 
   const conflictRoot = path.join(scratchRoot, 'existing-init-conflict')
   await createExistingAgent(conflictRoot)
-  await installArtifacts(conflictRoot, artifacts.core.path, artifacts.cli.path)
+  await installArtifacts(conflictRoot, artifacts.core.path, artifacts.cli.path, artifacts.dependencies)
   await writeFile(path.join(conflictRoot, 'ethogram.config.mjs'), 'export default { name: "user-owned" }\n')
   const conflictBefore = await sha256(path.join(conflictRoot, 'ethogram.config.mjs'))
   const conflictInit = run(path.join(conflictRoot, 'node_modules', '.bin', 'ethogram'), ['init', '--existing'], conflictRoot)
@@ -584,7 +598,7 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
   const normalInitRoot = path.join(scratchRoot, 'normal-init-control')
   await mkdir(normalInitRoot)
   await writeFile(path.join(normalInitRoot, 'package.json'), `${JSON.stringify({ name: 'normal-init-control', version: '1.0.0', private: true }, null, 2)}\n`)
-  await installArtifacts(normalInitRoot, artifacts.core.path, artifacts.cli.path)
+  await installArtifacts(normalInitRoot, artifacts.core.path, artifacts.cli.path, artifacts.dependencies)
   const normalInit = run(path.join(normalInitRoot, 'node_modules', '.bin', 'ethogram'), ['init'], normalInitRoot)
   assert.equal(normalInit.status, 0, normalInit.output)
   for (const file of ['ethogram.config.mjs', 'agents/access-request.agent.ts', 'stories/admin-access-requires-approval.agent.stories.ts', 'execution/access-request.profile.ts']) {
@@ -593,7 +607,7 @@ test('Test 08 integrates and observes a pre-existing TypeScript agent without so
 
   const portableRoot = path.join(scratchRoot, 'portable-purchase-agent')
   await createExistingAgent(portableRoot)
-  await installArtifacts(portableRoot, artifacts.core.path, artifacts.cli.path)
+  await installArtifacts(portableRoot, artifacts.core.path, artifacts.cli.path, artifacts.dependencies)
   const portableBinary = path.join(portableRoot, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(portableBinary, ['init', '--existing'], portableRoot).status, 0)
   await addIntegration(portableRoot)

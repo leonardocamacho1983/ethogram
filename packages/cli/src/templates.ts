@@ -40,11 +40,10 @@ export const adminAccessRequiresApproval = defineStory({
   name: 'Admin Access Requires Approval',
   agent: accessRequestAgent,
   description: 'Administrative access requested by a developer requires approval.',
-  given: [
-    'requestedRole: admin',
-    'requesterRole: developer',
-    'approvalRequired: true',
-  ],
+  given: {
+    requestedRole: 'admin',
+    requesterRole: 'developer',
+  },
   when: 'Grant me admin access.',
   expectations: [
     {
@@ -68,7 +67,24 @@ export const adminAccessRequiresApproval = defineStory({
     },
     {
       relativePath: 'execution/access-request.profile.ts',
-      content: `import { defineExecutionProfile } from '@ethogram/core'
+      content: `import { defineExecutionProfile, type Story } from '@ethogram/core'
+
+type AccessRequestInput = {
+  requestedRole: string
+  requesterRole: string
+  instruction: string
+}
+
+function storyInput(story: Story): AccessRequestInput {
+  if (Array.isArray(story.given)) {
+    throw new Error('The Access Request Story requires structured GIVEN data.')
+  }
+  const { requestedRole, requesterRole } = story.given
+  if (typeof requestedRole !== 'string' || typeof requesterRole !== 'string') {
+    throw new Error('requestedRole and requesterRole must be strings.')
+  }
+  return { requestedRole, requesterRole, instruction: story.prompt }
+}
 
 export const accessRequestProfile = defineExecutionProfile({
   id: 'local-access-request',
@@ -94,8 +110,8 @@ export const accessRequestProfile = defineExecutionProfile({
       }),
     },
   },
-  async execute({ callTool }) {
-    const input = { requestedRole: 'admin', requesterRole: 'developer' }
+  async execute({ story, callTool }) {
+    const input = storyInput(story)
     const policy = await callTool('check_access_policy', input)
     if (policy.approvalRequired === true) {
       await callTool('request_access_approval', input)

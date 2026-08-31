@@ -1,9 +1,11 @@
 # Ethogram OSS Alpha Release Readiness
 
-Status: `0.1.0-alpha.1` corrective release  
+Status: **historical `0.1.0-alpha.1` release record — not the current candidate checklist**
 Audit date: 2026-08-29  
 Architectural baseline: Tests 01–09, through commit `2a114db`  
 Release name: **Ethogram**
+
+> This document preserves the decisions and evidence for the published `0.1.0-alpha.1` core/CLI release. The later coordinated `0.1.0-alpha.2` release adds `@ethogram/mcp`; see [`MCP-SERVER-PLAN.md`](MCP-SERVER-PLAN.md), [`mcp.md`](mcp.md), and [`packages.md`](packages.md) for its scope. Statements below about a two-package release are historical.
 
 ## Executive conclusion
 

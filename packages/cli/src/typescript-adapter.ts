@@ -1,4 +1,4 @@
-import { readdir, readFile, realpath, stat } from 'node:fs/promises'
+import { lstat, readdir, readFile, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { build } from 'esbuild'
 import type {
@@ -77,6 +77,7 @@ export type TypeScriptAdapterErrorCode =
   | 'MISSING_PROJECT_PACKAGE'
   | 'MISSING_ETHOGRAM_CONFIG'
   | 'INVALID_ETHOGRAM_CONFIG'
+  | 'PROJECT_PATH_ESCAPE'
   | 'NO_STORIES'
   | 'INVALID_AGENT_EXPORT'
   | 'INVALID_STORY_EXPORT'
@@ -104,9 +105,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isAgent(value: unknown): value is NativeAgent {
   return isRecord(value)
     && typeof value.id === 'string'
+    && value.id.length > 0
+    && value.id.length <= 200
     && typeof value.name === 'string'
+    && value.name.length <= 1_000
     && typeof value.description === 'string'
+    && value.description.length <= 4_000
     && typeof value.icon === 'string'
+    && value.icon.length <= 200
 }
 
 function isGivenValue(value: unknown, ancestors: Set<object>): boolean {
@@ -136,22 +142,62 @@ function isGiven(value: unknown): value is StoryDescriptor['given'] {
     : isGivenValue(value, new Set()) && Boolean(value && typeof value === 'object' && !Array.isArray(value))
 }
 
+function isJsonRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+    && isGivenValue(value, new Set())
+}
+
 function isStory(value: unknown): value is NativeStory {
   return isRecord(value)
     && value.__ethogramType === 'story'
     && typeof value.id === 'string'
+    && value.id.length > 0
+    && value.id.length <= 200
     && typeof value.name === 'string'
+    && value.name.length <= 1_000
     && isAgent(value.agent)
     && typeof value.description === 'string'
+    && value.description.length <= 4_000
     && isGiven(value.given)
     && typeof value.prompt === 'string'
+    && value.prompt.length <= 128_000
     && Array.isArray(value.expectations)
+    && value.expectations.length > 0
+    && (() => {
+      const ids = new Set<string>()
+      return value.expectations.every((candidate) => {
+        if (!isRecord(candidate)
+          || typeof candidate.id !== 'string'
+          || !candidate.id.trim()
+          || candidate.id.length > 200
+          || ids.has(candidate.id)
+          || typeof candidate.description !== 'string'
+          || !candidate.description.trim()
+          || candidate.description.length > 4_000
+          || (candidate.failureDescription !== undefined
+            && (typeof candidate.failureDescription !== 'string'
+              || !candidate.failureDescription.trim()
+              || candidate.failureDescription.length > 4_000))
+          || !isRecord(candidate.matcher)
+          || (candidate.matcher.kind !== 'tool-called' && candidate.matcher.kind !== 'tool-not-called')
+          || typeof candidate.matcher.tool !== 'string'
+          || !candidate.matcher.tool.trim()
+          || candidate.matcher.tool.length > 200
+          || ['passed', 'failed', 'status', 'verdict'].some((key) => Object.prototype.hasOwnProperty.call(candidate, key))) {
+          return false
+        }
+        ids.add(candidate.id)
+        return true
+      })
+    })()
 }
 
 function isProfile(value: unknown): value is NativeExecutionProfile {
   return isRecord(value)
     && value.__ethogramType === 'execution-profile'
     && typeof value.id === 'string'
+    && value.id.length > 0
+    && value.id.length <= 200
     && isRecord(value.tools)
     && typeof value.execute === 'function'
 }
@@ -168,7 +214,7 @@ function deepFreeze<T>(value: T): T {
   return value
 }
 
-async function allFiles(root: string, directories: string[]): Promise<string[]> {
+async function allFiles(directories: string[]): Promise<string[]> {
   const files: string[] = []
   async function visit(directory: string): Promise<void> {
     let entries
@@ -181,11 +227,40 @@ async function allFiles(root: string, directories: string[]): Promise<string[]> 
       if (entry.name === 'node_modules' || entry.name === '.git') continue
       const absolute = path.join(directory, entry.name)
       if (entry.isDirectory()) await visit(absolute)
-      else files.push(absolute)
+      else if (entry.isFile() || entry.isSymbolicLink()) files.push(absolute)
     }
   }
-  for (const directory of directories) await visit(path.resolve(root, directory))
+  for (const directory of directories) await visit(directory)
   return [...new Set(files)].sort()
+}
+
+function isInside(root: string, candidate: string): boolean {
+  const relativePath = path.relative(root, candidate)
+  return relativePath === '' || (!relativePath.startsWith(`..${path.sep}`) && relativePath !== '..' && !path.isAbsolute(relativePath))
+}
+
+async function confinedDirectories(root: string, entries: string[], field: string): Promise<string[]> {
+  const directories: string[] = []
+  for (const entry of entries) {
+    if (path.isAbsolute(entry)) {
+      throw new TypeScriptAdapterError('PROJECT_PATH_ESCAPE', `${field} must contain project-relative paths: ${entry}`)
+    }
+    const resolved = path.resolve(root, entry)
+    if (!isInside(root, resolved)) {
+      throw new TypeScriptAdapterError('PROJECT_PATH_ESCAPE', `${field} path escapes the project root: ${entry}`)
+    }
+    let canonical = resolved
+    try {
+      canonical = await realpath(resolved)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    }
+    if (!isInside(root, canonical)) {
+      throw new TypeScriptAdapterError('PROJECT_PATH_ESCAPE', `${field} path resolves outside the project root: ${entry}`)
+    }
+    directories.push(canonical)
+  }
+  return directories
 }
 
 function matches(filePath: string, stem: string): boolean {
@@ -194,23 +269,47 @@ function matches(filePath: string, stem: string): boolean {
   )
 }
 
-async function importNativeModule(filePath: string): Promise<Record<string, unknown>> {
+async function importNativeModule(filePath: string, projectRoot: string): Promise<Record<string, unknown>> {
   try {
     const result = await build({
       entryPoints: [filePath],
+      absWorkingDir: projectRoot,
       bundle: true,
       platform: 'node',
       format: 'esm',
       target: 'node20',
       write: false,
       sourcemap: false,
+      metafile: true,
       logLevel: 'silent',
     })
+    for (const [importer, metadata] of Object.entries(result.metafile.inputs)) {
+      const importerPath = path.isAbsolute(importer) ? importer : path.resolve(projectRoot, importer)
+      if (!isInside(projectRoot, importerPath)) continue
+      for (const imported of metadata.imports) {
+        const original = imported.original ?? imported.path
+        if (!original.startsWith('.') && !path.isAbsolute(original)) continue
+        const resolved = path.isAbsolute(imported.path) ? imported.path : path.resolve(projectRoot, imported.path)
+        let canonical = resolved
+        try {
+          canonical = await realpath(resolved)
+        } catch {
+          // esbuild owns missing-import diagnostics; this check only narrows resolved inputs.
+        }
+        if (!isInside(projectRoot, canonical)) {
+          throw new TypeScriptAdapterError(
+            'PROJECT_PATH_ESCAPE',
+            `A project-relative import resolves outside the project root: ${original}`,
+          )
+        }
+      }
+    }
     const source = result.outputFiles[0]?.contents
     if (!source) throw new Error('The TypeScript adapter produced no executable module.')
     const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
     return await import(moduleUrl) as Record<string, unknown>
   } catch (error) {
+    if (error instanceof TypeScriptAdapterError) throw error
     const detail = error instanceof Error ? error.message.split('\n')[0] : 'Unknown module-loading error.'
     throw new TypeScriptAdapterError(
       filePath.includes('.stories.') ? 'INVALID_STORY_EXPORT' : 'INVALID_EXECUTION_PROFILE_EXPORT',
@@ -265,17 +364,28 @@ export class TypeScriptAdapter implements LanguageAdapter {
 
     let packageName: string
     try {
-      const packageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')) as { name?: unknown }
+      const packagePath = path.join(root, 'package.json')
+      const packageMetadata = await lstat(packagePath)
+      if (packageMetadata.isSymbolicLink() || !packageMetadata.isFile()) {
+        throw new TypeScriptAdapterError('PROJECT_PATH_ESCAPE', 'package.json must be a regular file inside the project root.')
+      }
+      const packageJson = JSON.parse(await readFile(packagePath, 'utf8')) as { name?: unknown }
       if (typeof packageJson.name !== 'string' || !packageJson.name.trim()) throw new Error('missing-name')
       packageName = packageJson.name
-    } catch {
+    } catch (error) {
+      if (error instanceof TypeScriptAdapterError) throw error
       throw new TypeScriptAdapterError('MISSING_PROJECT_PACKAGE', `Project ${root} must contain a package.json with a name.`)
     }
 
     const configPath = path.join(root, 'ethogram.config.mjs')
     try {
-      if (!(await stat(configPath)).isFile()) throw new Error('not-file')
-    } catch {
+      const configMetadata = await lstat(configPath)
+      if (configMetadata.isSymbolicLink()) {
+        throw new TypeScriptAdapterError('PROJECT_PATH_ESCAPE', 'ethogram.config.mjs must not be a symbolic link.')
+      }
+      if (!configMetadata.isFile()) throw new Error('not-file')
+    } catch (error) {
+      if (error instanceof TypeScriptAdapterError) throw error
       throw new TypeScriptAdapterError(
         'MISSING_ETHOGRAM_CONFIG',
         `Project ${root} is not initialized. Run "ethogram init" first.`,
@@ -284,7 +394,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
 
     let config: ProjectConfig
     try {
-      const module = await importNativeModule(configPath)
+      const module = await importNativeModule(configPath, root)
       if (!isRecord(module.default)) throw new Error('missing-default')
       config = module.default as ProjectConfig
     } catch (error) {
@@ -294,27 +404,41 @@ export class TypeScriptAdapter implements LanguageAdapter {
       throw new TypeScriptAdapterError('INVALID_ETHOGRAM_CONFIG', `Invalid ethogram.config.mjs in ${root}.`)
     }
 
-    const agentDirectories = config.agentDirectories ?? ['agents']
-    const storyDirectories = config.storyDirectories ?? ['stories']
-    const executionDirectories = config.executionDirectories ?? ['execution']
-    if (![agentDirectories, storyDirectories, executionDirectories].every((entries) =>
+    const configuredAgentDirectories = config.agentDirectories ?? ['agents']
+    const configuredStoryDirectories = config.storyDirectories ?? ['stories']
+    const configuredExecutionDirectories = config.executionDirectories ?? ['execution']
+    if (![configuredAgentDirectories, configuredStoryDirectories, configuredExecutionDirectories].every((entries) =>
       Array.isArray(entries) && entries.every((entry) => typeof entry === 'string' && entry.length > 0),
     )) {
       throw new TypeScriptAdapterError('INVALID_ETHOGRAM_CONFIG', 'Ethogram directory configuration must contain string arrays.')
     }
 
+    const [agentDirectories, storyDirectories, executionDirectories] = await Promise.all([
+      confinedDirectories(root, configuredAgentDirectories, 'agentDirectories'),
+      confinedDirectories(root, configuredStoryDirectories, 'storyDirectories'),
+      confinedDirectories(root, configuredExecutionDirectories, 'executionDirectories'),
+    ])
+
     const [agentFiles, storyFiles, profileFiles] = await Promise.all([
-      allFiles(root, agentDirectories),
-      allFiles(root, storyDirectories),
-      allFiles(root, executionDirectories),
+      allFiles(agentDirectories),
+      allFiles(storyDirectories),
+      allFiles(executionDirectories),
     ])
 
     const selectedAgentFiles = agentFiles.filter((file) => matches(file, '.agent'))
     const selectedStoryFiles = storyFiles.filter((file) => matches(file, '.agent.stories'))
     const selectedProfileFiles = profileFiles.filter((file) => matches(file, '.profile') || matches(file, '-profile'))
+    await Promise.all([...selectedAgentFiles, ...selectedStoryFiles, ...selectedProfileFiles].map(async (file) => {
+      if ((await lstat(file)).isSymbolicLink()) {
+        throw new TypeScriptAdapterError(
+          'PROJECT_PATH_ESCAPE',
+          `Ethogram source entrypoints must not be symbolic links: ${relative(root, file)}`,
+        )
+      }
+    }))
 
     const agentEntries = (await Promise.all(selectedAgentFiles.map(async (file) => {
-      const module = await importNativeModule(file)
+      const module = await importNativeModule(file, root)
       const values = Object.values(module).filter(isAgent)
       if (values.length === 0) {
         throw new TypeScriptAdapterError('INVALID_AGENT_EXPORT', `No valid Agent export found in ${relative(root, file)}.`)
@@ -323,7 +447,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
     }))).flat()
 
     const storyEntries = (await Promise.all(selectedStoryFiles.map(async (file) => {
-      const module = await importNativeModule(file)
+      const module = await importNativeModule(file, root)
       const values = Object.values(module).filter(isStory)
       if (values.length === 0) {
         throw new TypeScriptAdapterError('INVALID_STORY_EXPORT', `No valid Story export found in ${relative(root, file)}.`)
@@ -332,7 +456,7 @@ export class TypeScriptAdapter implements LanguageAdapter {
     }))).flat()
 
     const profileEntries = (await Promise.all(selectedProfileFiles.map(async (file) => {
-      const module = await importNativeModule(file)
+      const module = await importNativeModule(file, root)
       const values = Object.values(module).filter(isProfile)
       if (values.length === 0) {
         throw new TypeScriptAdapterError(
@@ -398,6 +522,12 @@ export class TypeScriptAdapter implements LanguageAdapter {
       const outcome = await binding.profile.execute({
         story: binding.story,
         callTool: async (name, input) => {
+          if (typeof name !== 'string' || !name.trim() || name.length > 200 || !isJsonRecord(input)) {
+            throw new TypeScriptAdapterError(
+              'PROFILE_EXECUTION_FAILED',
+              'PROFILE_EXECUTION_FAILED: callTool requires a bounded tool name and a finite JSON object input.',
+            )
+          }
           const tool = binding.profile.tools[name]
           if (!tool) throw new Error(`Execution profile requested unavailable tool: ${name}`)
           const callStartedMs = Date.now()
@@ -413,6 +543,12 @@ export class TypeScriptAdapter implements LanguageAdapter {
           trace.push(invocation)
           try {
             const output = await tool.execute(cloneRecord(input))
+            if (!isJsonRecord(output)) {
+              throw new TypeScriptAdapterError(
+                'PROFILE_EXECUTION_FAILED',
+                'PROFILE_EXECUTION_FAILED: an intercepted tool must return a finite JSON object output.',
+              )
+            }
             invocation.output = cloneRecord(output)
             return cloneRecord(output)
           } catch (error) {
@@ -429,6 +565,14 @@ export class TypeScriptAdapter implements LanguageAdapter {
           }
         },
       })
+      if (!outcome || typeof outcome !== 'object'
+        || typeof outcome.decision !== 'string'
+        || typeof outcome.finalResponse !== 'string') {
+        throw new TypeScriptAdapterError(
+          'PROFILE_EXECUTION_FAILED',
+          'PROFILE_EXECUTION_FAILED: The execution profile must return string decision and finalResponse fields.',
+        )
+      }
       if (outcome.evidence !== undefined && trace.length > 0) {
         throw new TypeScriptAdapterError(
           'CONFLICTING_OBSERVATION_SOURCES',

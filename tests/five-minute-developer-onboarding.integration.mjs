@@ -21,10 +21,15 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { parseNpmPackOutput } from '../scripts/parse-npm-pack-output.mjs'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 const corePackageRoot = path.join(repositoryRoot, 'packages', 'agentbook')
 const cliPackageRoot = path.join(repositoryRoot, 'packages', 'cli')
+const esbuildPackageRoots = [
+  path.join(repositoryRoot, 'node_modules', 'esbuild'),
+  path.join(repositoryRoot, 'node_modules', '@esbuild', `${process.platform}-${process.arch}`),
+]
 
 function cleanEnvironment() {
   const environment = { ...process.env }
@@ -41,6 +46,8 @@ function cleanEnvironment() {
   environment.npm_config_update_notifier = 'false'
   environment.npm_config_audit = 'false'
   environment.npm_config_fund = 'false'
+  environment.npm_config_cache = path.join(tmpdir(), 'ethogram-test07-npm-cache')
+  environment.npm_config_logs_dir = path.join(tmpdir(), 'ethogram-test07-npm-logs')
   return environment
 }
 
@@ -139,7 +146,7 @@ async function startDev(binary, cwd, args) {
   }
 }
 
-async function installArtifacts(root, coreTarball, cliTarball) {
+async function installArtifacts(root, coreTarball, cliTarball, dependencyTarballs) {
   const install = run('npm', [
     'install',
     '--save-dev',
@@ -149,6 +156,7 @@ async function installArtifacts(root, coreTarball, cliTarball) {
     '--offline',
     coreTarball,
     cliTarball,
+    ...dependencyTarballs,
   ], root)
   assert.equal(install.status, 0, install.output)
   return install.output.trim()
@@ -184,10 +192,16 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const cliPack = run('npm', ['pack', cliPackageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
   assert.equal(corePack.status, 0, corePack.output)
   assert.equal(cliPack.status, 0, cliPack.output)
-  const [corePackResult] = JSON.parse(corePack.output)
-  const [cliPackResult] = JSON.parse(cliPack.output)
+  const corePackResult = parseNpmPackOutput(corePack.output, '@ethogram/core')
+  const cliPackResult = parseNpmPackOutput(cliPack.output, '@ethogram/cli')
   const coreTarball = path.join(artifactDirectory, corePackResult.filename)
   const cliTarball = path.join(artifactDirectory, cliPackResult.filename)
+  const dependencyTarballs = esbuildPackageRoots.map((packageRoot) => {
+    const packed = run('npm', ['pack', packageRoot, '--ignore-scripts', '--json', '--pack-destination', artifactDirectory], repositoryRoot)
+    assert.equal(packed.status, 0, packed.output)
+    const metadata = parseNpmPackOutput(packed.output)
+    return path.join(artifactDirectory, metadata.filename)
+  })
 
   const extracted = path.join(scratchRoot, 'extracted')
   await mkdir(extracted)
@@ -197,7 +211,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   assert.equal(packedCliJson.name, '@ethogram/cli')
   assert.equal(packedCliJson.bin.ethogram, 'dist/cli.js')
   assert.equal(packedCliJson.engines.node, '>=20.9')
-  assert.equal(packedCliJson.dependencies['@ethogram/core'], '0.1.0-alpha.1')
+  assert.equal(packedCliJson.dependencies['@ethogram/core'], '0.1.0-alpha.2')
   assert.match(packedCliJson.dependencies.esbuild, /^\^0\./)
   for (const required of [
     'dist/cli.js',
@@ -228,7 +242,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const timerStartWall = new Date().toISOString()
   const timerStart = process.hrtime.bigint()
-  const installOutput = await installArtifacts(consumerOne, coreTarball, cliTarball)
+  const installOutput = await installArtifacts(consumerOne, coreTarball, cliTarball, dependencyTarballs)
   const boundary = await installedBoundary(consumerOne)
   const binary = path.join(consumerOne, 'node_modules', '.bin', 'ethogram')
   const packageAfterInstall = await readFile(path.join(consumerOne, 'package.json'), 'utf8')
@@ -304,7 +318,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
     'requests-approval': 'PASS',
   })
   assert.equal(runPayload.boundaryEvidence.storyUnchanged, true)
-  assert.equal(runPayload.boundaryEvidence.mockDataUsed, false)
+  assert.equal(runPayload.boundaryEvidence.mockDataUsed, 'unknown')
   assert.equal(runPayload.boundaryEvidence.adapter, 'typescript')
 
   const storyPath = path.join(consumerOne, 'stories', 'admin-access-requires-approval.agent.stories.ts')
@@ -345,6 +359,38 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const currentRunPayload = await currentRunResponse.json()
   assert.equal(currentRunResponse.status, 200)
   assert.equal(currentRunPayload.execution.evaluationResult.verdict, 'PASS')
+
+  const storyAfterNameReload = await readFile(storyPath, 'utf8')
+  await writeFile(storyPath, storyAfterNameReload.replace(
+    "requesterRole: 'developer',",
+    "requesterRole: 'manager',",
+  ))
+  let changedInputProject
+  const changedInputDeadline = Date.now() + 10_000
+  while (Date.now() < changedInputDeadline) {
+    const response = await fetch(new URL('/api/project', dev.url))
+    if (response.ok) {
+      const candidate = await response.json()
+      if (candidate.runtime.revision > reloadedProject.runtime.revision) {
+        changedInputProject = candidate
+        break
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  assert.ok(changedInputProject, 'Ethogram did not reload the changed Story input')
+  const changedInputResponse = await fetch(new URL('/api/run', dev.url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ storyId: 'admin-access-requires-approval', ...changedInputProject.runtime }),
+  })
+  const changedInputPayload = await changedInputResponse.json()
+  assert.equal(changedInputResponse.status, 200)
+  assert.deepEqual(changedInputPayload.execution.observedRun.toolCalls.map(({ name }) => name), [
+    'check_access_policy',
+    'grant_admin_access',
+  ])
+  assert.equal(changedInputPayload.execution.evaluationResult.verdict, 'FAIL')
   const timerEnd = process.hrtime.bigint()
   const timerEndWall = new Date().toISOString()
   const elapsedMs = Number(timerEnd - timerStart) / 1_000_000
@@ -358,7 +404,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const consumerTwo = path.join(scratchRoot, 'consumer-two')
   await createOrdinaryProject(consumerTwo, 'test07-portable-consumer')
-  await installArtifacts(consumerTwo, coreTarball, cliTarball)
+  await installArtifacts(consumerTwo, coreTarball, cliTarball, dependencyTarballs)
   const binaryTwo = path.join(consumerTwo, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(binaryTwo, ['init'], consumerTwo).status, 0)
   await unlink(path.join(consumerTwo, 'execution', 'access-request.profile.ts'))
@@ -374,7 +420,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const conflictRoot = path.join(scratchRoot, 'conflict-consumer')
   await createOrdinaryProject(conflictRoot, 'test07-conflict-consumer')
-  await installArtifacts(conflictRoot, coreTarball, cliTarball)
+  await installArtifacts(conflictRoot, coreTarball, cliTarball, dependencyTarballs)
   await mkdir(path.join(conflictRoot, 'agents'))
   await writeFile(path.join(conflictRoot, 'agents', 'access-request.agent.ts'), 'user owned content\n')
   const conflictBinary = path.join(conflictRoot, 'node_modules', '.bin', 'ethogram')
@@ -386,7 +432,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const uninitializedRoot = path.join(scratchRoot, 'uninitialized-consumer')
   await createOrdinaryProject(uninitializedRoot, 'test07-uninitialized')
-  await installArtifacts(uninitializedRoot, coreTarball, cliTarball)
+  await installArtifacts(uninitializedRoot, coreTarball, cliTarball, dependencyTarballs)
   const uninitializedBinary = path.join(uninitializedRoot, 'node_modules', '.bin', 'ethogram')
   const beforeInitDev = run(uninitializedBinary, ['dev', '--no-open', '--port', '0'], uninitializedRoot)
   assert.notEqual(beforeInitDev.status, 0)
@@ -395,7 +441,7 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
 
   const invalidRoot = path.join(scratchRoot, 'invalid-story-consumer')
   await createOrdinaryProject(invalidRoot, 'test07-invalid-story')
-  await installArtifacts(invalidRoot, coreTarball, cliTarball)
+  await installArtifacts(invalidRoot, coreTarball, cliTarball, dependencyTarballs)
   const invalidBinary = path.join(invalidRoot, 'node_modules', '.bin', 'ethogram')
   assert.equal(run(invalidBinary, ['init'], invalidRoot).status, 0)
   await writeFile(path.join(invalidRoot, 'stories', 'admin-access-requires-approval.agent.stories.ts'), 'export const invalid = true\n')

@@ -1,6 +1,6 @@
 {
   "name": "ethogram",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Local, code-first behavioral testing for TypeScript and Node.js agents.",
   "license": "MIT",
   "repository": {
@@ -19,19 +19,23 @@
   "scripts": {
     "core:build": "tsc -p packages/agentbook/tsconfig.build.json && tsc -p packages/agentbook/tsconfig.cjs.json && node packages/agentbook/scripts/finish-cjs-build.mjs",
     "cli:build": "npm run build -w @ethogram/cli",
+    "mcp:build": "npm run core:build && npm run cli:build && npm run build -w @ethogram/mcp",
+    "test:mcp": "npm run mcp:build && node --test tests/mcp-server.integration.test.mjs tests/mcp-package-boundary.test.mjs",
     "test:package": "node --test tests/installable-package-boundary.test.mjs",
     "test:onboarding": "node --test tests/five-minute-developer-onboarding.integration.mjs",
     "test:existing-agent": "node --test tests/bring-your-own-agent.integration.mjs",
     "test:third-party-agent": "npm run core:build && npm run cli:build && node tests/real-third-party-agent.integration.mjs",
+    "release:verify": "node scripts/verify-release.mjs",
+    "release:publish": "node scripts/publish-release.mjs",
     "stories:discover": "node scripts/generate-story-registry.mjs",
     "predev": "npm run core:build && node scripts/generate-story-registry.mjs",
     "dev": "next dev",
-    "prebuild": "npm run core:build && npm run cli:build && node scripts/generate-story-registry.mjs",
+    "prebuild": "npm run core:build && npm run cli:build && npm run build -w @ethogram/mcp && node scripts/generate-story-registry.mjs",
     "build": "next build --webpack",
-    "pretypecheck": "npm run core:build && npm run cli:build",
+    "pretypecheck": "npm run core:build && npm run cli:build && npm run build -w @ethogram/mcp",
     "typecheck": "tsc --noEmit",
-    "pretest": "npm run core:build && npm run cli:build",
-    "test": "node --test tests/*.test.mjs",
+    "pretest": "npm run core:build && npm run cli:build && npm run build -w @ethogram/mcp",
+    "test": "node --import tsx --test",
     "test:real-agent": "node --test tests/real-agent-runner.integration.mjs",
     "test:seo:schemas": "node scripts/validate-seo-schema.mjs",
     "start": "next start"
@@ -52,12 +56,14 @@
   },
   "devDependencies": {
     "@github-tools/sdk": "1.13.0",
+    "@modelcontextprotocol/client": "^2.0.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
     "typescript": "5.7.3"
   }
 }

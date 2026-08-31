@@ -153,12 +153,34 @@ function requiredText(value: string, field: string): void {
   if (!value.trim()) throw new Error(`${field} is required.`)
 }
 
-function assertVerdictFreeExpectations(expectations: StoryExpectation[]): void {
-  for (const expectation of expectations) {
+function assertValidExpectations(expectations: StoryExpectation[]): void {
+  if (!Array.isArray(expectations) || expectations.length === 0) {
+    throw new Error('Story expectations must contain at least one expectation.')
+  }
+  const ids = new Set<string>()
+  for (const [index, expectation] of expectations.entries()) {
+    if (!expectation || typeof expectation !== 'object') {
+      throw new Error(`Story expectation[${index}] must be an object.`)
+    }
+    requiredText(expectation.id, `Story expectation[${index}] id`)
+    requiredText(expectation.description, `Story expectation "${expectation.id}" description`)
+    if (ids.has(expectation.id)) throw new Error(`Duplicate Story expectation identity: ${expectation.id}`)
+    ids.add(expectation.id)
     for (const key of forbiddenExpectationVerdictKeys) {
       if (Object.prototype.hasOwnProperty.call(expectation, key)) {
         throw new Error(`Story expectation "${expectation.id}" must not contain behavioral verdict field "${key}".`)
       }
+    }
+    const matcher = expectation.matcher as unknown
+    if (!matcher || typeof matcher !== 'object') {
+      throw new Error(`Story expectation "${expectation.id}" matcher must be an object.`)
+    }
+    const { kind, tool } = matcher as { kind?: unknown; tool?: unknown }
+    if (kind !== 'tool-called' && kind !== 'tool-not-called') {
+      throw new Error(`Story expectation "${expectation.id}" uses unsupported matcher kind "${String(kind)}".`)
+    }
+    if (typeof tool !== 'string' || !tool.trim()) {
+      throw new Error(`Story expectation "${expectation.id}" matcher tool is required.`)
     }
   }
 }
@@ -238,7 +260,7 @@ export function defineStory(input: StoryInput): Story {
   const prompt = (input.prompt ?? input.when) as string
   const expectations = (input.expectations ?? input.then) as StoryExpectation[]
   requiredText(prompt, 'Story prompt')
-  assertVerdictFreeExpectations(expectations)
+  assertValidExpectations(expectations)
 
   return {
     __ethogramType: 'story',

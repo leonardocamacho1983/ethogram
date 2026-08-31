@@ -112,6 +112,14 @@ export type BehavioralVerdict = 'PASS' | 'FAIL'
 export type EvaluationResult = {
   verdict: BehavioralVerdict
   expectations: Readonly<Record<string, BehavioralVerdict>>
+  expectationResults: readonly {
+    id: string
+    description: string
+    matcher: ExpectationMatcher
+    verdict: BehavioralVerdict
+    observedCallCount: number
+    matchingCallIds: readonly string[]
+  }[]
 }
 
 export type CompletedExecutionRecord = {

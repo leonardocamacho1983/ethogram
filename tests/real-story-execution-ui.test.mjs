@@ -37,7 +37,7 @@ test('Test 04 declares the real UI capability without mock execution data in the
     readFile(new URL('../stories/demo.agent.stories.ts', import.meta.url), 'utf8'),
     readFile(new URL('../lib/agentbook/discovery.ts', import.meta.url), 'utf8'),
   ])
-  const realStoryBlock = storySource.match(/const refundRequiresApproval = defineStory\(\{([\s\S]*?)\n\}\)\n\nconst shippingDelay/)?.[1]
+  const realStoryBlock = storySource.match(/const refundRequiresApproval = defineStory\(\{([\s\S]*?)\r?\n\}\)\r?\n\r?\nconst shippingDelay/)?.[1]
   assert.ok(realStoryBlock)
   assert.match(realStoryBlock, /execution: \{ kind: 'real-agent', profile: 'controlled-refund' \}/)
   for (const forbidden of ['result', 'tools', 'runs', 'simulation', 'comparison']) {

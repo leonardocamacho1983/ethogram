@@ -29,7 +29,7 @@ export type EngineRunResult = {
     runner: 'LanguageAdapterRunner'
     evaluator: 'deterministic'
     storyUnchanged: boolean
-    mockDataUsed: false
+    mockDataUsed: 'unknown'
   }
 }
 
@@ -48,7 +48,7 @@ export class EthogramEngine {
     return this.project
   }
 
-  async runStory(storyId: string): Promise<EngineRunResult> {
+  async runStory(storyId: string, executionId: string = randomUUID()): Promise<EngineRunResult> {
     const project = this.getProject()
     const story = project.stories.find((candidate) => candidate.id === storyId)
     if (!story) throw new Error(`STORY_NOT_FOUND: ${storyId}`)
@@ -63,13 +63,13 @@ export class EthogramEngine {
     return {
       execution: { observedRun, evaluationResult },
       boundaryEvidence: {
-        executionId: randomUUID(),
+        executionId,
         completedBehavioralRuns: 1,
         adapter: this.runner.id,
         runner: 'LanguageAdapterRunner',
         evaluator: 'deterministic',
         storyUnchanged: canonical(story) === storySnapshot,
-        mockDataUsed: false,
+        mockDataUsed: 'unknown',
       },
     }
   }

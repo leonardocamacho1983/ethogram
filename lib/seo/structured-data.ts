@@ -60,7 +60,7 @@ export const homePageStructuredData: JsonLdNode = {
       applicationSubCategory: 'AI agent behavioral testing',
       operatingSystem: 'Node.js',
       softwareRequirements: 'Node.js 20.9 or newer',
-      softwareVersion: '0.1.0-alpha.1',
+      softwareVersion: '0.1.0-alpha.2',
       isAccessibleForFree: true,
       license: LICENSE_URL,
       codeRepository: GITHUB_URL,
@@ -71,6 +71,7 @@ export const homePageStructuredData: JsonLdNode = {
         'Consumer-owned execution profiles',
         'Current-run execution evidence',
         'Read-only local interface',
+        'Optional local MCP server',
       ],
       audience: {
         '@type': 'Audience',
