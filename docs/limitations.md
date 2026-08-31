@@ -1,6 +1,6 @@
 # Alpha limitations
 
-Ethogram `0.1.0-alpha.0` is intentionally narrow.
+Ethogram `0.1.0-alpha.1` is intentionally narrow.
 
 Supported:
 

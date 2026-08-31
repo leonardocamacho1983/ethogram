@@ -1,6 +1,6 @@
 # New-project quickstart
 
-This guide describes the public `0.1.0-alpha.0` journey. The npm commands become usable after the packages are published.
+This guide describes the published `0.1.0-alpha.1` journey.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ This guide describes the public `0.1.0-alpha.0` journey. The npm commands become
 ## Install and initialize
 
 ```bash
-npm install --save-dev @ethogram/core@0.1.0-alpha.0 @ethogram/cli@0.1.0-alpha.0
+npm install --save-dev @ethogram/core@0.1.0-alpha.1 @ethogram/cli@0.1.0-alpha.1
 npx ethogram init
 npx ethogram dev
 ```

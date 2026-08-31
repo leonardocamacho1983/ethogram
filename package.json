@@ -1,6 +1,6 @@
 {
   "name": "ethogram",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Local, code-first behavioral testing for TypeScript and Node.js agents.",
   "license": "MIT",
   "repository": {

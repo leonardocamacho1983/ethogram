@@ -1,9 +1,9 @@
 # Integrate an existing agent
 
-Install the alpha packages after they are published, then create configuration only:
+Install the published alpha packages, then create configuration only:
 
 ```bash
-npm install --save-dev @ethogram/core@0.1.0-alpha.0 @ethogram/cli@0.1.0-alpha.0
+npm install --save-dev @ethogram/core@0.1.0-alpha.1 @ethogram/cli@0.1.0-alpha.1
 npx ethogram init --existing
 ```
 

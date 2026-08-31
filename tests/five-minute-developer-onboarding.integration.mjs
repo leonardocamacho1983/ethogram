@@ -195,9 +195,9 @@ test('Test 07 packed artifacts provide five-minute zero-config onboarding', { ti
   const cliManifest = await listFiles(path.join(extracted, 'package'))
   const packedCliJson = JSON.parse(await readFile(path.join(extracted, 'package', 'package.json'), 'utf8'))
   assert.equal(packedCliJson.name, '@ethogram/cli')
-  assert.equal(packedCliJson.bin.ethogram, './dist/cli.js')
+  assert.equal(packedCliJson.bin.ethogram, 'dist/cli.js')
   assert.equal(packedCliJson.engines.node, '>=20.9')
-  assert.equal(packedCliJson.dependencies['@ethogram/core'], '0.1.0-alpha.0')
+  assert.equal(packedCliJson.dependencies['@ethogram/core'], '0.1.0-alpha.1')
   assert.match(packedCliJson.dependencies.esbuild, /^\^0\./)
   for (const required of [
     'dist/cli.js',

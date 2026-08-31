@@ -1,6 +1,6 @@
 # Packages
 
-The public packages are `@ethogram/core` and `@ethogram/cli`. The npm scope is controlled and the repository manifests use these final names. Nothing has been published yet.
+The public packages are `@ethogram/core@0.1.0-alpha.1` and `@ethogram/cli@0.1.0-alpha.1`. Both are published on npm and available through the `next` tag.
 
 ## Core
 
@@ -17,4 +17,4 @@ The CLI exposes `ethogram` with:
 
 `dev` binds to localhost, loads the selected consumer project, watches relevant source files, and serves a read-only UI. It does not persist run history.
 
-Both packages are prepared at `0.1.0-alpha.0`. No npm publication is part of this release-preparation change.
+Both packages are published at `0.1.0-alpha.1`, with the CLI pinned to the exact matching core version.

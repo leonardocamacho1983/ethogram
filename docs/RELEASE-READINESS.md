@@ -1,6 +1,6 @@
 # Ethogram OSS Alpha Release Readiness
 
-Status: release preparation in progress  
+Status: `0.1.0-alpha.1` corrective release  
 Audit date: 2026-08-29  
 Architectural baseline: Tests 01–09, through commit `2a114db`  
 Release name: **Ethogram**
@@ -16,7 +16,7 @@ ethogram init [--existing]
 ethogram dev
 ```
 
-Release preparation now includes the MIT license, public documentation, an explicit read-only/code-first contract, automatic project reload, stale-evidence invalidation, confirmed ownership of the `@ethogram` npm scope, and the atomic public package-name migration. No package has been published.
+The release includes the MIT license, public documentation, an explicit read-only/code-first contract, automatic project reload, stale-evidence invalidation, confirmed ownership of the `@ethogram` npm scope, and the atomic public package-name migration. `0.1.0-alpha.0` proved registry publication and installation but shipped stale pre-publication README copy. `@ethogram/core@0.1.0-alpha.1` and `@ethogram/cli@0.1.0-alpha.1` supersede it with corrected package metadata.
 
 Tests 01–09 remain the frozen architectural baseline. Their behavioral contracts must continue to pass after release preparation. Historical test specifications and recorded evidence should retain the Agentbook name so the record is not rewritten; executable consumers may be mechanically updated to exercise the released Ethogram names.
 
@@ -97,9 +97,9 @@ Executable tests and live fixtures are different from historical prose: they may
 
 Authenticated npm access confirmed on 2026-08-30 that `leonardocamacho` is an owner of the `ethogram` organization. The repository is controlled at `github.com/leonardocamacho1983/ethogram`.
 
-- `@ethogram/core` and `@ethogram/cli` use the controlled `@ethogram` npm organization/scope. Public publishing permission still must be exercised successfully during the release step.
+- `@ethogram/core` and `@ethogram/cli` use the controlled `@ethogram` npm organization/scope and were published successfully.
 - The unscoped npm name `ethogram` returned 404 from the public registry during this audit. That is only a point-in-time observation, not a reservation. The proposed release does not need an unscoped package if `@ethogram/cli` exposes the `ethogram` binary.
-- `@ethogram/core` and `@ethogram/cli` returned 404 during the original audit and remain unpublished.
+- `@ethogram/core` and `@ethogram/cli` returned 404 during the original audit; both now resolve from the public registry, with `next` pointing to `0.1.0-alpha.1`.
 - `github.com/Ethogram` is already an organization created in 2014. Do not assume it is available or controlled. Publish the repository as `<controlled-owner>/ethogram` unless ownership of that organization is independently established.
 - Confirm the `Ethogram` word mark, package names, repository name, and relevant domains/handles with an appropriate trademark/brand clearance process. This audit does not provide legal clearance.
 
@@ -239,11 +239,11 @@ Unknown commands/options must fail nonzero without a stack trace and point to `e
 
 ### Versioning
 
-- Start both packages at `0.1.0-alpha.0` and keep them aligned for the alpha.
+- Keep both packages aligned at `0.1.0-alpha.1` for the corrective alpha release.
 - Use SemVer prereleases and publish under the npm `next` dist-tag.
 - Pin the CLI's dependency on core to the exact same prerelease version for reproducible alpha installs.
 - Document that public API compatibility is not guaranteed across `0.x` prereleases, while avoiding gratuitous churn.
-- Create one Git tag, `v0.1.0-alpha.0`, after the published artifacts pass clean-room verification.
+- Create one Git tag, `v0.1.0-alpha.1`, after the published artifacts pass clean-room verification.
 
 ### npm publishing
 
@@ -298,12 +298,12 @@ Do not use `github.com/Ethogram` unless the maintainer proves control of the alr
 
 ### 1. Smallest credible Ethogram OSS alpha
 
-Ship `@ethogram/core@0.1.0-alpha.0` and `@ethogram/cli@0.1.0-alpha.0` under the `next` tag, exposing `ethogram init`, `ethogram init --existing`, and `ethogram dev`. The release supports local TypeScript/Node projects, code-authored Stories, one thin execution-profile boundary, framework-owned facts-only evidence, the two validated tool-call matchers, and a read-only ephemeral UI. It includes one generated starter, one existing-agent example, focused evidence integration documentation, an OSS license, and accurate READMEs/help.
+Ship `@ethogram/core@0.1.0-alpha.1` and `@ethogram/cli@0.1.0-alpha.1` under the `next` tag, exposing `ethogram init`, `ethogram init --existing`, and `ethogram dev`. The release supports local TypeScript/Node projects, code-authored Stories, one thin execution-profile boundary, framework-owned facts-only evidence, the two validated tool-call matchers, and a read-only ephemeral UI. It includes one generated starter, one existing-agent example, focused evidence integration documentation, an OSS license, and accurate READMEs/help.
 
 ### 2. Exact work sequence
 
 1. Confirm the controlled npm scope, package names, GitHub owner/repository path, brand clearance, and license.
-2. Freeze the release map and version at `0.1.0-alpha.0`; make no architecture changes.
+2. Freeze the corrective release map and version at `0.1.0-alpha.1`; make no architecture changes.
 3. Rename all P0 public surfaces atomically and regenerate lockfiles/build artifacts.
 4. Add the stale-evidence invalidation and explicit code-first/read-only messaging.
 5. Standardize starter/docs/UI terminology on expectations and document automatic reload.
@@ -311,7 +311,7 @@ Ship `@ethogram/core@0.1.0-alpha.0` and `@ethogram/cli@0.1.0-alpha.0` under the 
 7. Update executable tests/fixtures mechanically to consume Ethogram while preserving the historical Test 01–09 documents and behavioral assertions.
 8. Run typecheck, build, all executable baseline tests, example checks, clean-room tarball installs, and both public journeys outside the monorepo.
 9. Inspect tarballs, publish core then CLI under `next`, reinstall from npm, and rerun the smoke journeys.
-10. Rename/present the GitHub repository, create `v0.1.0-alpha.0`, and invite the first tester with the new-project or existing-agent guide that matches their project.
+10. Rename/present the GitHub repository, create `v0.1.0-alpha.1`, and invite the first tester with the new-project or existing-agent guide that matches their project.
 
 ### 3. Explicitly do not build before alpha
 

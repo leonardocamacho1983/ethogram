@@ -428,7 +428,7 @@ test('Test 06 packs and consumes @ethogram/core across two clean filesystem boun
 
   const packedPackageJson = JSON.parse(await readFile(path.join(extractRoot, 'package', 'package.json'), 'utf8'))
   assert.equal(packedPackageJson.name, '@ethogram/core')
-  assert.equal(packedPackageJson.version, '0.1.0-alpha.0')
+  assert.equal(packedPackageJson.version, '0.1.0-alpha.1')
   assert.equal(packedPackageJson.type, 'module')
   assert.deepEqual(packedPackageJson.exports, {
     '.': { types: './dist/index.d.ts', import: './dist/index.js', require: './dist/index.cjs' },

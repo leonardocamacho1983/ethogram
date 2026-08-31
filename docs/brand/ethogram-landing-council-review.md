@@ -46,8 +46,8 @@ O H1 cinético é visualmente bom, mas semanticamente errado. Frases como “The
 | CI, exit code e pull request | Apresentam roadmap como funcionalidade existente | Remover ou marcar explicitamente como visão futura fora da prova principal |
 | IDs, commits, versões e tempos fictícios | Parecem evidência autêntica e simulam maturidade | Usar fixture reproduzível com proveniência ou remover esses detalhes |
 | CTA “Open Ethogram” | Leva à interface interna e comunica produto pronto | Usar `Join the alpha`, `Read the alpha scope` ou destino público realmente acessível |
-| Comando copiável | Os pacotes ainda não estão publicados | Não exibir instalação até o comando funcionar ponta a ponta |
-| GitHub e “OPEN SOURCE · MIT” | O link público auditado respondeu 404 | Publicar o source ou retirar a alegação verificável até o destino existir |
+| Comando copiável | Resolvido: os pacotes foram publicados e o fluxo passou no smoke test do registro | Exibir apenas o comando validado para a alpha atual |
+| GitHub e “OPEN SOURCE · MIT” | Resolvido: source público e licença MIT disponíveis | Manter os destinos públicos consistentes com a release |
 | Homepage em `/landing` | Divide a entidade pública da aplicação em `/` | Transformar `/` na entity home e isolar a UI local como `/app`, `/lab` ou implantação separada/noindex |
 
 ## P1 — melhora estrutural

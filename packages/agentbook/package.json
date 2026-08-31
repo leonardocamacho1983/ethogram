@@ -1,6 +1,6 @@
 {
   "name": "@ethogram/core",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Code-first Agent and Story authoring contracts for Ethogram.",
   "license": "MIT",
   "repository": {

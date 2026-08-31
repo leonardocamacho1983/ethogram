@@ -2,7 +2,7 @@
 
 The code-first authoring contract for Ethogram Agents, Stories, behavioral matchers, and consumer-owned local execution profiles.
 
-This package is prepared as `@ethogram/core@0.1.0-alpha.0` but has not been published yet.
+The public alpha is available as `@ethogram/core@0.1.0-alpha.1` under the npm `next` tag.
 
 ## Public API
 

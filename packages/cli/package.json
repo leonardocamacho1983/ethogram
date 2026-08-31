@@ -1,6 +1,6 @@
 {
   "name": "@ethogram/cli",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Local Ethogram initialization and read-only developer runtime.",
   "license": "MIT",
   "repository": {
@@ -15,7 +15,7 @@
   "keywords": ["ai-agents", "behavioral-testing", "typescript", "cli"],
   "type": "module",
   "bin": {
-    "ethogram": "./dist/cli.js"
+    "ethogram": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -28,7 +28,7 @@
     "node": ">=20.9"
   },
   "dependencies": {
-    "@ethogram/core": "0.1.0-alpha.0",
+    "@ethogram/core": "0.1.0-alpha.1",
     "esbuild": "^0.28.2"
   },
   "scripts": {

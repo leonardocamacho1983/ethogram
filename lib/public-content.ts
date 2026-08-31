@@ -101,14 +101,14 @@ export const PUBLIC_PAGES: PublicPage[] = [
     { title: 'Understand', body: [], items: ['Observed runs and evaluation results', 'Execution evidence', 'Limitations and troubleshooting'] },
   ], ['/docs/quickstart', '/docs/concepts/stories', '/docs/reference/cli']),
 
-  page('/docs/quickstart', 'docs', 'DOCS / START', 'Quickstart', 'Prepare a TypeScript or Node.js project for Ethogram and run the access-request starter Story.', 'Install the alpha packages, initialize the project, start the local interface, and run one deterministic Story. Package commands remain pre-release until npm publication.', [
+  page('/docs/quickstart', 'docs', 'DOCS / START', 'Quickstart', 'Prepare a TypeScript or Node.js project for Ethogram and run the access-request starter Story.', 'Install the published alpha packages, initialize the project, start the local interface, and run one deterministic Story.', [
     { title: 'Requirements', body: [], items: ['Node.js 20.9 or newer', 'A TypeScript or Node.js project', 'A named package.json'] },
-    { title: 'Install and initialize', body: ['These commands are the intended public path after publication.'], code: 'npm install --save-dev @ethogram/core@0.1.0-alpha.0 @ethogram/cli@0.1.0-alpha.0\nnpx ethogram init\nnpx ethogram dev' },
+    { title: 'Install and initialize', body: ['These commands install the current public alpha.'], code: 'npm install --save-dev @ethogram/core@0.1.0-alpha.1 @ethogram/cli@0.1.0-alpha.1\nnpx ethogram init\nnpx ethogram dev' },
     { title: 'What initialization creates', body: ['Initialization creates missing files only. A conflict aborts instead of overwriting your work.'], items: ['ethogram.config.mjs', 'one Agent descriptor', 'one Story', 'one local execution profile'] },
   ], ['/docs/installation', '/examples/access-request-agent', '/docs/limitations']),
 
-  page('/docs/installation', 'docs', 'DOCS / START', 'Installation', 'Install Ethogram as a development dependency and understand the pre-release boundary.', 'Ethogram is designed to be installed in the project that owns the agent. The npm packages are not yet public, so the commands below describe the approved release path rather than an available download.', [
-    { title: 'Planned package pair', body: [], items: ['@ethogram/core: Story and evidence types', '@ethogram/cli: initialization and local developer server'] },
+  page('/docs/installation', 'docs', 'DOCS / START', 'Installation', 'Install Ethogram as a development dependency and understand the pre-release boundary.', 'Ethogram is designed to be installed in the project that owns the agent. The npm packages are public prereleases distributed through the next tag.', [
+    { title: 'Package pair', body: [], items: ['@ethogram/core: Story and evidence types', '@ethogram/cli: initialization and local developer server'] },
     { title: 'Runtime requirement', body: ['Use Node.js 20.9 or newer. The alpha supports TypeScript and Node.js projects only.'] },
     { title: 'No silent overwrite', body: ['The initializer is designed to stop on conflicting target files. Existing source remains the authority.'] },
   ], ['/docs/quickstart', '/alpha', '/docs/reference/cli']),
@@ -187,7 +187,7 @@ export const PUBLIC_PAGES: PublicPage[] = [
     { title: 'Preserve independence', body: ['The original agent must not know Story IDs or read expectations. Otherwise the test harness can teach the system how to pass.'] },
   ], ['/docs/guides/add-ethogram-to-existing-agent', '/docs/concepts/execution-profiles', '/examples/external-agent-profile']),
 
-  page('/docs/guides/add-ethogram-to-existing-agent', 'guide', 'GUIDE / INTEGRATION', 'Add Ethogram to an existing agent project', 'A step-by-step integration path that keeps the original agent independent of Ethogram.', 'Install the development packages after publication, initialize with --existing, then wire one Story to the agent’s public entry point.', [
+  page('/docs/guides/add-ethogram-to-existing-agent', 'guide', 'GUIDE / INTEGRATION', 'Add Ethogram to an existing agent project', 'A step-by-step integration path that keeps the original agent independent of Ethogram.', 'Install the published development packages, initialize with --existing, then wire one Story to the agent’s public entry point.', [
     { title: 'Integration order', body: [], items: ['Initialize without overwriting project files', 'Name the existing agent with a descriptor', 'Write one behavior-focused Story', 'Adapt the public entry point in a profile', 'Run and inspect current evidence'] },
     { title: 'Stop if the adapter copies policy', body: ['A profile that reproduces decisions from the agent is no longer an adapter. Keep translation and instrumentation at the boundary.'] },
   ], ['/docs/guides/bring-your-own-agent', '/docs/quickstart', '/docs/limitations']),
@@ -306,8 +306,8 @@ export const PUBLIC_PAGES: PublicPage[] = [
     { title: 'No implied promise', body: ['Candidate work is not a compatibility or delivery commitment. Changelog entries record what actually ships.'] },
   ], ['/alpha', '/changelog', '/docs/limitations']),
 
-  page('/changelog', 'trust', 'PROJECT / CHANGES', 'Changelog', 'Public product changes for Ethogram, beginning with the 0.1 alpha preparation.', 'The current release line is 0.1.0-alpha.0. It defines the narrow local, code-first product boundary before package publication.', [
-    { title: '0.1.0-alpha.0 — preparation', body: [], items: ['Ethogram public identity and brand system', 'Story discovery and real-agent execution', 'tool-called and tool-not-called evaluation', 'Current-run evidence invalidation', 'Read-only local interface', 'Public technical SEO foundation'] },
+  page('/changelog', 'trust', 'PROJECT / CHANGES', 'Changelog', 'Public product changes for Ethogram, beginning with the 0.1 alpha.', 'The current release is 0.1.0-alpha.1. It defines the narrow local, code-first product boundary and supersedes alpha.0 package metadata.', [
+    { title: '0.1.0-alpha.1 — public alpha', body: [], items: ['Corrected npm package READMEs and metadata', 'Ethogram public identity and brand system', 'Story discovery and real-agent execution', 'tool-called and tool-not-called evaluation', 'Current-run evidence invalidation', 'Read-only local interface', 'Public technical SEO foundation'] },
   ], ['/alpha', '/roadmap', '/docs']),
 
   page('/security', 'trust', 'TRUST / SECURITY', 'Security model', 'Understand what Ethogram tests, what it does not enforce, and how to report a security issue.', 'Ethogram is a testing tool, not a runtime authorization layer. Keep access control and policy enforcement in the systems that own the tools.', [

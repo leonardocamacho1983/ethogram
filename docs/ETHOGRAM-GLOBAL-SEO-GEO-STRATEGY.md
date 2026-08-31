@@ -112,7 +112,7 @@ Sem isso, conteúdo pode gerar interesse que termina em uma jornada quebrada.
 - Não há structured data de `WebSite`, `Organization`/`Person`, `SoftwareApplication`, `TechArticle` ou `BreadcrumbList`.
 - Não há arquitetura internacional nem `hreflang`.
 - Não há páginas públicas que respondam às intenções principais.
-- O scope npm está confirmado, mas os pacotes ainda não foram publicados.
+- O scope npm está confirmado e os pacotes `0.1.0-alpha.1` foram publicados.
 - O repositório tem ampla migração de nome em andamento; referências legadas reduzem consistência de entidade.
 - Não há dados disponíveis de Search Console, Bing Webmaster Tools ou um painel de citações em motores de IA.
 
@@ -989,8 +989,7 @@ Preservar assimetria: Ethogram não precisa ser a melhor suite de evals; precisa
 ### Explicit blockers
 
 - domínio canônico não consta no repositório;
-- npm scope confirmado; publicação dos pacotes ainda pendente;
-- pacote ainda não publicado;
+- npm scope confirmado e pacotes publicados;
 - homepage atual é a UI do produto;
 - não há GSC/Bing/analytics para sizing real;
 - clearance de marca/handles permanece aberto.

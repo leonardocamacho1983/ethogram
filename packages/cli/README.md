@@ -2,7 +2,7 @@
 
 Local Ethogram initialization and read-only developer runtime for TypeScript/Node projects.
 
-This package is prepared as `@ethogram/cli@0.1.0-alpha.0` but has not been published yet.
+The public alpha is available as `@ethogram/cli@0.1.0-alpha.1` under the npm `next` tag.
 
 ```bash
 npx ethogram init

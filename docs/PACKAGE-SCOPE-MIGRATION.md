@@ -1,6 +1,6 @@
 # Package-scope migration record
 
-Status: completed locally on 2026-08-30; publication remains pending.
+Status: completed; corrective packages `0.1.0-alpha.1` published on 2026-08-30. The initial `alpha.0` packages are deprecated in favor of `alpha.1`.
 
 Authenticated npm access confirmed that `leonardocamacho` is an owner of the `ethogram` organization. The public package names were migrated atomically from `@agentbook/core` and `@agentbook/cli` to `@ethogram/core` and `@ethogram/cli`. The migration covered:
 

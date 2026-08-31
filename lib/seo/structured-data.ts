@@ -60,7 +60,7 @@ export const homePageStructuredData: JsonLdNode = {
       applicationSubCategory: 'AI agent behavioral testing',
       operatingSystem: 'Node.js',
       softwareRequirements: 'Node.js 20.9 or newer',
-      softwareVersion: '0.1.0-alpha.0',
+      softwareVersion: '0.1.0-alpha.1',
       isAccessibleForFree: true,
       license: LICENSE_URL,
       codeRepository: GITHUB_URL,
